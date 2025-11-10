@@ -456,6 +456,29 @@
             <div class="subtitle">4-Operator Frequency Modulation Synthesizer</div>
         </div>
 
+        <!-- FM Algorithm Selector -->
+        <div class="panel-row">
+            <div class="panel">
+                <div class="panel-header">◆ FM Algorithm ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Routing Configuration</div>
+                    <select id="fm-algorithm" style="width: 100%; padding: 10px; background: #2a2520; color: #d4a574; border: 2px inset #5a4a3a; border-radius: 5px; font-size: 1em;">
+                        <option value="1">1 - Cascade (4→3→2→1) - Bells, Piano</option>
+                        <option value="2">2 - Dual Mod (4→3,2→1) - Rich Harmonics</option>
+                        <option value="3">3 - Parallel (4→3, 2→1) - Brass, Strings</option>
+                        <option value="4">4 - Triple Mod (4,3,2→1) - Metallic Tones</option>
+                        <option value="5">5 - Additive (4,3,2,1) - Organs</option>
+                        <option value="6">6 - Dual Cascade (4,3→2→1) - Evolving</option>
+                        <option value="7">7 - Fan Out (4→3,2,1) - Lush Pads</option>
+                        <option value="8">8 - Dual Stack (4→3→1, 2→1) - Thick Layers</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px; padding: 10px; background: rgba(212, 165, 116, 0.05); border-radius: 5px; font-size: 0.75em; color: #c8b8a0;">
+                    <div id="algorithm-desc">Select an algorithm to change operator routing</div>
+                </div>
+            </div>
+        </div>
+
         <!-- Oscillators -->
         <div class="panel-row">
             <div class="panel oscillator-panel">
@@ -771,6 +794,26 @@
                         <option value="square">Square</option>
                     </select>
                 </div>
+                <div class="control-group">
+                    <div class="switch-container">
+                        <span class="control-label" style="margin: 0;">Tempo Sync</span>
+                        <label class="switch">
+                            <input type="checkbox" id="lfo-tempo-sync">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="control-group" id="lfo-division-group" style="display: none;">
+                    <div class="control-label">Note Division</div>
+                    <select id="lfo-division">
+                        <option value="1n">1n (Whole)</option>
+                        <option value="2n">2n (Half)</option>
+                        <option value="4n">4n (Quarter)</option>
+                        <option value="8n" selected>8n (Eighth)</option>
+                        <option value="16n">16n (Sixteenth)</option>
+                        <option value="32n">32n (Thirty-Second)</option>
+                    </select>
+                </div>
                 <div class="knob-row">
                     <div class="knob-container">
                         <div class="knob-wrapper">
@@ -779,7 +822,7 @@
                                 <div class="knob-center"></div>
                             </div>
                         </div>
-                        <div class="knob-label">Rate</div>
+                        <div class="knob-label" id="lfo-rate-label">Rate</div>
                         <div class="knob-value" data-value="lfo-rate">2.0</div>
                     </div>
                     <div class="knob-container">

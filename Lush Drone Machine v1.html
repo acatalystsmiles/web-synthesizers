@@ -414,6 +414,21 @@
                 <div class="knob-value" data-value="lfo-depth">0</div>
             </div>
 
+            <div class="knob-container" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <div class="knob-label" style="margin: 0;">LFO Sync</div>
+                <button id="lfo-sync-btn" style="padding: 10px 20px; background: rgba(100, 150, 200, 0.2); border: 2px solid #6496c8; border-radius: 8px; color: #b0c8dc; cursor: pointer; font-family: 'Courier New', monospace; font-size: 0.85em; transition: all 0.2s;">
+                    OFF
+                </button>
+                <select id="lfo-division-select" style="padding: 5px; background: rgba(30, 30, 50, 0.8); border: 1px solid #6496c8; border-radius: 5px; color: #b0c8dc; font-family: 'Courier New', monospace; font-size: 0.75em; display: none;">
+                    <option value="1n">1n</option>
+                    <option value="2n">2n</option>
+                    <option value="4n">4n</option>
+                    <option value="8n" selected>8n</option>
+                    <option value="16n">16n</option>
+                    <option value="32n">32n</option>
+                </select>
+            </div>
+
             <div class="knob-container">
                 <div class="knob-wrapper">
                     <div class="knob" data-knob="reverb">
@@ -1106,6 +1121,32 @@
         const stopBtn = document.getElementById('stopBtn');
         const evolveBtn = document.getElementById('evolveBtn');
         const status = document.getElementById('status');
+
+        // LFO Tempo Sync button
+        const lfoSyncBtn = document.getElementById('lfo-sync-btn');
+        const lfoDivisionSelect = document.getElementById('lfo-division-select');
+
+        lfoSyncBtn.addEventListener('click', () => {
+            synth.toggleLFOTempoSync();
+            if (synth.lfoTempoSync) {
+                lfoSyncBtn.textContent = 'ON';
+                lfoSyncBtn.style.background = 'rgba(100, 200, 150, 0.3)';
+                lfoSyncBtn.style.borderColor = '#64c896';
+                lfoDivisionSelect.style.display = 'block';
+            } else {
+                lfoSyncBtn.textContent = 'OFF';
+                lfoSyncBtn.style.background = 'rgba(100, 150, 200, 0.2)';
+                lfoSyncBtn.style.borderColor = '#6496c8';
+                lfoDivisionSelect.style.display = 'none';
+            }
+        });
+
+        lfoDivisionSelect.addEventListener('change', (e) => {
+            synth.parameters.lfoDivision = e.target.value;
+            if (synth.lfoTempoSync) {
+                synth.updateLFOTempoSync();
+            }
+        });
 
         startBtn.addEventListener('click', async () => {
             await synth.start();

@@ -948,6 +948,39 @@ class FMSynth {
             this.updateLFO('wave', e.target.value);
         });
 
+        // FM Algorithm selector
+        document.getElementById('fm-algorithm').addEventListener('change', (e) => {
+            const algNum = parseInt(e.target.value);
+            this.setAlgorithm(algNum);
+            // Update description
+            const desc = this.algorithms[algNum].name;
+            document.getElementById('algorithm-desc').textContent = `Algorithm ${algNum}: ${desc}`;
+        });
+
+        // LFO Tempo Sync
+        document.getElementById('lfo-tempo-sync').addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            this.updateLFO('tempoSync', enabled);
+
+            // Show/hide division selector
+            const divisionGroup = document.getElementById('lfo-division-group');
+            const rateLabel = document.getElementById('lfo-rate-label');
+            if (enabled) {
+                divisionGroup.style.display = 'block';
+                rateLabel.textContent = 'Rate (Synced)';
+                rateLabel.style.color = '#d4a574';
+            } else {
+                divisionGroup.style.display = 'none';
+                rateLabel.textContent = 'Rate';
+                rateLabel.style.color = '';
+            }
+        });
+
+        // LFO Division selector
+        document.getElementById('lfo-division').addEventListener('change', (e) => {
+            this.updateLFO('division', e.target.value);
+        });
+
         // Drone switch
         document.getElementById('drone-switch').addEventListener('click', () => {
             this.toggleDrone();
