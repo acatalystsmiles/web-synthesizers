@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lush Drone Synthesizer</title>
+    <script src="Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(20, 20, 35, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 1000px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(100, 100, 150, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            color: #a8b7ff;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85em;
+            color: #7a8aaa;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            font-size: 0.9em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #8a9abd;
+            margin-top: 10px;
+            margin-bottom: -10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(138, 154, 189, 0.2);
+        }
+
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .knob-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .knob {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+                inset -5px -5px 10px rgba(80, 80, 100, 0.1),
+                3px 3px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.05s ease;
+        }
+
+        .knob:hover {
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.6),
+                inset -5px -5px 10px rgba(80, 80, 100, 0.15),
+                3px 3px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .knob-indicator {
+            position: absolute;
+            width: 3px;
+            height: 28px;
+            background: linear-gradient(180deg, #6b8cff, #4a6bdd);
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(107, 140, 255, 0.6);
+        }
+
+        .knob-center {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #2a2a3e;
+        }
+
+        .knob-label {
+            font-size: 0.8em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #9aa5be;
+            text-align: center;
+        }
+
+        .knob-value {
+            font-size: 0.85em;
+            color: #6b8cff;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        .oscillator-section {
+            background: rgba(40, 40, 60, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(100, 100, 150, 0.2);
+        }
+
+        .osc-title {
+            font-size: 0.95em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #a8b7ff;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .osc-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 16px 50px;
+            font-size: 1em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(107, 140, 255, 0.15);
+            color: #6b8cff;
+            border: 2px solid #6b8cff;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: rgba(107, 140, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 140, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.active {
+            background: #6b8cff;
+            color: #0f0c29;
+            box-shadow: 0 6px 25px rgba(107, 140, 255, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #555;
+            letter-spacing: 1px;
+        }
+
+        .status.active {
+            color: #6b8cff;
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 20px;
+            }
+
+            .knob-wrapper {
+                width: 70px;
+                height: 70px;
+            }
+
+            .knob {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LUSH DRONE</h1>
+        <div class="subtitle">Multi-Oscillator Synthesizer</div>
+
+        <!-- Oscillator 1: Sine -->
+        <div class="oscillator-section">
+            <div class="osc-title">◉ Sine Wave</div>
+            <div class="osc-controls">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc1-freq">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Frequency</div>
+                    <div class="knob-value" data-value="osc1-freq">0 Hz</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc1-vol">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Volume</div>
+                    <div class="knob-value" data-value="osc1-vol">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oscillator 2: Sawtooth -->
+        <div class="oscillator-section">
+            <div class="osc-title">◢ Sawtooth Wave</div>
+            <div class="osc-controls">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc2-freq">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Frequency</div>
+                    <div class="knob-value" data-value="osc2-freq">0 Hz</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc2-vol">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Volume</div>
+                    <div class="knob-value" data-value="osc2-vol">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oscillator 3: Square -->
+        <div class="oscillator-section">
+            <div class="osc-title">◻ Square Wave</div>
+            <div class="osc-controls">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc3-freq">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Frequency</div>
+                    <div class="knob-value" data-value="osc3-freq">0 Hz</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc3-vol">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Volume</div>
+                    <div class="knob-value" data-value="osc3-vol">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Noise Oscillator -->
+        <div class="oscillator-section">
+            <div class="osc-title">≋ Noise</div>
+            <div class="osc-controls">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="noise-vol">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Volume</div>
+                    <div class="knob-value" data-value="noise-vol">0</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="noise-filter">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="knob-label">Color</div>
+                    <div class="knob-value" data-value="noise-filter">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Effects Section -->
+        <div class="controls-grid" style="margin-top: 30px;">
+            <div class="section-title">Filter & Effects</div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="cutoff">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">Cutoff</div>
+                <div class="knob-value" data-value="cutoff">2000 Hz</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="resonance">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">Resonance</div>
+                <div class="knob-value" data-value="resonance">1</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="detune">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">Detune</div>
+                <div class="knob-value" data-value="detune">0¢</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="lfo-rate">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">LFO Rate</div>
+                <div class="knob-value" data-value="lfo-rate">0.5 Hz</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="lfo-depth">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">LFO Depth</div>
+                <div class="knob-value" data-value="lfo-depth">0</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="reverb">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">Reverb</div>
+                <div class="knob-value" data-value="reverb">50</div>
+            </div>
+
+            <div class="knob-container">
+                <div class="knob-wrapper">
+                    <div class="knob" data-knob="master-vol">
+                        <div class="knob-indicator"></div>
+                        <div class="knob-center"></div>
+                    </div>
+                </div>
+                <div class="knob-label">Master</div>
+                <div class="knob-value" data-value="master-vol">70</div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="startBtn">Start</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="evolveBtn">Evolve</button>
+        </div>
+
+        <div class="status" id="status">Ready</div>
+    </div>
+
+    <script>
+        // Lush Drone Synthesizer Engine
+        class DroneSynth {
+            constructor() {
+                this.isPlaying = false;
+                this.initializeAudio();
+                this.parameters = this.getDefaultParameters();
+            }
+
+            getDefaultParameters() {
+                return {
+                    osc1: { freq: 0, vol: 50 },
+                    osc2: { freq: 0, vol: 50 },
+                    osc3: { freq: 0, vol: 50 },
+                    noise: { vol: 0, filter: 50 },
+                    cutoff: 70,
+                    resonance: 1,
+                    detune: 0,
+                    lfoRate: 0.5,
+                    lfoDepth: 0,
+                    reverb: 50,
+                    masterVol: 70
+                };
+            }
+
+            async initializeAudio() {
+                // Master volume
+                this.masterVolume = new Tone.Volume(-10).toDestination();
+
+                // Reverb - lush and spacious
+                this.reverb = new Tone.Reverb({
+                    decay: 8,
+                    wet: 0.5,
+                    preDelay: 0.01
+                }).connect(this.masterVolume);
+
+                await this.reverb.generate();
+
+                // Master filter with resonance
+                // Initial frequency matches default cutoff of 70: 100 * 100^0.7 ≈ 2512 Hz
+                this.filter = new Tone.Filter({
+                    frequency: 2512,
+                    type: "lowpass",
+                    rolloff: -24,
+                    Q: 1
+                }).connect(this.reverb);
+
+                // Chorus for thickness
+                this.chorus = new Tone.Chorus({
+                    frequency: 0.3,
+                    delayTime: 3.5,
+                    depth: 0.4,
+                    wet: 0.5
+                }).connect(this.filter).start();
+
+                // LFO for filter modulation
+                this.lfo = new Tone.LFO({
+                    frequency: 0.5,
+                    min: 200,
+                    max: 2000
+                });
+                this.lfoConnected = false;
+                this.baseCutoffFreq = 2512; // Track base filter frequency (matches default cutoff)
+
+                // Evolution LFOs - very slow random modulation
+                this.evolveLFO1 = new Tone.LFO(0.02, 0, 1); // Filter sweep
+                this.evolveLFO2 = new Tone.LFO(0.03, 0, 1); // Detune
+                this.evolveLFO3 = new Tone.LFO(0.015, 0, 1); // Reverb
+                this.evolveActive = false;
+
+                // Oscillator 1: Sine - deep fundamental
+                this.osc1Volume = new Tone.Volume(-6).connect(this.chorus);
+                this.osc1 = new Tone.Oscillator({
+                    type: "sine",
+                    frequency: 65.41, // C2
+                    volume: -96
+                }).connect(this.osc1Volume);
+
+                // Oscillator 2: Sawtooth - rich harmonics
+                this.osc2Volume = new Tone.Volume(-6).connect(this.chorus);
+                this.osc2 = new Tone.Oscillator({
+                    type: "sawtooth",
+                    frequency: 130.81, // C3
+                    volume: -96
+                }).connect(this.osc2Volume);
+
+                // Oscillator 3: Square - hollow harmonics
+                this.osc3Volume = new Tone.Volume(-6).connect(this.chorus);
+                this.osc3 = new Tone.Oscillator({
+                    type: "square",
+                    frequency: 196.00, // G3
+                    volume: -96
+                }).connect(this.osc3Volume);
+
+                // Noise with its own filter
+                this.noiseFilter = new Tone.Filter({
+                    frequency: 500,
+                    type: "lowpass",
+                    rolloff: -24
+                }).connect(this.chorus);
+
+                this.noiseVolume = new Tone.Volume(-30).connect(this.noiseFilter);
+                this.noise = new Tone.Noise("pink").connect(this.noiseVolume);
+
+                // Detune LFO for slow wavering
+                this.detuneLFO = new Tone.LFO({
+                    frequency: 0.1,
+                    min: -5,
+                    max: 5
+                }).start();
+            }
+
+            async start() {
+                if (this.isPlaying) return;
+
+                await Tone.start();
+                this.isPlaying = true;
+
+                // Start all oscillators with fade in
+                this.osc1.start();
+                this.osc2.start();
+                this.osc3.start();
+                this.noise.start();
+
+                // Fade in over 2 seconds
+                this.osc1.volume.rampTo(-6, 2);
+                this.osc2.volume.rampTo(-6, 2);
+                this.osc3.volume.rampTo(-6, 2);
+
+                // Apply initial detune
+                this.updateDetune();
+            }
+
+            stop() {
+                if (!this.isPlaying) return;
+
+                this.isPlaying = false;
+
+                // Fade out over 2 seconds
+                this.osc1.volume.rampTo(-96, 2);
+                this.osc2.volume.rampTo(-96, 2);
+                this.osc3.volume.rampTo(-96, 2);
+
+                setTimeout(() => {
+                    if (!this.isPlaying) {
+                        this.osc1.stop();
+                        this.osc2.stop();
+                        this.osc3.stop();
+                        this.noise.stop();
+                    }
+                }, 2100);
+            }
+
+            updateOscFreq(osc, offset) {
+                const baseFreqs = {
+                    osc1: 65.41,  // C2
+                    osc2: 130.81, // C3
+                    osc3: 196.00  // G3
+                };
+
+                // Offset range: -12 to +12 semitones (1 octave up/down)
+                const semitones = (offset - 50) * 0.24;
+                const multiplier = Math.pow(2, semitones / 12);
+                const newFreq = baseFreqs[osc] * multiplier;
+
+                this[osc].frequency.rampTo(newFreq, 0.1);
+            }
+
+            updateOscVolume(osc, value) {
+                // Map 0-100 to -60 to -6 dB
+                const db = -60 + (value / 100) * 54;
+                this[`${osc}Volume`].volume.rampTo(db, 0.05);
+            }
+
+            updateNoiseVolume(value) {
+                const db = -60 + (value / 100) * 40; // -60 to -20 dB
+                this.noiseVolume.volume.rampTo(db, 0.05);
+            }
+
+            updateNoiseFilter(value) {
+                // Map to 100 Hz - 5000 Hz
+                const freq = 100 + (value / 100) * 4900;
+                this.noiseFilter.frequency.rampTo(freq, 0.1);
+            }
+
+            updateCutoff(value) {
+                // 100 Hz to 10000 Hz, exponential
+                const freq = 100 * Math.pow(100, value / 100);
+                this.baseCutoffFreq = freq;
+
+                // If LFO is connected, update its range; otherwise update filter directly
+                if (this.lfoConnected) {
+                    const depth = this.parameters.lfoDepth;
+                    const depthAmount = (depth / 100) * freq * 0.5;
+                    this.lfo.min = Math.max(100, freq - depthAmount);
+                    this.lfo.max = Math.min(10000, freq + depthAmount);
+                } else {
+                    this.filter.frequency.rampTo(freq, 0.1);
+                }
+            }
+
+            updateResonance(value) {
+                // Q from 0.5 to 20
+                const q = 0.5 + (value / 100) * 19.5;
+                this.filter.Q.rampTo(q, 0.1);
+            }
+
+            updateDetune() {
+                const amount = this.parameters.detune;
+
+                // Apply subtle random detuning to each oscillator
+                if (amount > 0) {
+                    const detune1 = (Math.random() - 0.5) * amount * 0.8;
+                    const detune2 = (Math.random() - 0.5) * amount * 1.0;
+                    const detune3 = (Math.random() - 0.5) * amount * 1.2;
+
+                    this.osc1.detune.rampTo(detune1, 0.5);
+                    this.osc2.detune.rampTo(detune2, 0.5);
+                    this.osc3.detune.rampTo(detune3, 0.5);
+
+                    // Re-apply detuning periodically
+                    if (this.isPlaying) {
+                        setTimeout(() => this.updateDetune(), 3000);
+                    }
+                } else {
+                    this.osc1.detune.rampTo(0, 0.5);
+                    this.osc2.detune.rampTo(0, 0.5);
+                    this.osc3.detune.rampTo(0, 0.5);
+                }
+            }
+
+            updateLFO(rate, depth) {
+                this.lfo.frequency.value = rate;
+
+                if (depth > 0) {
+                    const filterBase = this.baseCutoffFreq;
+                    const depthAmount = (depth / 100) * filterBase * 0.5;
+                    this.lfo.min = Math.max(100, filterBase - depthAmount);
+                    this.lfo.max = Math.min(10000, filterBase + depthAmount);
+
+                    if (!this.lfoConnected) {
+                        this.lfo.connect(this.filter.frequency);
+                        this.lfo.start();
+                        this.lfoConnected = true;
+                    }
+                } else {
+                    if (this.lfoConnected) {
+                        this.lfo.disconnect();
+                        this.lfo.stop();
+                        this.lfoConnected = false;
+                        // Restore base filter frequency
+                        this.filter.frequency.rampTo(this.baseCutoffFreq, 0.1);
+                    }
+                }
+            }
+
+            toggleEvolve(enabled) {
+                this.evolveActive = enabled;
+
+                if (enabled) {
+                    // Start evolution LFOs with random phases
+                    this.evolveLFO1.phase = Math.random() * 360;
+                    this.evolveLFO2.phase = Math.random() * 360;
+                    this.evolveLFO3.phase = Math.random() * 360;
+
+                    this.evolveLFO1.start();
+                    this.evolveLFO2.start();
+                    this.evolveLFO3.start();
+
+                    // Start evolution loop
+                    this.evolveLoop();
+                } else {
+                    this.evolveLFO1.stop();
+                    this.evolveLFO2.stop();
+                    this.evolveLFO3.stop();
+                }
+            }
+
+            evolveLoop() {
+                if (!this.evolveActive) return;
+
+                // Randomize LFO speeds occasionally for more organic evolution
+                if (Math.random() < 0.1) {
+                    this.evolveLFO1.frequency.value = 0.01 + Math.random() * 0.03;
+                    this.evolveLFO2.frequency.value = 0.015 + Math.random() * 0.04;
+                    this.evolveLFO3.frequency.value = 0.01 + Math.random() * 0.02;
+                }
+
+                // LFO1: Modulate filter cutoff
+                const lfo1Value = (this.evolveLFO1.state + 1) / 2; // Normalize to 0-1
+                const baseCutoff = this.parameters.cutoff;
+                const cutoffVariation = baseCutoff * 0.3; // 30% variation
+                const newCutoff = Math.max(0, Math.min(100, baseCutoff + (lfo1Value - 0.5) * cutoffVariation));
+                this.updateCutoff(newCutoff);
+
+                // LFO2: Modulate detune amount
+                const lfo2Value = (this.evolveLFO2.state + 1) / 2;
+                const baseDetune = this.parameters.detune;
+                const detuneVariation = Math.min(baseDetune + 10, 50);
+                const newDetune = baseDetune + (lfo2Value - 0.5) * 20;
+
+                if (newDetune > 0 && this.isPlaying) {
+                    const detune1 = (Math.random() - 0.5) * newDetune * 0.8;
+                    const detune2 = (Math.random() - 0.5) * newDetune * 1.0;
+                    const detune3 = (Math.random() - 0.5) * newDetune * 1.2;
+
+                    this.osc1.detune.rampTo(detune1, 2);
+                    this.osc2.detune.rampTo(detune2, 2);
+                    this.osc3.detune.rampTo(detune3, 2);
+                }
+
+                // LFO3: Modulate reverb wet
+                const lfo3Value = (this.evolveLFO3.state + 1) / 2;
+                const baseReverb = this.parameters.reverb;
+                const reverbVariation = 20;
+                const newReverb = Math.max(0, Math.min(100, baseReverb + (lfo3Value - 0.5) * reverbVariation));
+                this.reverb.wet.rampTo(newReverb / 100, 2);
+
+                // Continue evolution
+                setTimeout(() => this.evolveLoop(), 2000);
+            }
+
+            updateReverb(value) {
+                const wet = value / 100;
+                this.reverb.wet.rampTo(wet, 0.1);
+            }
+
+            updateMasterVolume(value) {
+                const db = -30 + (value / 100) * 20; // -30 to -10 dB
+                this.masterVolume.volume.rampTo(db, 0.05);
+            }
+        }
+
+        // Knob Controller
+        class Knob {
+            constructor(element, config) {
+                this.element = element;
+                this.indicator = element.querySelector('.knob-indicator');
+                this.config = {
+                    min: config.min || 0,
+                    max: config.max || 100,
+                    value: config.value || 50,
+                    step: config.step || 1,
+                    onChange: config.onChange || (() => {})
+                };
+
+                this.isDragging = false;
+                this.startY = 0;
+                this.startValue = this.config.value;
+
+                this.bindEvents();
+                this.updateRotation();
+            }
+
+            bindEvents() {
+                this.element.addEventListener('mousedown', this.onMouseDown.bind(this));
+                document.addEventListener('mousemove', this.onMouseMove.bind(this));
+                document.addEventListener('mouseup', this.onMouseUp.bind(this));
+
+                // Touch events
+                this.element.addEventListener('touchstart', this.onTouchStart.bind(this));
+                document.addEventListener('touchmove', this.onTouchMove.bind(this));
+                document.addEventListener('touchend', this.onTouchEnd.bind(this));
+            }
+
+            onMouseDown(e) {
+                e.preventDefault();
+                this.isDragging = true;
+                this.startY = e.clientY;
+                this.startValue = this.config.value;
+                this.element.style.cursor = 'grabbing';
+            }
+
+            onTouchStart(e) {
+                this.isDragging = true;
+                this.startY = e.touches[0].clientY;
+                this.startValue = this.config.value;
+            }
+
+            onMouseMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onTouchMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.touches[0].clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onMouseUp() {
+                this.isDragging = false;
+                this.element.style.cursor = 'pointer';
+            }
+
+            onTouchEnd() {
+                this.isDragging = false;
+            }
+
+            updateRotation() {
+                const percentage = (this.config.value - this.config.min) / (this.config.max - this.config.min);
+                const degrees = -135 + (percentage * 270); // -135° to +135°
+                this.indicator.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
+                this.indicator.style.transformOrigin = 'center bottom';
+            }
+
+            setValue(value) {
+                this.config.value = Math.max(this.config.min, Math.min(this.config.max, value));
+                this.updateRotation();
+            }
+
+            getValue() {
+                return this.config.value;
+            }
+        }
+
+        // Initialize
+        const synth = new DroneSynth();
+        const knobs = {};
+
+        // Setup all knobs
+        function initKnobs() {
+            const knobConfigs = {
+                'osc1-freq': { min: 0, max: 100, value: 50, format: (v) => {
+                    const semitones = ((v - 50) * 0.24).toFixed(1);
+                    return semitones > 0 ? `+${semitones}` : `${semitones}`;
+                }},
+                'osc1-vol': { min: 0, max: 100, value: 50 },
+                'osc2-freq': { min: 0, max: 100, value: 50, format: (v) => {
+                    const semitones = ((v - 50) * 0.24).toFixed(1);
+                    return semitones > 0 ? `+${semitones}` : `${semitones}`;
+                }},
+                'osc2-vol': { min: 0, max: 100, value: 50 },
+                'osc3-freq': { min: 0, max: 100, value: 50, format: (v) => {
+                    const semitones = ((v - 50) * 0.24).toFixed(1);
+                    return semitones > 0 ? `+${semitones}` : `${semitones}`;
+                }},
+                'osc3-vol': { min: 0, max: 100, value: 50 },
+                'noise-vol': { min: 0, max: 100, value: 0 },
+                'noise-filter': { min: 0, max: 100, value: 50, format: (v) => Math.round(100 + v * 49) + ' Hz' },
+                'cutoff': { min: 0, max: 100, value: 70, format: (v) => Math.round(100 * Math.pow(100, v / 100)) + ' Hz' },
+                'resonance': { min: 0, max: 100, value: 5, format: (v) => (0.5 + v * 0.195).toFixed(1) },
+                'detune': { min: 0, max: 50, value: 8, format: (v) => Math.round(v) + '¢' },
+                'lfo-rate': { min: 0.01, max: 5, value: 0.5, step: 0.01, format: (v) => v.toFixed(2) + ' Hz' },
+                'lfo-depth': { min: 0, max: 100, value: 30 },
+                'reverb': { min: 0, max: 100, value: 65 },
+                'master-vol': { min: 0, max: 100, value: 70 }
+            };
+
+            document.querySelectorAll('[data-knob]').forEach(el => {
+                const id = el.dataset.knob;
+                const config = knobConfigs[id];
+                const valueEl = document.querySelector(`[data-value="${id}"]`);
+
+                knobs[id] = new Knob(el, {
+                    ...config,
+                    onChange: (value) => {
+                        // Update display
+                        const displayValue = config.format ? config.format(value) : Math.round(value);
+                        valueEl.textContent = displayValue;
+
+                        // Update synth
+                        handleKnobChange(id, value);
+                    }
+                });
+
+                // Set initial display
+                const displayValue = config.format ? config.format(config.value) : Math.round(config.value);
+                valueEl.textContent = displayValue;
+            });
+
+            // Initialize all parameters
+            Object.keys(knobs).forEach(id => {
+                handleKnobChange(id, knobs[id].getValue());
+            });
+        }
+
+        function handleKnobChange(id, value) {
+            const [type, param] = id.split('-');
+
+            switch(type) {
+                case 'osc1':
+                case 'osc2':
+                case 'osc3':
+                    if (param === 'freq') {
+                        synth.updateOscFreq(type, value);
+                        synth.parameters[type].freq = value;
+                    } else if (param === 'vol') {
+                        synth.updateOscVolume(type, value);
+                        synth.parameters[type].vol = value;
+                    }
+                    break;
+                case 'noise':
+                    if (param === 'vol') {
+                        synth.updateNoiseVolume(value);
+                        synth.parameters.noise.vol = value;
+                    } else if (param === 'filter') {
+                        synth.updateNoiseFilter(value);
+                        synth.parameters.noise.filter = value;
+                    }
+                    break;
+                case 'cutoff':
+                    synth.updateCutoff(value);
+                    synth.parameters.cutoff = value;
+                    break;
+                case 'resonance':
+                    synth.updateResonance(value);
+                    synth.parameters.resonance = value;
+                    break;
+                case 'detune':
+                    synth.parameters.detune = value;
+                    if (synth.isPlaying) synth.updateDetune();
+                    break;
+                case 'lfo':
+                    if (param === 'rate') {
+                        synth.parameters.lfoRate = value;
+                    } else if (param === 'depth') {
+                        synth.parameters.lfoDepth = value;
+                    }
+                    synth.updateLFO(synth.parameters.lfoRate, synth.parameters.lfoDepth);
+                    break;
+                case 'reverb':
+                    synth.updateReverb(value);
+                    synth.parameters.reverb = value;
+                    break;
+                case 'master':
+                    synth.updateMasterVolume(value);
+                    synth.parameters.masterVol = value;
+                    break;
+            }
+        }
+
+        // Start/Stop/Evolve buttons
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const evolveBtn = document.getElementById('evolveBtn');
+        const status = document.getElementById('status');
+
+        startBtn.addEventListener('click', async () => {
+            await synth.start();
+            startBtn.disabled = true;
+            startBtn.classList.remove('active');
+            stopBtn.disabled = false;
+            stopBtn.classList.add('active');
+            status.textContent = 'Drone Active';
+            status.classList.add('active');
+        });
+
+        stopBtn.addEventListener('click', () => {
+            synth.stop();
+            stopBtn.disabled = true;
+            stopBtn.classList.remove('active');
+            startBtn.disabled = false;
+            status.textContent = 'Stopped';
+            status.classList.remove('active');
+        });
+
+        evolveBtn.addEventListener('click', () => {
+            const isActive = evolveBtn.classList.toggle('active');
+            synth.toggleEvolve(isActive);
+
+            if (isActive) {
+                status.textContent = synth.isPlaying ? 'Drone Active • Evolving' : 'Ready • Evolving';
+            } else {
+                status.textContent = synth.isPlaying ? 'Drone Active' : 'Ready';
+            }
+        });
+
+        // Initialize everything
+        setTimeout(() => {
+            initKnobs();
+        }, 100);
+    </script>
+</body>
+</html>

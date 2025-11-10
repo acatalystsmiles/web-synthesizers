@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple DAW - Step Sequencer Demo</title>
+    <script src="Tone.js"></script>
+    <!-- Load the Step Sequencer module -->
+    <script src="instruments/step-sequencer-module.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #2a2a3a;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            color: #6a9bd8;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #9a9aaa;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #222232;
+            border-radius: 8px;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #4a4a5a;
+            color: #e0e0e0;
+        }
+
+        button:hover {
+            background: #5a5a6a;
+            transform: translateY(-1px);
+        }
+
+        button.primary {
+            background: #6a9bd8;
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #7aabf8;
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .instrument-wrapper {
+            background: #1a1a2a;
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid #3a3a4a;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #222232;
+            border-radius: 8px;
+            text-align: center;
+            color: #9a9aaa;
+        }
+
+        .status.active {
+            color: #6a9bd8;
+        }
+
+        .info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(106, 155, 216, 0.1);
+            border-left: 4px solid #6a9bd8;
+            border-radius: 4px;
+        }
+
+        .info h3 {
+            color: #6a9bd8;
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            line-height: 1.6;
+            color: #c0c0d0;
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: #2a2a3a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #7aabf8;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Step Sequencer Module Demo</h1>
+        <p class="subtitle">Testing the Step Sequencer as a loadable DAW instrument module</p>
+
+        <div class="controls">
+            <button id="playBtn" class="primary">Play</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <label style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+                Tempo:
+                <input type="number" id="tempoInput" value="120" min="40" max="240"
+                       style="width: 80px; padding: 8px; background: #3a3a4a; border: 1px solid #4a4a5a;
+                              color: #e0e0e0; border-radius: 4px;">
+            </label>
+        </div>
+
+        <div class="instrument-wrapper" id="instrumentContainer">
+            <p style="text-align: center; color: #6a6a7a;">Loading instrument...</p>
+        </div>
+
+        <div class="status" id="status">Click Play to start</div>
+
+        <div class="info">
+            <h3>About This Demo</h3>
+            <p>
+                This demonstrates the Step Sequencer converted into a module that can be loaded into the DAW.
+                The instrument is completely isolated and communicates with the host through a clean API.
+            </p>
+            <p>
+                <strong>Key Features:</strong>
+            </p>
+            <ul style="margin-left: 20px; margin-top: 10px; color: #c0c0d0;">
+                <li>Connects to a Tone.Channel (not directly to destination)</li>
+                <li>Responds to Transport start/stop (doesn't control it)</li>
+                <li>Provides its own UI via <code>getUI()</code></li>
+                <li>Saves/loads state via <code>getState()</code> and <code>setState()</code></li>
+                <li>Cleans up resources via <code>dispose()</code></li>
+            </ul>
+            <p style="margin-top: 15px;">
+                To integrate this into the full DAW, modify the <code>loadInstrument()</code> method in Simple DAW.html
+                to load this module instead of the test instruments.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Simple test harness for the module
+        let instrument = null;
+        let channel = null;
+        let isPlaying = false;
+
+        async function init() {
+            // Create a channel for the instrument to connect to
+            channel = new Tone.Channel({
+                volume: 0,
+                pan: 0
+            }).toDestination();
+
+            // Create the instrument instance
+            instrument = new StepSequencerModule(channel);
+
+            // Get and display the UI
+            const ui = instrument.getUI();
+            document.getElementById('instrumentContainer').innerHTML = '';
+            document.getElementById('instrumentContainer').appendChild(ui);
+
+            // Set up controls
+            document.getElementById('playBtn').addEventListener('click', async () => {
+                await Tone.start();
+                Tone.Transport.bpm.value = parseInt(document.getElementById('tempoInput').value);
+                Tone.Transport.start();
+                instrument.start();
+                isPlaying = true;
+
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('status').textContent = 'Playing...';
+                document.getElementById('status').classList.add('active');
+            });
+
+            document.getElementById('stopBtn').addEventListener('click', () => {
+                instrument.stop();
+                Tone.Transport.stop();
+                Tone.Transport.position = 0;
+                isPlaying = false;
+
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('status').textContent = 'Stopped';
+                document.getElementById('status').classList.remove('active');
+            });
+
+            document.getElementById('tempoInput').addEventListener('change', (e) => {
+                const bpm = parseInt(e.target.value);
+                Tone.Transport.bpm.rampTo(bpm, 0.1);
+                instrument.setTempo(bpm);
+            });
+
+            console.log('Instrument info:', StepSequencerModule.getInfo());
+        }
+
+        // Initialize when page loads
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FM Synth</title>
+    <script src="Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #3a2f1f 0%, #2a1f1a 50%, #3a2a1f 100%);
+            color: #e0d8c8;
+            min-height: 100vh;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+
+        .synth-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #4a3f2f, #3a2f2a);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow:
+                inset -2px -2px 5px rgba(0, 0, 0, 0.5),
+                inset 2px 2px 5px rgba(100, 80, 60, 0.1),
+                5px 5px 20px rgba(0, 0, 0, 0.6);
+            border: 3px solid #5a4a3a;
+        }
+
+        .synth-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: linear-gradient(180deg, #2a1f1a, #3a2f2a);
+            border-radius: 8px;
+            border: 2px inset #5a4a3a;
+        }
+
+        .synth-header h1 {
+            font-size: 2em;
+            letter-spacing: 4px;
+            color: #d4a574;
+            text-shadow:
+                0 0 10px rgba(212, 165, 116, 0.5),
+                2px 2px 3px rgba(0, 0, 0, 0.8);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .synth-header .subtitle {
+            font-size: 0.8em;
+            color: #c4956d;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(196, 149, 109, 0.3);
+        }
+
+        .panel-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .panel {
+            background: linear-gradient(145deg, #3a2f2a, #2a2520);
+            border-radius: 8px;
+            padding: 15px;
+            border: 2px outset #5a4a3a;
+            box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-header {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #d4a574;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: linear-gradient(90deg, rgba(212, 165, 116, 0.1), transparent);
+            border-left: 3px solid #d4a574;
+            text-shadow: 0 0 5px rgba(212, 165, 116, 0.3);
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            font-size: 0.75em;
+            color: #c8b8a0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .knob-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 10px;
+        }
+
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .knob-wrapper {
+            position: relative;
+            width: 50px;
+            height: 50px;
+        }
+
+        .knob {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 30% 30%, #5a4a3a, #3a2f2a);
+            box-shadow:
+                inset -3px -3px 6px rgba(0, 0, 0, 0.7),
+                inset 3px 3px 6px rgba(100, 80, 60, 0.2),
+                2px 2px 5px rgba(0, 0, 0, 0.5);
+            position: relative;
+            cursor: pointer;
+            border: 2px solid #4a3a2a;
+        }
+
+        .knob:hover {
+            border-color: #d4a574;
+            box-shadow:
+                inset -3px -3px 6px rgba(0, 0, 0, 0.7),
+                inset 3px 3px 6px rgba(100, 80, 60, 0.2),
+                0 0 10px rgba(212, 165, 116, 0.3);
+        }
+
+        .knob-indicator {
+            position: absolute;
+            width: 3px;
+            height: 18px;
+            background: linear-gradient(180deg, #d4a574, #b48a5a);
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 5px rgba(212, 165, 116, 0.6);
+        }
+
+        .knob-center {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #2a1f1a;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #3a2f2a;
+        }
+
+        .knob-value {
+            font-size: 0.65em;
+            color: #d4a574;
+            font-weight: bold;
+            text-shadow: 0 0 3px rgba(212, 165, 116, 0.3);
+            font-family: 'Courier New', monospace;
+        }
+
+        .knob-label {
+            font-size: 0.65em;
+            color: #c8b8a0;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 6px 10px;
+            background: linear-gradient(145deg, #3a2f2a, #2a1f1a);
+            border: 2px inset #5a4a3a;
+            color: #d4a574;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #d4a574;
+            box-shadow: 0 0 8px rgba(212, 165, 116, 0.3);
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+        }
+
+        .switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: linear-gradient(145deg, #3a2f2a, #2a1f1a);
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px inset #5a4a3a;
+            transition: all 0.3s ease;
+        }
+
+        .switch.active {
+            background: linear-gradient(145deg, #b48a5a, #947a4a);
+            border-color: #d4a574;
+            box-shadow: 0 0 10px rgba(212, 165, 116, 0.5);
+        }
+
+        .switch-thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background: radial-gradient(circle, #e0d8c8, #b0a890);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .switch.active .switch-thumb {
+            left: 28px;
+            background: radial-gradient(circle, #d4a574, #b48a5a);
+            box-shadow: 0 0 8px rgba(212, 165, 116, 0.6);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border: 2px outset #5a4a3a;
+            border-radius: 6px;
+            cursor: pointer;
+            background: linear-gradient(145deg, #4a3f2f, #3a2f2a);
+            color: #e0d8c8;
+            box-shadow:
+                2px 2px 5px rgba(0, 0, 0, 0.5),
+                inset 1px 1px 2px rgba(120, 100, 80, 0.2);
+            transition: all 0.15s ease;
+        }
+
+        button:hover {
+            border-color: #d4a574;
+            color: #d4a574;
+            box-shadow:
+                2px 2px 5px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(212, 165, 116, 0.3);
+        }
+
+        button:active {
+            border-style: inset;
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        button.active {
+            background: linear-gradient(145deg, #b48a5a, #947a4a);
+            color: #1a1410;
+            border-color: #d4a574;
+            box-shadow:
+                0 0 15px rgba(212, 165, 116, 0.6),
+                inset -1px -1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .keyboard {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(145deg, #3a2f2a, #2a1f1a);
+            border-radius: 8px;
+            border: 2px inset #5a4a3a;
+        }
+
+        .keyboard-label {
+            font-size: 0.85em;
+            color: #d4a574;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .keys {
+            display: flex;
+            gap: 2px;
+            height: 100px;
+            position: relative;
+        }
+
+        .key {
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .key.white {
+            flex: 1;
+            background: linear-gradient(180deg, #e8e0d0, #c8c0b0);
+            border: 2px outset #a8a090;
+            border-radius: 0 0 4px 4px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 8px;
+            font-size: 0.7em;
+            color: #666;
+        }
+
+        .key.white:hover {
+            background: linear-gradient(180deg, #f8f0e0, #d8d0c0);
+        }
+
+        .key.white:active,
+        .key.white.active {
+            border-style: inset;
+            background: linear-gradient(180deg, #d4a574, #b48a5a);
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(212, 165, 116, 0.6);
+        }
+
+        .key.black {
+            position: absolute;
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(180deg, #3a2f2a, #2a1f1a);
+            border: 2px outset #1a1410;
+            border-radius: 0 0 3px 3px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+            z-index: 1;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 5px;
+            font-size: 0.6em;
+            color: #888;
+        }
+
+        .key.black:hover {
+            background: linear-gradient(180deg, #4a3f2f, #3a2f2a);
+        }
+
+        .key.black:active,
+        .key.black.active {
+            border-style: inset;
+            background: linear-gradient(180deg, #c4956d, #a4855d);
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.5),
+                0 0 15px rgba(196, 149, 109, 0.6);
+        }
+
+        .status-bar {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background: linear-gradient(90deg, rgba(212, 165, 116, 0.1), rgba(196, 149, 109, 0.1));
+            border-radius: 6px;
+            border: 1px solid #4a3a2a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8em;
+        }
+
+        .status-text {
+            color: #c8b8a0;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .status-indicator.active {
+            background: #d4a574;
+            box-shadow: 0 0 10px rgba(212, 165, 116, 0.8);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .led {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #444;
+            border: 1px solid #333;
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .led.active {
+            background: #c4a562;
+            box-shadow:
+                0 0 8px rgba(196, 165, 98, 0.8),
+                inset -1px -1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .oscillator-panel {
+            background: linear-gradient(145deg, #3a2f2f, #2a2528);
+            border-left: 4px solid #d4a574;
+        }
+
+        .lfo-panel {
+            background: linear-gradient(145deg, #3a2a2f, #2a2028);
+            border-left: 4px solid #c4956d;
+        }
+
+        @media (max-width: 768px) {
+            .panel-row {
+                grid-template-columns: 1fr;
+            }
+
+            .keys {
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="synth-container">
+        <!-- Header -->
+        <div class="synth-header">
+            <h1>◢ FM SYNTH ◣</h1>
+            <div class="subtitle">4-Operator Frequency Modulation Synthesizer</div>
+        </div>
+
+        <!-- Oscillators -->
+        <div class="panel-row">
+            <div class="panel oscillator-panel">
+                <div class="panel-header">◆ Oscillator 1 ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Waveform</div>
+                    <select id="osc1-wave">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc1-level">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Level</div>
+                        <div class="knob-value" data-value="osc1-level">70</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc1-detune">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Detune</div>
+                        <div class="knob-value" data-value="osc1-detune">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel oscillator-panel">
+                <div class="panel-header">◆ Oscillator 2 ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Waveform</div>
+                    <select id="osc2-wave">
+                        <option value="sine" selected>Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc2-level">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Level</div>
+                        <div class="knob-value" data-value="osc2-level">30</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc2-detune">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Detune</div>
+                        <div class="knob-value" data-value="osc2-detune">0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc2-fm">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">FM</div>
+                        <div class="knob-value" data-value="osc2-fm">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel oscillator-panel">
+                <div class="panel-header">◆ Oscillator 3 ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Waveform</div>
+                    <select id="osc3-wave">
+                        <option value="sine" selected>Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc3-level">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Level</div>
+                        <div class="knob-value" data-value="osc3-level">20</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc3-detune">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Detune</div>
+                        <div class="knob-value" data-value="osc3-detune">0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc3-fm">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">FM</div>
+                        <div class="knob-value" data-value="osc3-fm">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel oscillator-panel">
+                <div class="panel-header">◆ Oscillator 4 ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Waveform</div>
+                    <select id="osc4-wave">
+                        <option value="sine" selected>Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc4-level">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Level</div>
+                        <div class="knob-value" data-value="osc4-level">10</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc4-detune">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Detune</div>
+                        <div class="knob-value" data-value="osc4-detune">0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="osc4-fm">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">FM</div>
+                        <div class="knob-value" data-value="osc4-fm">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Envelopes & Filter -->
+        <div class="panel-row">
+            <div class="panel">
+                <div class="panel-header">◆ Amplitude Envelope ◆</div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="amp-attack">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Attack</div>
+                        <div class="knob-value" data-value="amp-attack">0.01</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="amp-decay">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Decay</div>
+                        <div class="knob-value" data-value="amp-decay">0.2</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="amp-sustain">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Sustain</div>
+                        <div class="knob-value" data-value="amp-sustain">0.5</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="amp-release">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Release</div>
+                        <div class="knob-value" data-value="amp-release">0.8</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">◆ Filter ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Type</div>
+                    <select id="filter-type">
+                        <option value="lowpass">Lowpass</option>
+                        <option value="highpass">Highpass</option>
+                        <option value="bandpass">Bandpass</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filter-freq">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Cutoff</div>
+                        <div class="knob-value" data-value="filter-freq">2000</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filter-res">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Resonance</div>
+                        <div class="knob-value" data-value="filter-res">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">◆ Filter Envelope ◆</div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filt-attack">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Attack</div>
+                        <div class="knob-value" data-value="filt-attack">0.05</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filt-decay">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Decay</div>
+                        <div class="knob-value" data-value="filt-decay">0.3</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filt-sustain">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Sustain</div>
+                        <div class="knob-value" data-value="filt-sustain">0.5</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="filt-amount">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Amount</div>
+                        <div class="knob-value" data-value="filt-amount">2000</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LFO & Effects -->
+        <div class="panel-row">
+            <div class="panel lfo-panel">
+                <div class="panel-header">◆ LFO ◆</div>
+                <div class="control-group">
+                    <div class="control-label">Waveform</div>
+                    <select id="lfo-wave">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="lfo-rate">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Rate</div>
+                        <div class="knob-value" data-value="lfo-rate">2.0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="lfo-pitch">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Pitch</div>
+                        <div class="knob-value" data-value="lfo-pitch">0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="lfo-filter">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Filter</div>
+                        <div class="knob-value" data-value="lfo-filter">0</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="lfo-amp">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Amp</div>
+                        <div class="knob-value" data-value="lfo-amp">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">◆ Reverb ◆</div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="reverb-decay">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Decay</div>
+                        <div class="knob-value" data-value="reverb-decay">2.5</div>
+                    </div>
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="reverb-wet">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Mix</div>
+                        <div class="knob-value" data-value="reverb-wet">25</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">◆ Master ◆</div>
+                <div class="control-group">
+                    <div class="switch-container">
+                        <span class="control-label" style="margin: 0;">Drone Mode</span>
+                        <div class="switch" id="drone-switch">
+                            <div class="switch-thumb"></div>
+                        </div>
+                        <div class="led" id="drone-led"></div>
+                    </div>
+                </div>
+                <div class="knob-row">
+                    <div class="knob-container">
+                        <div class="knob-wrapper">
+                            <div class="knob" data-knob="master-volume">
+                                <div class="knob-indicator"></div>
+                                <div class="knob-center"></div>
+                            </div>
+                        </div>
+                        <div class="knob-label">Volume</div>
+                        <div class="knob-value" data-value="master-volume">70</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keyboard -->
+        <div class="keyboard">
+            <div class="keyboard-label">▶ Virtual Keyboard ◀</div>
+            <div class="keys" id="keyboard"></div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-text" id="statusText">Ready - Click anywhere to enable audio</div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <span style="font-size: 0.7em; color: #9a9a9a;">LATENCY:</span>
+                    <span style="font-size: 0.8em; color: #d4a574; font-family: 'Courier New', monospace;" id="latencyDisplay">--ms</span>
+                </div>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <span style="font-size: 0.7em; color: #9a9a9a;">MIDI:</span>
+                    <div class="led" id="midiLed"></div>
+                </div>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <span style="font-size: 0.75em;">STATUS:</span>
+                    <div class="status-indicator" id="statusIndicator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="fm-synth-engine.js"></script>
+</body>
+</html>

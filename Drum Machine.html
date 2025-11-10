@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drum Machine</title>
+    <script src="Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #2e1a1a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(20, 20, 35, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(150, 100, 100, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            color: #ffb8a8;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85em;
+            color: #7a8aaa;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
+        }
+
+        .controls-section {
+            background: rgba(60, 40, 40, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(150, 100, 100, 0.2);
+        }
+
+        .section-header {
+            font-size: 0.95em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffb8a8;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #9aa5be;
+        }
+
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .knob-wrapper {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+
+        .knob {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #3a2a2a, #2a1a1a);
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+                inset -5px -5px 10px rgba(100, 80, 80, 0.1),
+                3px 3px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.05s ease;
+        }
+
+        .knob:hover {
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.6),
+                inset -5px -5px 10px rgba(100, 80, 80, 0.15),
+                3px 3px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .knob-indicator {
+            position: absolute;
+            width: 3px;
+            height: 22px;
+            background: linear-gradient(180deg, #ffb8a8, #ff8866);
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(255, 184, 168, 0.6);
+        }
+
+        .knob-center {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #2a1a1a;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #3a2a2a;
+        }
+
+        .knob-value {
+            font-size: 0.75em;
+            color: #ffb8a8;
+            font-weight: 600;
+        }
+
+        .drum-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(40, 30, 30, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(150, 100, 100, 0.2);
+        }
+
+        .drum-label {
+            width: 80px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #ffb8a8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .drum-volume {
+            width: 60px;
+        }
+
+        .drum-steps {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .step-pad {
+            flex: 1;
+            aspect-ratio: 1;
+            min-width: 30px;
+            max-width: 60px;
+            background: rgba(60, 50, 50, 0.5);
+            border: 2px solid rgba(150, 100, 100, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s ease;
+        }
+
+        .step-pad:hover {
+            background: rgba(80, 60, 60, 0.6);
+            border-color: rgba(255, 184, 168, 0.5);
+        }
+
+        .step-pad.active {
+            background: rgba(255, 136, 102, 0.4);
+            border-color: #ff8866;
+            box-shadow: 0 0 10px rgba(255, 136, 102, 0.3);
+        }
+
+        .step-pad.playing {
+            background: rgba(255, 184, 168, 0.8);
+            border-color: #ffb8a8;
+            box-shadow: 0 0 20px rgba(255, 184, 168, 0.6);
+            transform: scale(1.1);
+        }
+
+        .step-velocity {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 136, 102, 0.6);
+            transition: height 0.1s ease;
+            border-radius: 0 0 6px 6px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 35px;
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 184, 168, 0.15);
+            color: #ffb8a8;
+            border: 2px solid #ffb8a8;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: rgba(255, 184, 168, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 184, 168, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.active {
+            background: #ffb8a8;
+            color: #2a1a1a;
+            box-shadow: 0 6px 25px rgba(255, 184, 168, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .patch-manager {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            background: rgba(60, 40, 40, 0.8);
+            border: 1px solid rgba(150, 100, 100, 0.3);
+            color: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ffb8a8;
+        }
+
+        select {
+            background: rgba(60, 40, 40, 0.8);
+            color: #e0e0e0;
+            border: 1px solid rgba(150, 100, 100, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            cursor: pointer;
+            outline: none;
+        }
+
+        select:hover {
+            border-color: rgba(255, 184, 168, 0.5);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #555;
+            letter-spacing: 1px;
+        }
+
+        .status.active {
+            color: #ffb8a8;
+        }
+
+        .sync-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #555;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.active {
+            background: #4ade80;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 1200px) {
+            .drum-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .drum-label {
+                width: 100%;
+            }
+
+            .drum-steps {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DRUM MACHINE</h1>
+        <div class="subtitle">16-Step Rhythm Sequencer</div>
+
+        <!-- Master Controls -->
+        <div class="controls-section">
+            <div class="section-header">Master Controls</div>
+            <div class="controls-row">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="tempo">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Tempo <span class="sync-indicator" id="sync-indicator"></span></div>
+                    <div class="knob-value" data-value="tempo">120 BPM</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="swing">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Swing</div>
+                    <div class="knob-value" data-value="swing">0%</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="master">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Master</div>
+                    <div class="knob-value" data-value="master">75</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Sync</div>
+                    <button id="syncBtn">Broadcast Tempo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drum Sequencer -->
+        <div class="controls-section">
+            <div class="section-header">Drum Tracks</div>
+            <div id="drum-tracks"></div>
+        </div>
+
+        <!-- Transport Controls -->
+        <div class="button-group">
+            <button id="playBtn">Play</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="randomizeBtn">Randomize All</button>
+            <button id="clearBtn">Clear All</button>
+        </div>
+
+        <!-- Patch Management -->
+        <div class="controls-section">
+            <div class="section-header">Pattern Manager</div>
+            <div class="patch-manager">
+                <input type="text" id="pattern-name" placeholder="Pattern Name" value="Init">
+                <button id="saveBtn">Save</button>
+                <button id="loadBtn">Load</button>
+                <select id="pattern-list">
+                    <option value="">Select Pattern...</option>
+                </select>
+                <button id="deleteBtn">Delete</button>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready</div>
+    </div>
+
+    <script>
+        // Drum Machine Engine
+        class DrumMachine {
+            constructor() {
+                this.isPlaying = false;
+                this.currentStep = 0;
+                this.stepCount = 16;
+                this.drums = {};
+                this.initializeAudio();
+                this.initializePatterns();
+                this.setupTempoSync();
+            }
+
+            setupTempoSync() {
+                // BroadcastChannel for cross-tab tempo sync
+                try {
+                    this.syncChannel = new BroadcastChannel('music_tempo_sync');
+                    this.syncChannel.onmessage = (event) => {
+                        if (event.data.type === 'tempo' && !this.isBroadcasting) {
+                            this.updateTempo(event.data.value);
+                            this.showSyncIndicator();
+                            // Update UI
+                            if (knobs.tempo) {
+                                knobs.tempo.setValue(event.data.value);
+                                document.querySelector('[data-value="tempo"]').textContent =
+                                    Math.round(event.data.value) + ' BPM';
+                            }
+                        }
+                    };
+                } catch (e) {
+                    console.log('BroadcastChannel not supported');
+                }
+                this.isBroadcasting = false;
+            }
+
+            showSyncIndicator() {
+                const indicator = document.getElementById('sync-indicator');
+                indicator.classList.add('active');
+                setTimeout(() => indicator.classList.remove('active'), 200);
+            }
+
+            broadcastTempo(tempo) {
+                if (this.syncChannel) {
+                    this.isBroadcasting = true;
+                    this.syncChannel.postMessage({ type: 'tempo', value: tempo });
+                    setTimeout(() => this.isBroadcasting = false, 100);
+                }
+            }
+
+            async initializeAudio() {
+                // Master volume
+                this.masterVolume = new Tone.Volume(-6).toDestination();
+
+                // Create drum voices
+                this.createDrumVoices();
+
+                this.tempo = 120;
+                this.swing = 0;
+            }
+
+            createDrumVoices() {
+                // Kick
+                const kickEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.3,
+                    sustain: 0,
+                    release: 0.3
+                }).connect(this.masterVolume);
+
+                const kickOsc = new Tone.Oscillator({
+                    frequency: 60,
+                    type: 'sine'
+                }).connect(kickEnv).start();
+
+                this.drums.kick = {
+                    name: 'Kick',
+                    trigger: (time, velocity) => {
+                        kickOsc.frequency.setValueAtTime(150, time);
+                        kickOsc.frequency.exponentialRampToValueAtTime(60, time + 0.3);
+                        kickEnv.triggerAttackRelease(0.3, time, velocity);
+                    },
+                    volume: new Tone.Volume(0).connect(kickEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.8 })
+                };
+                kickOsc.disconnect();
+                kickOsc.connect(this.drums.kick.volume);
+
+                // Snare
+                const snareNoise = new Tone.Noise('white').start();
+                const snareFilter = new Tone.Filter(2000, 'highpass').connect(this.masterVolume);
+                const snareEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.2,
+                    sustain: 0,
+                    release: 0.2
+                }).connect(snareFilter);
+
+                this.drums.snare = {
+                    name: 'Snare',
+                    trigger: (time, velocity) => {
+                        snareEnv.triggerAttackRelease(0.2, time, velocity);
+                    },
+                    volume: new Tone.Volume(0).connect(snareEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.8 })
+                };
+                snareNoise.disconnect();
+                snareNoise.connect(this.drums.snare.volume);
+
+                // Hi-Hat Closed
+                const hatNoise = new Tone.Noise('white').start();
+                const hatFilter = new Tone.Filter(8000, 'highpass').connect(this.masterVolume);
+                const hatEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.05,
+                    sustain: 0,
+                    release: 0.05
+                }).connect(hatFilter);
+
+                this.drums.hihat = {
+                    name: 'Hi-Hat',
+                    trigger: (time, velocity) => {
+                        hatEnv.triggerAttackRelease(0.05, time, velocity);
+                    },
+                    volume: new Tone.Volume(-3).connect(hatEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.6 })
+                };
+                hatNoise.disconnect();
+                hatNoise.connect(this.drums.hihat.volume);
+
+                // Open Hat
+                const openHatNoise = new Tone.Noise('white').start();
+                const openHatFilter = new Tone.Filter(7000, 'highpass').connect(this.masterVolume);
+                const openHatEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.3,
+                    sustain: 0,
+                    release: 0.3
+                }).connect(openHatFilter);
+
+                this.drums.openhat = {
+                    name: 'Open Hat',
+                    trigger: (time, velocity) => {
+                        openHatEnv.triggerAttackRelease(0.3, time, velocity);
+                    },
+                    volume: new Tone.Volume(-6).connect(openHatEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.7 })
+                };
+                openHatNoise.disconnect();
+                openHatNoise.connect(this.drums.openhat.volume);
+
+                // Clap
+                const clapNoise = new Tone.Noise('pink').start();
+                const clapFilter = new Tone.Filter(1500, 'bandpass').connect(this.masterVolume);
+                const clapEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.15,
+                    sustain: 0,
+                    release: 0.15
+                }).connect(clapFilter);
+
+                this.drums.clap = {
+                    name: 'Clap',
+                    trigger: (time, velocity) => {
+                        clapEnv.triggerAttackRelease(0.05, time, velocity * 0.7);
+                        clapEnv.triggerAttackRelease(0.05, time + 0.03, velocity * 0.5);
+                        clapEnv.triggerAttackRelease(0.15, time + 0.06, velocity);
+                    },
+                    volume: new Tone.Volume(-3).connect(clapEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.8 })
+                };
+                clapNoise.disconnect();
+                clapNoise.connect(this.drums.clap.volume);
+
+                // Tom
+                const tomOsc = new Tone.Oscillator(120, 'sine').start();
+                const tomEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.25,
+                    sustain: 0,
+                    release: 0.25
+                }).connect(this.masterVolume);
+
+                this.drums.tom = {
+                    name: 'Tom',
+                    trigger: (time, velocity) => {
+                        tomOsc.frequency.setValueAtTime(180, time);
+                        tomOsc.frequency.exponentialRampToValueAtTime(120, time + 0.25);
+                        tomEnv.triggerAttackRelease(0.25, time, velocity);
+                    },
+                    volume: new Tone.Volume(0).connect(tomEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.8 })
+                };
+                tomOsc.disconnect();
+                tomOsc.connect(this.drums.tom.volume);
+
+                // Clave - sharp, high-pitched click
+                const claveOsc = new Tone.Oscillator(2500, 'square').start();
+                const claveFilter = new Tone.Filter(3000, 'bandpass', -12).connect(this.masterVolume);
+                const claveEnv = new Tone.AmplitudeEnvelope({
+                    attack: 0.001,
+                    decay: 0.02,
+                    sustain: 0,
+                    release: 0.02
+                }).connect(claveFilter);
+
+                this.drums.clave = {
+                    name: 'Clave',
+                    trigger: (time, velocity) => {
+                        claveOsc.frequency.setValueAtTime(2500, time);
+                        claveOsc.frequency.exponentialRampToValueAtTime(2000, time + 0.02);
+                        claveEnv.triggerAttackRelease(0.02, time, velocity);
+                    },
+                    volume: new Tone.Volume(-6).connect(claveEnv),
+                    pattern: Array(16).fill({ active: false, velocity: 0.8 })
+                };
+                claveOsc.disconnect();
+                claveOsc.connect(this.drums.clave.volume);
+            }
+
+            initializePatterns() {
+                // Set up a basic rock beat
+                this.drums.kick.pattern[0] = { active: true, velocity: 1.0 };
+                this.drums.kick.pattern[4] = { active: true, velocity: 0.8 };
+                this.drums.kick.pattern[8] = { active: true, velocity: 1.0 };
+                this.drums.kick.pattern[12] = { active: true, velocity: 0.8 };
+
+                this.drums.snare.pattern[4] = { active: true, velocity: 1.0 };
+                this.drums.snare.pattern[12] = { active: true, velocity: 1.0 };
+
+                for (let i = 0; i < 16; i += 2) {
+                    this.drums.hihat.pattern[i] = { active: true, velocity: 0.6 };
+                }
+            }
+
+            start() {
+                if (this.isPlaying) return;
+
+                Tone.Transport.bpm.value = this.tempo;
+                Tone.Transport.swing = this.swing;
+                this.isPlaying = true;
+                this.currentStep = 0;
+
+                this.sequence = new Tone.Sequence((time, step) => {
+                    this.currentStep = step;
+                    this.triggerStep(step, time);
+                }, Array.from({length: this.stepCount}, (_, i) => i), "16n");
+
+                this.sequence.start(0);
+                Tone.Transport.start();
+            }
+
+            stop() {
+                if (!this.isPlaying) return;
+
+                this.isPlaying = false;
+                this.currentStep = 0;
+
+                if (this.sequence) {
+                    this.sequence.stop();
+                    this.sequence.dispose();
+                    this.sequence = null;
+                }
+
+                Tone.Transport.stop();
+            }
+
+            triggerStep(step, time) {
+                Object.keys(this.drums).forEach(drumKey => {
+                    const drum = this.drums[drumKey];
+                    const stepData = drum.pattern[step];
+
+                    if (stepData && stepData.active) {
+                        drum.trigger(time, stepData.velocity);
+                    }
+                });
+            }
+
+            updateStep(drum, step, data) {
+                this.drums[drum].pattern[step] = { ...this.drums[drum].pattern[step], ...data };
+            }
+
+            updateDrumVolume(drum, value) {
+                const db = -30 + (value / 100) * 30; // -30 to 0 dB
+                this.drums[drum].volume.volume.rampTo(db, 0.05);
+            }
+
+            updateTempo(bpm) {
+                this.tempo = bpm;
+                Tone.Transport.bpm.value = bpm;
+            }
+
+            updateSwing(amount) {
+                this.swing = amount / 100;
+                Tone.Transport.swing = this.swing;
+            }
+
+            updateMasterVolume(value) {
+                const db = -30 + (value / 100) * 24; // -30 to -6 dB
+                this.masterVolume.volume.rampTo(db, 0.05);
+            }
+
+            randomizeDrum(drum) {
+                this.drums[drum].pattern = this.drums[drum].pattern.map(() => ({
+                    active: Math.random() > 0.7,
+                    velocity: 0.3 + Math.random() * 0.7
+                }));
+            }
+
+            randomizeAll() {
+                Object.keys(this.drums).forEach(drum => this.randomizeDrum(drum));
+            }
+
+            clearDrum(drum) {
+                this.drums[drum].pattern = Array(16).fill({ active: false, velocity: 0.8 });
+            }
+
+            clearAll() {
+                Object.keys(this.drums).forEach(drum => this.clearDrum(drum));
+            }
+
+            getState() {
+                const state = {
+                    tempo: this.tempo,
+                    swing: this.swing,
+                    drums: {}
+                };
+
+                Object.keys(this.drums).forEach(drum => {
+                    state.drums[drum] = {
+                        pattern: JSON.parse(JSON.stringify(this.drums[drum].pattern)),
+                        volume: this.drums[drum].volume.volume.value
+                    };
+                });
+
+                return state;
+            }
+
+            setState(state) {
+                this.tempo = state.tempo || 120;
+                this.swing = state.swing || 0;
+
+                Tone.Transport.bpm.value = this.tempo;
+                Tone.Transport.swing = this.swing;
+
+                if (state.drums) {
+                    Object.keys(state.drums).forEach(drum => {
+                        if (this.drums[drum]) {
+                            this.drums[drum].pattern = JSON.parse(JSON.stringify(state.drums[drum].pattern));
+                            if (state.drums[drum].volume !== undefined) {
+                                this.drums[drum].volume.volume.value = state.drums[drum].volume;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // Knob Controller (reused from other instruments)
+        class Knob {
+            constructor(element, config) {
+                this.element = element;
+                this.indicator = element.querySelector('.knob-indicator');
+                this.config = {
+                    min: config.min || 0,
+                    max: config.max || 100,
+                    value: config.value || 50,
+                    step: config.step || 1,
+                    onChange: config.onChange || (() => {})
+                };
+
+                this.isDragging = false;
+                this.startY = 0;
+                this.startValue = this.config.value;
+
+                this.bindEvents();
+                this.updateRotation();
+            }
+
+            bindEvents() {
+                this.element.addEventListener('mousedown', this.onMouseDown.bind(this));
+                document.addEventListener('mousemove', this.onMouseMove.bind(this));
+                document.addEventListener('mouseup', this.onMouseUp.bind(this));
+                this.element.addEventListener('touchstart', this.onTouchStart.bind(this));
+                document.addEventListener('touchmove', this.onTouchMove.bind(this));
+                document.addEventListener('touchend', this.onTouchEnd.bind(this));
+            }
+
+            onMouseDown(e) {
+                e.preventDefault();
+                this.isDragging = true;
+                this.startY = e.clientY;
+                this.startValue = this.config.value;
+                this.element.style.cursor = 'grabbing';
+            }
+
+            onTouchStart(e) {
+                this.isDragging = true;
+                this.startY = e.touches[0].clientY;
+                this.startValue = this.config.value;
+            }
+
+            onMouseMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onTouchMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.touches[0].clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onMouseUp() {
+                this.isDragging = false;
+                this.element.style.cursor = 'pointer';
+            }
+
+            onTouchEnd() {
+                this.isDragging = false;
+            }
+
+            updateRotation() {
+                const percentage = (this.config.value - this.config.min) / (this.config.max - this.config.min);
+                const degrees = -135 + (percentage * 270);
+                this.indicator.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
+                this.indicator.style.transformOrigin = 'center bottom';
+            }
+
+            setValue(value) {
+                this.config.value = Math.max(this.config.min, Math.min(this.config.max, value));
+                this.updateRotation();
+            }
+
+            getValue() {
+                return this.config.value;
+            }
+        }
+
+        // Pattern Manager
+        class PatternManager {
+            constructor() {
+                this.storageKey = 'drumMachinePatterns';
+            }
+
+            save(name, state) {
+                const patterns = this.getAll();
+                patterns[name] = state;
+                localStorage.setItem(this.storageKey, JSON.stringify(patterns));
+            }
+
+            load(name) {
+                const patterns = this.getAll();
+                return patterns[name] || null;
+            }
+
+            delete(name) {
+                const patterns = this.getAll();
+                delete patterns[name];
+                localStorage.setItem(this.storageKey, JSON.stringify(patterns));
+            }
+
+            getAll() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : {};
+            }
+
+            getNames() {
+                return Object.keys(this.getAll());
+            }
+        }
+
+        // Initialize
+        const drumMachine = new DrumMachine();
+        const patternManager = new PatternManager();
+        const knobs = {};
+        const drumKnobs = {};
+
+        // Create drum track UI
+        function createDrumUI() {
+            const container = document.getElementById('drum-tracks');
+            container.innerHTML = '';
+
+            Object.keys(drumMachine.drums).forEach(drumKey => {
+                const drum = drumMachine.drums[drumKey];
+                const row = document.createElement('div');
+                row.className = 'drum-row';
+
+                row.innerHTML = `
+                    <div class="drum-label">${drum.name}</div>
+                    <div class="drum-volume">
+                        <div class="knob-container">
+                            <div class="knob-wrapper">
+                                <div class="knob" data-drum-knob="${drumKey}">
+                                    <div class="knob-indicator"></div>
+                                    <div class="knob-center"></div>
+                                </div>
+                            </div>
+                            <div class="knob-value" data-drum-value="${drumKey}">75</div>
+                        </div>
+                    </div>
+                    <div class="drum-steps" data-drum="${drumKey}">
+                        ${Array.from({length: 16}, (_, i) => `
+                            <div class="step-pad ${drum.pattern[i].active ? 'active' : ''}"
+                                 data-drum="${drumKey}" data-step="${i}">
+                                <div class="step-velocity" style="height: ${drum.pattern[i].velocity * 100}%"></div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(row);
+
+                // Initialize drum volume knob
+                const knobEl = row.querySelector(`[data-drum-knob="${drumKey}"]`);
+                const valueEl = row.querySelector(`[data-drum-value="${drumKey}"]`);
+
+                drumKnobs[drumKey] = new Knob(knobEl, {
+                    min: 0,
+                    max: 100,
+                    value: 75,
+                    onChange: (value) => {
+                        valueEl.textContent = Math.round(value);
+                        drumMachine.updateDrumVolume(drumKey, value);
+                    }
+                });
+            });
+
+            // Add step pad listeners
+            document.querySelectorAll('.step-pad').forEach(pad => {
+                let velocityMode = false;
+
+                pad.addEventListener('click', (e) => {
+                    const drum = e.currentTarget.dataset.drum;
+                    const step = parseInt(e.currentTarget.dataset.step);
+                    const isActive = !drumMachine.drums[drum].pattern[step].active;
+
+                    drumMachine.updateStep(drum, step, { active: isActive });
+                    e.currentTarget.classList.toggle('active', isActive);
+                });
+
+                pad.addEventListener('mousedown', (e) => {
+                    if (e.button === 2 || e.shiftKey) { // Right click or shift+click
+                        e.preventDefault();
+                        velocityMode = true;
+                    }
+                });
+
+                pad.addEventListener('mousemove', (e) => {
+                    if (velocityMode && e.buttons === 1) {
+                        const rect = pad.getBoundingClientRect();
+                        const y = e.clientY - rect.top;
+                        const velocity = 1 - (y / rect.height);
+                        const clampedVelocity = Math.max(0.1, Math.min(1, velocity));
+
+                        const drum = pad.dataset.drum;
+                        const step = parseInt(pad.dataset.step);
+
+                        drumMachine.updateStep(drum, step, { velocity: clampedVelocity });
+                        pad.querySelector('.step-velocity').style.height = (clampedVelocity * 100) + '%';
+                    }
+                });
+
+                pad.addEventListener('mouseup', () => {
+                    velocityMode = false;
+                });
+
+                pad.addEventListener('contextmenu', (e) => e.preventDefault());
+            });
+        }
+
+        // Update step highlighting
+        function updateStepHighlight() {
+            document.querySelectorAll('.step-pad').forEach((pad, globalIndex) => {
+                const step = parseInt(pad.dataset.step);
+                const isPlaying = step === drumMachine.currentStep && drumMachine.isPlaying;
+                pad.classList.toggle('playing', isPlaying);
+            });
+        }
+
+        setInterval(updateStepHighlight, 50);
+
+        // Initialize master knobs
+        function initKnobs() {
+            const knobConfigs = {
+                'tempo': { min: 40, max: 240, value: 120, format: (v) => Math.round(v) + ' BPM' },
+                'swing': { min: 0, max: 80, value: 0, format: (v) => Math.round(v) + '%' },
+                'master': { min: 0, max: 100, value: 75 }
+            };
+
+            document.querySelectorAll('[data-knob]').forEach(el => {
+                const id = el.dataset.knob;
+                const config = knobConfigs[id];
+                const valueEl = document.querySelector(`[data-value="${id}"]`);
+
+                knobs[id] = new Knob(el, {
+                    ...config,
+                    onChange: (value) => {
+                        const displayValue = config.format ? config.format(value) : Math.round(value);
+                        valueEl.textContent = displayValue;
+                        handleKnobChange(id, value);
+                    }
+                });
+
+                const displayValue = config.format ? config.format(config.value) : Math.round(config.value);
+                valueEl.textContent = displayValue;
+            });
+
+            Object.keys(knobs).forEach(id => handleKnobChange(id, knobs[id].getValue()));
+        }
+
+        function handleKnobChange(id, value) {
+            switch(id) {
+                case 'tempo':
+                    drumMachine.updateTempo(value);
+                    break;
+                case 'swing':
+                    drumMachine.updateSwing(value);
+                    break;
+                case 'master':
+                    drumMachine.updateMasterVolume(value);
+                    break;
+            }
+        }
+
+        // Tempo sync button
+        document.getElementById('syncBtn').addEventListener('click', () => {
+            drumMachine.broadcastTempo(drumMachine.tempo);
+            document.getElementById('status').textContent = 'Tempo broadcasted!';
+            setTimeout(() => {
+                document.getElementById('status').textContent = drumMachine.isPlaying ? 'Playing...' : 'Ready';
+            }, 1500);
+        });
+
+        // Transport controls
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+
+        playBtn.addEventListener('click', async () => {
+            await Tone.start();
+            drumMachine.start();
+            playBtn.disabled = true;
+            playBtn.classList.remove('active');
+            stopBtn.disabled = false;
+            stopBtn.classList.add('active');
+            status.textContent = 'Playing...';
+            status.classList.add('active');
+        });
+
+        stopBtn.addEventListener('click', () => {
+            drumMachine.stop();
+            stopBtn.disabled = true;
+            stopBtn.classList.remove('active');
+            playBtn.disabled = false;
+            status.textContent = 'Stopped';
+            status.classList.remove('active');
+        });
+
+        // Randomize & Clear
+        document.getElementById('randomizeBtn').addEventListener('click', () => {
+            drumMachine.randomizeAll();
+            createDrumUI();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            drumMachine.clearAll();
+            createDrumUI();
+        });
+
+        // Pattern management
+        function updatePatternList() {
+            const select = document.getElementById('pattern-list');
+            select.innerHTML = '<option value="">Select Pattern...</option>';
+
+            patternManager.getNames().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const name = document.getElementById('pattern-name').value.trim();
+            if (!name) {
+                alert('Please enter a pattern name');
+                return;
+            }
+
+            const state = drumMachine.getState();
+            state.knobs = {};
+            Object.keys(knobs).forEach(id => {
+                state.knobs[id] = knobs[id].getValue();
+            });
+            state.drumKnobs = {};
+            Object.keys(drumKnobs).forEach(id => {
+                state.drumKnobs[id] = drumKnobs[id].getValue();
+            });
+
+            patternManager.save(name, state);
+            updatePatternList();
+            status.textContent = `Saved: ${name}`;
+            setTimeout(() => status.textContent = drumMachine.isPlaying ? 'Playing...' : 'Ready', 2000);
+        });
+
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const select = document.getElementById('pattern-list');
+            const name = select.value;
+
+            if (!name) {
+                alert('Please select a pattern');
+                return;
+            }
+
+            const state = patternManager.load(name);
+            if (!state) {
+                alert('Pattern not found');
+                return;
+            }
+
+            const wasPlaying = drumMachine.isPlaying;
+            if (wasPlaying) drumMachine.stop();
+
+            drumMachine.setState(state);
+
+            // Update knobs
+            if (state.knobs) {
+                Object.keys(state.knobs).forEach(id => {
+                    if (knobs[id]) {
+                        knobs[id].setValue(state.knobs[id]);
+                        const config = knobs[id].config;
+                        const displayValue = config.format ? config.format(state.knobs[id]) : Math.round(state.knobs[id]);
+                        document.querySelector(`[data-value="${id}"]`).textContent = displayValue;
+                    }
+                });
+            }
+
+            if (state.drumKnobs) {
+                Object.keys(state.drumKnobs).forEach(id => {
+                    if (drumKnobs[id]) {
+                        drumKnobs[id].setValue(state.drumKnobs[id]);
+                        document.querySelector(`[data-drum-value="${id}"]`).textContent = Math.round(state.drumKnobs[id]);
+                    }
+                });
+            }
+
+            document.getElementById('pattern-name').value = name;
+            createDrumUI();
+
+            if (wasPlaying) {
+                setTimeout(() => drumMachine.start(), 100);
+            }
+
+            status.textContent = `Loaded: ${name}`;
+            setTimeout(() => status.textContent = drumMachine.isPlaying ? 'Playing...' : 'Ready', 2000);
+        });
+
+        document.getElementById('deleteBtn').addEventListener('click', () => {
+            const select = document.getElementById('pattern-list');
+            const name = select.value;
+
+            if (!name) {
+                alert('Please select a pattern to delete');
+                return;
+            }
+
+            if (confirm(`Delete pattern "${name}"?`)) {
+                patternManager.delete(name);
+                updatePatternList();
+                status.textContent = `Deleted: ${name}`;
+                setTimeout(() => status.textContent = drumMachine.isPlaying ? 'Playing...' : 'Ready', 2000);
+            }
+        });
+
+        // Initialize everything
+        setTimeout(() => {
+            initKnobs();
+            createDrumUI();
+            updatePatternList();
+        }, 100);
+    </script>
+</body>
+</html>

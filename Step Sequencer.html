@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step Sequencer</title>
+    <script src="Tone.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(20, 20, 35, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(100, 100, 150, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2.2em;
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            color: #ffa8a8;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.85em;
+            color: #7a8aaa;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
+        }
+
+        .controls-section {
+            background: rgba(40, 40, 60, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(100, 100, 150, 0.2);
+        }
+
+        .section-header {
+            font-size: 0.95em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #ffa8a8;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.75em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #9aa5be;
+        }
+
+        select {
+            background: rgba(40, 40, 60, 0.8);
+            color: #e0e0e0;
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            cursor: pointer;
+            outline: none;
+        }
+
+        select:hover {
+            border-color: rgba(255, 168, 168, 0.5);
+        }
+
+        .knob-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .knob-wrapper {
+            position: relative;
+            width: 60px;
+            height: 60px;
+        }
+
+        .knob {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+                inset -5px -5px 10px rgba(80, 80, 100, 0.1),
+                3px 3px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.05s ease;
+        }
+
+        .knob:hover {
+            box-shadow:
+                inset 5px 5px 10px rgba(0, 0, 0, 0.6),
+                inset -5px -5px 10px rgba(80, 80, 100, 0.15),
+                3px 3px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .knob-indicator {
+            position: absolute;
+            width: 3px;
+            height: 22px;
+            background: linear-gradient(180deg, #ffa8a8, #ff6b6b);
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(255, 168, 168, 0.6);
+        }
+
+        .knob-center {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #2a2a3e;
+        }
+
+        .knob-value {
+            font-size: 0.75em;
+            color: #ffa8a8;
+            font-weight: 600;
+        }
+
+        .sequencer-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .step {
+            background: rgba(40, 40, 60, 0.5);
+            border: 2px solid rgba(100, 100, 150, 0.3);
+            border-radius: 10px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .step.active {
+            background: rgba(255, 168, 168, 0.2);
+            border-color: #ffa8a8;
+            box-shadow: 0 0 15px rgba(255, 168, 168, 0.4);
+        }
+
+        .step.playing {
+            background: rgba(255, 168, 168, 0.4);
+            border-color: #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .step-number {
+            font-size: 0.7em;
+            color: #7a8aaa;
+            font-weight: 600;
+        }
+
+        .step-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .pitch-input {
+            background: rgba(20, 20, 35, 0.8);
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            color: #e0e0e0;
+            padding: 4px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7em;
+            text-align: center;
+            width: 100%;
+        }
+
+        .pitch-input:focus {
+            outline: none;
+            border-color: #ffa8a8;
+        }
+
+        .velocity-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            border-radius: 5px;
+        }
+
+        .velocity-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #ffa8a8;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .velocity-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: #ffa8a8;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .step-toggle {
+            width: 100%;
+            padding: 4px;
+            background: rgba(100, 100, 150, 0.2);
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            border-radius: 5px;
+            color: #9aa5be;
+            font-size: 0.65em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .step-toggle:hover {
+            background: rgba(100, 100, 150, 0.3);
+        }
+
+        .step-toggle.on {
+            background: rgba(255, 168, 168, 0.3);
+            border-color: #ffa8a8;
+            color: #ffa8a8;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 35px;
+            font-size: 0.9em;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 168, 168, 0.15);
+            color: #ffa8a8;
+            border: 2px solid #ffa8a8;
+            font-family: 'Courier New', monospace;
+        }
+
+        button:hover {
+            background: rgba(255, 168, 168, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 168, 168, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.active {
+            background: #ffa8a8;
+            color: #1a1a2e;
+            box-shadow: 0 6px 25px rgba(255, 168, 168, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .patch-manager {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(100, 100, 150, 0.3);
+            color: #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ffa8a8;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #555;
+            letter-spacing: 1px;
+        }
+
+        .status.active {
+            color: #ffa8a8;
+        }
+
+        .sync-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #555;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.active {
+            background: #4ade80;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 1200px) {
+            .sequencer-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sequencer-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>STEP SEQUENCER</h1>
+        <div class="subtitle">16-Step Arpeggiator</div>
+
+        <!-- Oscillator Controls -->
+        <div class="controls-section">
+            <div class="section-header">Oscillators</div>
+            <div class="controls-row">
+                <div class="control-group">
+                    <div class="control-label">Osc 1 Wave</div>
+                    <select id="osc1-wave">
+                        <option value="sine">Sine</option>
+                        <option value="triangle" selected>Triangle</option>
+                        <option value="sawtooth">Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Osc 2 Wave</div>
+                    <select id="osc2-wave">
+                        <option value="sine">Sine</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="sawtooth" selected>Sawtooth</option>
+                        <option value="square">Square</option>
+                    </select>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="osc-mix">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Osc Mix</div>
+                    <div class="knob-value" data-value="osc-mix">50</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sequencer Controls -->
+        <div class="controls-section">
+            <div class="section-header">Sequencer</div>
+            <div class="controls-row">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="tempo">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Tempo</div>
+                    <div class="knob-value" data-value="tempo">120 BPM</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="gate">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Gate Length</div>
+                    <div class="knob-value" data-value="gate">50%</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Steps</div>
+                    <select id="step-count">
+                        <option value="4">4</option>
+                        <option value="8">8</option>
+                        <option value="12">12</option>
+                        <option value="16" selected>16</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Effects -->
+        <div class="controls-section">
+            <div class="section-header">Effects</div>
+            <div class="controls-row">
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="filter">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Filter</div>
+                    <div class="knob-value" data-value="filter">5000 Hz</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="reverb">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Reverb</div>
+                    <div class="knob-value" data-value="reverb">30</div>
+                </div>
+                <div class="knob-container">
+                    <div class="knob-wrapper">
+                        <div class="knob" data-knob="volume">
+                            <div class="knob-indicator"></div>
+                            <div class="knob-center"></div>
+                        </div>
+                    </div>
+                    <div class="control-label">Volume</div>
+                    <div class="knob-value" data-value="volume">70</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Grid -->
+        <div class="controls-section">
+            <div class="section-header">Step Editor</div>
+            <div class="sequencer-grid" id="sequencer-grid"></div>
+        </div>
+
+        <!-- Transport Controls -->
+        <div class="button-group">
+            <button id="playBtn">Play</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="randomizeBtn">Randomize</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+
+        <!-- Patch Management -->
+        <div class="controls-section">
+            <div class="section-header">Patch Manager</div>
+            <div class="patch-manager">
+                <input type="text" id="patch-name" placeholder="Patch Name" value="Init">
+                <button id="saveBtn">Save</button>
+                <button id="loadBtn">Load</button>
+                <select id="patch-list">
+                    <option value="">Select Patch...</option>
+                </select>
+                <button id="deleteBtn">Delete</button>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready <span class="sync-indicator" id="sync-indicator"></span></div>
+    </div>
+
+    <script>
+        // Step Sequencer Engine
+        class StepSequencer {
+            constructor() {
+                this.isPlaying = false;
+                this.currentStep = 0;
+                this.stepCount = 16;
+                this.initializeAudio();
+                this.initializeSequence();
+            }
+
+            async initializeAudio() {
+                // Master volume
+                this.masterVolume = new Tone.Volume(-8).toDestination();
+
+                // Reverb
+                this.reverb = new Tone.Reverb({
+                    decay: 2,
+                    wet: 0.3
+                }).connect(this.masterVolume);
+
+                await this.reverb.generate();
+
+                // Filter
+                this.filter = new Tone.Filter({
+                    frequency: 5000,
+                    type: "lowpass",
+                    rolloff: -24
+                }).connect(this.reverb);
+
+                // Envelope for each note
+                this.envelope = new Tone.AmplitudeEnvelope({
+                    attack: 0.01,
+                    decay: 0.1,
+                    sustain: 0.3,
+                    release: 0.2
+                }).connect(this.filter);
+
+                // Two oscillators
+                this.osc1 = new Tone.Oscillator({
+                    type: "triangle",
+                    volume: -6
+                }).connect(this.envelope);
+
+                this.osc2 = new Tone.Oscillator({
+                    type: "sawtooth",
+                    volume: -6
+                }).connect(this.envelope);
+
+                // Start oscillators (envelope will control amplitude)
+                this.osc1.start();
+                this.osc2.start();
+
+                // Sequence
+                this.sequence = null;
+                this.tempo = 120;
+                this.gateLength = 0.5;
+            }
+
+            initializeSequence() {
+                // Default sequence: C major scale pattern
+                const defaultNotes = ['C4', 'E4', 'G4', 'C5', 'B4', 'G4', 'E4', 'C4',
+                                     'D4', 'F4', 'A4', 'D5', 'C5', 'A4', 'F4', 'D4'];
+
+                this.steps = Array(16).fill(null).map((_, i) => ({
+                    active: true,
+                    pitch: defaultNotes[i],
+                    velocity: 0.7
+                }));
+
+                this.setupTempoSync();
+            }
+
+            setupTempoSync() {
+                // BroadcastChannel for cross-tab tempo sync
+                try {
+                    this.syncChannel = new BroadcastChannel('music_tempo_sync');
+                    this.syncChannel.onmessage = (event) => {
+                        if (event.data.type === 'tempo') {
+                            this.updateTempo(event.data.value);
+                            // Update UI
+                            if (knobs && knobs.tempo) {
+                                knobs.tempo.setValue(event.data.value);
+                                const elem = document.querySelector('[data-value="tempo"]');
+                                if (elem) {
+                                    elem.textContent = Math.round(event.data.value) + ' BPM';
+                                }
+                            }
+                            // Visual feedback
+                            const status = document.getElementById('status');
+                            if (status) {
+                                const originalText = status.textContent;
+                                status.textContent = 'Tempo synced!';
+                                setTimeout(() => {
+                                    status.textContent = originalText;
+                                }, 1000);
+                            }
+                        }
+                        if (event.data.type === 'sync') {
+                            this.updateTempo(event.data.tempo);
+                            // Sync step position if both are playing
+                            if (this.isPlaying && event.data.isPlaying) {
+                                this.currentStep = event.data.step;
+                            }
+                            // Update UI
+                            if (knobs && knobs.tempo) {
+                                knobs.tempo.setValue(event.data.tempo);
+                                const elem = document.querySelector('[data-value="tempo"]');
+                                if (elem) {
+                                    elem.textContent = Math.round(event.data.tempo) + ' BPM';
+                                }
+                            }
+                            // Visual feedback - flash sync indicator
+                            const indicator = document.getElementById('sync-indicator');
+                            if (indicator) {
+                                indicator.classList.add('active');
+                                setTimeout(() => indicator.classList.remove('active'), 200);
+                            }
+                        }
+                    };
+                } catch (e) {
+                    console.log('BroadcastChannel not supported');
+                }
+            }
+
+            start() {
+                if (this.isPlaying) return;
+
+                Tone.Transport.bpm.value = this.tempo;
+                this.isPlaying = true;
+                this.currentStep = 0;
+
+                this.sequence = new Tone.Sequence((time, step) => {
+                    this.currentStep = step;
+                    this.triggerStep(step, time);
+                }, Array.from({length: this.stepCount}, (_, i) => i), "16n");
+
+                this.sequence.start(0);
+                Tone.Transport.start();
+            }
+
+            stop() {
+                if (!this.isPlaying) return;
+
+                this.isPlaying = false;
+                this.currentStep = 0;
+
+                if (this.sequence) {
+                    this.sequence.stop();
+                    this.sequence.dispose();
+                    this.sequence = null;
+                }
+
+                Tone.Transport.stop();
+            }
+
+            triggerStep(step, time) {
+                if (step >= this.stepCount) return;
+
+                const stepData = this.steps[step];
+                if (!stepData.active) return;
+
+                // Set oscillator frequencies
+                this.osc1.frequency.setValueAtTime(
+                    Tone.Frequency(stepData.pitch).toFrequency(),
+                    time
+                );
+                this.osc2.frequency.setValueAtTime(
+                    Tone.Frequency(stepData.pitch).toFrequency(),
+                    time
+                );
+
+                // Trigger envelope with velocity
+                const duration = (60 / this.tempo) * this.gateLength;
+                this.envelope.triggerAttackRelease(duration, time, stepData.velocity);
+            }
+
+            updateStep(index, data) {
+                this.steps[index] = { ...this.steps[index], ...data };
+            }
+
+            updateTempo(bpm) {
+                this.tempo = bpm;
+                if (this.isPlaying) {
+                    // Use rampTo for smooth tempo change while playing
+                    Tone.Transport.bpm.rampTo(bpm, 0.05);
+                } else {
+                    Tone.Transport.bpm.value = bpm;
+                }
+            }
+
+            updateGateLength(length) {
+                this.gateLength = length;
+            }
+
+            updateOscMix(mix) {
+                // Mix: 0 = all osc1, 100 = all osc2
+                const osc1Vol = -60 + ((100 - mix) / 100) * 54; // -60 to -6 dB
+                const osc2Vol = -60 + (mix / 100) * 54;
+                this.osc1.volume.rampTo(osc1Vol, 0.1);
+                this.osc2.volume.rampTo(osc2Vol, 0.1);
+            }
+
+            updateFilter(freq) {
+                this.filter.frequency.rampTo(freq, 0.1);
+            }
+
+            updateReverb(wet) {
+                this.reverb.wet.rampTo(wet / 100, 0.1);
+            }
+
+            updateVolume(value) {
+                const db = -30 + (value / 100) * 22; // -30 to -8 dB
+                this.masterVolume.volume.rampTo(db, 0.05);
+            }
+
+            updateOscWave(osc, type) {
+                this[osc].type = type;
+            }
+
+            updateStepCount(count) {
+                const wasPlaying = this.isPlaying;
+                if (wasPlaying) this.stop();
+
+                this.stepCount = count;
+
+                if (wasPlaying) {
+                    setTimeout(() => this.start(), 100);
+                }
+            }
+
+            randomizeSequence() {
+                const notes = ['C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
+                             'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                             'C5', 'D5', 'E5', 'F5'];
+
+                this.steps.forEach((step, i) => {
+                    step.pitch = notes[Math.floor(Math.random() * notes.length)];
+                    step.velocity = 0.3 + Math.random() * 0.7;
+                    step.active = Math.random() > 0.3; // 70% chance of being active
+                });
+            }
+
+            clearSequence() {
+                this.steps.forEach(step => {
+                    step.active = false;
+                    step.velocity = 0.7;
+                });
+            }
+
+            getState() {
+                return {
+                    steps: JSON.parse(JSON.stringify(this.steps)),
+                    stepCount: this.stepCount,
+                    tempo: this.tempo,
+                    gateLength: this.gateLength,
+                    osc1Type: this.osc1.type,
+                    osc2Type: this.osc2.type
+                };
+            }
+
+            setState(state) {
+                this.steps = JSON.parse(JSON.stringify(state.steps));
+                this.stepCount = state.stepCount || 16;
+                this.tempo = state.tempo || 120;
+                this.gateLength = state.gateLength || 0.5;
+                this.osc1.type = state.osc1Type || 'triangle';
+                this.osc2.type = state.osc2Type || 'sawtooth';
+
+                Tone.Transport.bpm.value = this.tempo;
+            }
+        }
+
+        // Knob Controller (same as drone synth)
+        class Knob {
+            constructor(element, config) {
+                this.element = element;
+                this.indicator = element.querySelector('.knob-indicator');
+                this.config = {
+                    min: config.min || 0,
+                    max: config.max || 100,
+                    value: config.value || 50,
+                    step: config.step || 1,
+                    onChange: config.onChange || (() => {})
+                };
+
+                this.isDragging = false;
+                this.startY = 0;
+                this.startValue = this.config.value;
+
+                this.bindEvents();
+                this.updateRotation();
+            }
+
+            bindEvents() {
+                this.element.addEventListener('mousedown', this.onMouseDown.bind(this));
+                document.addEventListener('mousemove', this.onMouseMove.bind(this));
+                document.addEventListener('mouseup', this.onMouseUp.bind(this));
+                this.element.addEventListener('touchstart', this.onTouchStart.bind(this));
+                document.addEventListener('touchmove', this.onTouchMove.bind(this));
+                document.addEventListener('touchend', this.onTouchEnd.bind(this));
+            }
+
+            onMouseDown(e) {
+                e.preventDefault();
+                this.isDragging = true;
+                this.startY = e.clientY;
+                this.startValue = this.config.value;
+                this.element.style.cursor = 'grabbing';
+            }
+
+            onTouchStart(e) {
+                this.isDragging = true;
+                this.startY = e.touches[0].clientY;
+                this.startValue = this.config.value;
+            }
+
+            onMouseMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onTouchMove(e) {
+                if (!this.isDragging) return;
+
+                const deltaY = this.startY - e.touches[0].clientY;
+                const sensitivity = 0.5;
+                const range = this.config.max - this.config.min;
+                const delta = (deltaY * sensitivity * range) / 100;
+
+                let newValue = this.startValue + delta;
+                newValue = Math.max(this.config.min, Math.min(this.config.max, newValue));
+                newValue = Math.round(newValue / this.config.step) * this.config.step;
+
+                if (newValue !== this.config.value) {
+                    this.config.value = newValue;
+                    this.updateRotation();
+                    this.config.onChange(newValue);
+                }
+            }
+
+            onMouseUp() {
+                this.isDragging = false;
+                this.element.style.cursor = 'pointer';
+            }
+
+            onTouchEnd() {
+                this.isDragging = false;
+            }
+
+            updateRotation() {
+                const percentage = (this.config.value - this.config.min) / (this.config.max - this.config.min);
+                const degrees = -135 + (percentage * 270);
+                this.indicator.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
+                this.indicator.style.transformOrigin = 'center bottom';
+            }
+
+            setValue(value) {
+                this.config.value = Math.max(this.config.min, Math.min(this.config.max, value));
+                this.updateRotation();
+            }
+
+            getValue() {
+                return this.config.value;
+            }
+        }
+
+        // Patch Manager
+        class PatchManager {
+            constructor() {
+                this.storageKey = 'stepSequencerPatches';
+            }
+
+            save(name, state) {
+                const patches = this.getAll();
+                patches[name] = state;
+                localStorage.setItem(this.storageKey, JSON.stringify(patches));
+            }
+
+            load(name) {
+                const patches = this.getAll();
+                return patches[name] || null;
+            }
+
+            delete(name) {
+                const patches = this.getAll();
+                delete patches[name];
+                localStorage.setItem(this.storageKey, JSON.stringify(patches));
+            }
+
+            getAll() {
+                const data = localStorage.getItem(this.storageKey);
+                return data ? JSON.parse(data) : {};
+            }
+
+            getNames() {
+                return Object.keys(this.getAll());
+            }
+        }
+
+        // Initialize
+        const sequencer = new StepSequencer();
+        const patchManager = new PatchManager();
+        const knobs = {};
+
+        // Create step UI
+        function createStepUI() {
+            const grid = document.getElementById('sequencer-grid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 16; i++) {
+                const step = document.createElement('div');
+                step.className = 'step';
+                step.dataset.step = i;
+
+                if (i >= sequencer.stepCount) {
+                    step.style.opacity = '0.3';
+                }
+
+                step.innerHTML = `
+                    <div class="step-number">${i + 1}</div>
+                    <button class="step-toggle ${sequencer.steps[i].active ? 'on' : ''}" data-step="${i}">
+                        ${sequencer.steps[i].active ? 'ON' : 'OFF'}
+                    </button>
+                    <input type="text" class="pitch-input" data-step="${i}" value="${sequencer.steps[i].pitch}">
+                    <input type="range" class="velocity-slider" data-step="${i}"
+                           min="0" max="100" value="${sequencer.steps[i].velocity * 100}">
+                `;
+
+                grid.appendChild(step);
+            }
+
+            // Add event listeners
+            document.querySelectorAll('.step-toggle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const step = parseInt(e.target.dataset.step);
+                    const isActive = !sequencer.steps[step].active;
+                    sequencer.updateStep(step, { active: isActive });
+                    e.target.classList.toggle('on', isActive);
+                    e.target.textContent = isActive ? 'ON' : 'OFF';
+                });
+            });
+
+            document.querySelectorAll('.pitch-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const step = parseInt(e.target.dataset.step);
+                    sequencer.updateStep(step, { pitch: e.target.value });
+                });
+            });
+
+            document.querySelectorAll('.velocity-slider').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const step = parseInt(e.target.dataset.step);
+                    sequencer.updateStep(step, { velocity: parseInt(e.target.value) / 100 });
+                });
+            });
+        }
+
+        // Update step highlighting
+        function updateStepHighlight() {
+            document.querySelectorAll('.step').forEach((step, i) => {
+                step.classList.toggle('playing', i === sequencer.currentStep && sequencer.isPlaying);
+            });
+        }
+
+        setInterval(updateStepHighlight, 50);
+
+        // Initialize knobs
+        function initKnobs() {
+            const knobConfigs = {
+                'tempo': { min: 40, max: 240, value: 120, format: (v) => Math.round(v) + ' BPM' },
+                'gate': { min: 10, max: 100, value: 50, format: (v) => Math.round(v) + '%' },
+                'osc-mix': { min: 0, max: 100, value: 50 },
+                'filter': { min: 200, max: 10000, value: 5000, format: (v) => Math.round(v) + ' Hz' },
+                'reverb': { min: 0, max: 100, value: 30 },
+                'volume': { min: 0, max: 100, value: 70 }
+            };
+
+            document.querySelectorAll('[data-knob]').forEach(el => {
+                const id = el.dataset.knob;
+                const config = knobConfigs[id];
+                const valueEl = document.querySelector(`[data-value="${id}"]`);
+
+                knobs[id] = new Knob(el, {
+                    ...config,
+                    onChange: (value) => {
+                        const displayValue = config.format ? config.format(value) : Math.round(value);
+                        valueEl.textContent = displayValue;
+                        handleKnobChange(id, value);
+                    }
+                });
+
+                const displayValue = config.format ? config.format(config.value) : Math.round(config.value);
+                valueEl.textContent = displayValue;
+            });
+
+            // Initialize parameters
+            Object.keys(knobs).forEach(id => handleKnobChange(id, knobs[id].getValue()));
+        }
+
+        function handleKnobChange(id, value) {
+            switch(id) {
+                case 'tempo':
+                    sequencer.updateTempo(value);
+                    break;
+                case 'gate':
+                    sequencer.updateGateLength(value / 100);
+                    break;
+                case 'osc-mix':
+                    sequencer.updateOscMix(value);
+                    break;
+                case 'filter':
+                    sequencer.updateFilter(value);
+                    break;
+                case 'reverb':
+                    sequencer.updateReverb(value);
+                    break;
+                case 'volume':
+                    sequencer.updateVolume(value);
+                    break;
+            }
+        }
+
+        // Waveform selectors
+        document.getElementById('osc1-wave').addEventListener('change', (e) => {
+            sequencer.updateOscWave('osc1', e.target.value);
+        });
+
+        document.getElementById('osc2-wave').addEventListener('change', (e) => {
+            sequencer.updateOscWave('osc2', e.target.value);
+        });
+
+        // Step count selector
+        document.getElementById('step-count').addEventListener('change', (e) => {
+            sequencer.updateStepCount(parseInt(e.target.value));
+            createStepUI();
+        });
+
+        // Transport controls
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+
+        playBtn.addEventListener('click', async () => {
+            await Tone.start();
+            sequencer.start();
+            playBtn.disabled = true;
+            playBtn.classList.remove('active');
+            stopBtn.disabled = false;
+            stopBtn.classList.add('active');
+            status.textContent = 'Playing...';
+            status.classList.add('active');
+        });
+
+        stopBtn.addEventListener('click', () => {
+            sequencer.stop();
+            stopBtn.disabled = true;
+            stopBtn.classList.remove('active');
+            playBtn.disabled = false;
+            status.textContent = 'Stopped';
+            status.classList.remove('active');
+        });
+
+        // Randomize
+        document.getElementById('randomizeBtn').addEventListener('click', () => {
+            sequencer.randomizeSequence();
+            createStepUI();
+        });
+
+        // Clear
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            sequencer.clearSequence();
+            createStepUI();
+        });
+
+        // Patch management
+        function updatePatchList() {
+            const select = document.getElementById('patch-list');
+            select.innerHTML = '<option value="">Select Patch...</option>';
+
+            patchManager.getNames().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const name = document.getElementById('patch-name').value.trim();
+            if (!name) {
+                alert('Please enter a patch name');
+                return;
+            }
+
+            const state = sequencer.getState();
+            state.knobs = {};
+            Object.keys(knobs).forEach(id => {
+                state.knobs[id] = knobs[id].getValue();
+            });
+
+            patchManager.save(name, state);
+            updatePatchList();
+            status.textContent = `Saved: ${name}`;
+            setTimeout(() => status.textContent = sequencer.isPlaying ? 'Playing...' : 'Ready', 2000);
+        });
+
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const select = document.getElementById('patch-list');
+            const name = select.value;
+
+            if (!name) {
+                alert('Please select a patch');
+                return;
+            }
+
+            const state = patchManager.load(name);
+            if (!state) {
+                alert('Patch not found');
+                return;
+            }
+
+            const wasPlaying = sequencer.isPlaying;
+            if (wasPlaying) sequencer.stop();
+
+            sequencer.setState(state);
+
+            // Update knobs
+            if (state.knobs) {
+                Object.keys(state.knobs).forEach(id => {
+                    if (knobs[id]) {
+                        knobs[id].setValue(state.knobs[id]);
+                        const config = knobs[id].config;
+                        const displayValue = config.format ? config.format(state.knobs[id]) : Math.round(state.knobs[id]);
+                        document.querySelector(`[data-value="${id}"]`).textContent = displayValue;
+                    }
+                });
+            }
+
+            // Update UI
+            document.getElementById('osc1-wave').value = state.osc1Type || 'triangle';
+            document.getElementById('osc2-wave').value = state.osc2Type || 'sawtooth';
+            document.getElementById('step-count').value = state.stepCount || 16;
+            document.getElementById('patch-name').value = name;
+
+            createStepUI();
+
+            if (wasPlaying) {
+                setTimeout(() => sequencer.start(), 100);
+            }
+
+            status.textContent = `Loaded: ${name}`;
+            setTimeout(() => status.textContent = sequencer.isPlaying ? 'Playing...' : 'Ready', 2000);
+        });
+
+        document.getElementById('deleteBtn').addEventListener('click', () => {
+            const select = document.getElementById('patch-list');
+            const name = select.value;
+
+            if (!name) {
+                alert('Please select a patch to delete');
+                return;
+            }
+
+            if (confirm(`Delete patch "${name}"?`)) {
+                patchManager.delete(name);
+                updatePatchList();
+                status.textContent = `Deleted: ${name}`;
+                setTimeout(() => status.textContent = sequencer.isPlaying ? 'Playing...' : 'Ready', 2000);
+            }
+        });
+
+        // Initialize everything
+        setTimeout(() => {
+            initKnobs();
+            createStepUI();
+            updatePatchList();
+        }, 100);
+    </script>
+</body>
+</html>
