@@ -451,7 +451,10 @@
         class DroneSynth {
             constructor() {
                 this.isPlaying = false;
+                this.tempo = 120; // Default tempo for LFO sync
+                this.lfoTempoSync = false; // LFO free-running by default
                 this.initializeAudio();
+                this.setupTempoSync();
                 this.parameters = this.getDefaultParameters();
             }
 
@@ -466,9 +469,61 @@
                     detune: 0,
                     lfoRate: 0.5,
                     lfoDepth: 0,
+                    lfoTempoSync: false,
+                    lfoDivision: '8n',
                     reverb: 50,
                     masterVol: 70
                 };
+            }
+
+            setupTempoSync() {
+                // BroadcastChannel for cross-synth tempo synchronization
+                try {
+                    this.syncChannel = new BroadcastChannel('music_tempo_sync');
+                    this.isBroadcasting = false;
+
+                    this.syncChannel.onmessage = (event) => {
+                        // Only react to tempo messages when not broadcasting
+                        if (event.data.type === 'tempo' && !this.isBroadcasting) {
+                            this.tempo = event.data.value;
+                            console.log('🎵 Drone: Tempo synced to', Math.round(event.data.value), 'BPM');
+
+                            // Update LFO if it's in tempo-sync mode
+                            if (this.lfoTempoSync) {
+                                this.updateLFOTempoSync();
+                            }
+
+                            // Visual feedback
+                            this.showSyncIndicator();
+                        }
+
+                        // Also handle full sync messages
+                        if (event.data.type === 'sync' && !this.isBroadcasting) {
+                            this.tempo = event.data.tempo;
+                            if (this.lfoTempoSync) {
+                                this.updateLFOTempoSync();
+                            }
+                            this.showSyncIndicator();
+                        }
+                    };
+
+                    console.log('✅ Drone: Tempo sync ready');
+                } catch (e) {
+                    console.log('⚠️ BroadcastChannel not supported');
+                }
+            }
+
+            showSyncIndicator() {
+                const status = document.getElementById('status');
+                const originalText = status.textContent;
+                status.textContent = 'Tempo Synced!';
+                status.classList.add('active');
+                setTimeout(() => {
+                    status.textContent = originalText;
+                    if (!this.isPlaying) {
+                        status.classList.remove('active');
+                    }
+                }, 1000);
             }
 
             async initializeAudio() {
@@ -678,7 +733,10 @@
             }
 
             updateLFO(rate, depth) {
-                this.lfo.frequency.value = rate;
+                // Only update rate if not in tempo sync mode
+                if (!this.lfoTempoSync) {
+                    this.lfo.frequency.value = rate;
+                }
 
                 if (depth > 0) {
                     const filterBase = this.baseCutoffFreq;
@@ -700,6 +758,44 @@
                         this.filter.frequency.rampTo(this.baseCutoffFreq, 0.1);
                     }
                 }
+            }
+
+            toggleLFOTempoSync() {
+                this.lfoTempoSync = !this.lfoTempoSync;
+                this.parameters.lfoTempoSync = this.lfoTempoSync;
+
+                if (this.lfoTempoSync) {
+                    this.updateLFOTempoSync();
+                } else {
+                    // Return to free-running mode
+                    this.lfo.frequency.value = this.parameters.lfoRate;
+                }
+
+                console.log('LFO Tempo Sync:', this.lfoTempoSync);
+            }
+
+            updateLFOTempoSync() {
+                if (!this.lfoTempoSync || !this.tempo) return;
+
+                // Convert note division to frequency based on tempo
+                const division = this.parameters.lfoDivision || '8n';
+                const secondsPerBeat = 60 / this.tempo;
+
+                // Calculate frequency based on note division
+                const divisionMap = {
+                    '1n': 1,   // Whole note
+                    '2n': 2,   // Half note
+                    '4n': 4,   // Quarter note
+                    '8n': 8,   // Eighth note
+                    '16n': 16, // Sixteenth note
+                    '32n': 32  // Thirty-second note
+                };
+
+                const divider = divisionMap[division] || 8;
+                const lfoFreq = 1 / (secondsPerBeat * (4 / divider));
+
+                this.lfo.frequency.value = lfoFreq;
+                console.log(`🎵 Drone LFO synced to ${division} at ${this.tempo} BPM = ${lfoFreq.toFixed(2)} Hz`);
             }
 
             toggleEvolve(enabled) {

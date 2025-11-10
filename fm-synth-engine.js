@@ -26,6 +26,53 @@ class FMSynth {
         }, { once: true });
     }
 
+    setupTempoSync() {
+        // BroadcastChannel for cross-synth tempo synchronization
+        try {
+            this.syncChannel = new BroadcastChannel('music_tempo_sync');
+            this.isBroadcasting = false;
+
+            this.syncChannel.onmessage = (event) => {
+                // Only react to tempo messages when not broadcasting
+                if (event.data.type === 'tempo' && !this.isBroadcasting) {
+                    // FM Synth doesn't have a Transport tempo, but we can store it for LFO sync
+                    this.tempo = event.data.value;
+                    console.log('🎵 FM Synth: Tempo synced to', Math.round(event.data.value), 'BPM');
+
+                    // Update LFO if it's in tempo-sync mode
+                    if (this.lfoTempoSync) {
+                        this.updateLFOTempoSync();
+                    }
+
+                    // Visual feedback
+                    this.showSyncIndicator();
+                }
+
+                // Also handle full sync messages
+                if (event.data.type === 'sync' && !this.isBroadcasting) {
+                    this.tempo = event.data.tempo;
+                    if (this.lfoTempoSync) {
+                        this.updateLFOTempoSync();
+                    }
+                    this.showSyncIndicator();
+                }
+            };
+
+            console.log('✅ FM Synth: Tempo sync ready');
+        } catch (e) {
+            console.log('⚠️ BroadcastChannel not supported');
+        }
+    }
+
+    showSyncIndicator() {
+        const statusText = document.getElementById('statusText');
+        const originalText = statusText.textContent;
+        statusText.textContent = 'Tempo Synced!';
+        setTimeout(() => {
+            statusText.textContent = originalText;
+        }, 1000);
+    }
+
     async initializeAudio() {
         // LATENCY OPTIMIZATION: Set to lowest latency mode
         Tone.context.latencyHint = 'interactive';
@@ -34,6 +81,9 @@ class FMSynth {
         // Log actual latency for debugging
         console.log('🎵 Audio Latency:',
             Math.round((Tone.context.baseLatency + Tone.context.outputLatency) * 1000), 'ms');
+
+        // Setup tempo sync
+        this.setupTempoSync();
 
         // Master chain
         this.masterVolume = new Tone.Volume(-8).toDestination();
@@ -68,17 +118,59 @@ class FMSynth {
         }
 
         // Parameters - better default levels for smoother sound
+        this.tempo = 120; // Default tempo for LFO sync
+        this.lfoTempoSync = false; // LFO free-running by default
+        this.currentAlgorithm = 1; // Default algorithm
+
         this.params = {
-            osc1: { level: 0.7, detune: 0, wave: 'sine' },  // No FM on carrier
-            osc2: { level: 0.3, detune: 0, fm: 0, wave: 'sine' },
-            osc3: { level: 0.2, detune: 0, fm: 0, wave: 'sine' },
-            osc4: { level: 0.1, detune: 0, fm: 0, wave: 'sine' },
+            algorithm: 1, // FM Algorithm (1-8)
+            osc1: { level: 0.7, detune: 0, wave: 'sine' },  // Carrier
+            osc2: { level: 0.3, detune: 0, fm: 0, wave: 'sine' },  // Modulator
+            osc3: { level: 0.2, detune: 0, fm: 0, wave: 'sine' },  // Modulator
+            osc4: { level: 0.1, detune: 0, fm: 0, wave: 'sine' },  // Modulator
             ampEnv: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.8 },
             filterEnv: { attack: 0.05, decay: 0.3, sustain: 0.5, amount: 2000 },
             filter: { freq: 2000, res: 1, type: 'lowpass' },
-            lfo: { rate: 2.0, pitch: 0, filter: 0, amp: 0, wave: 'sine' },
+            lfo: { rate: 2.0, pitch: 0, filter: 0, amp: 0, wave: 'sine', tempoSync: false, division: '8n' },
             reverb: { decay: 2.5, wet: 25 },
             master: { volume: 70 }
+        };
+
+        // FM Algorithms (inspired by DX7)
+        // Each algorithm defines the routing of operators
+        this.algorithms = {
+            1: { // 4 -> 3 -> 2 -> 1 (Classic cascade)
+                name: 'Cascade',
+                routing: { osc4: ['osc3'], osc3: ['osc2'], osc2: ['osc1'], osc1: ['output'] }
+            },
+            2: { // (4 -> 3, 2) -> 1 (Two modulators into carrier)
+                name: 'Dual Mod',
+                routing: { osc4: ['osc3'], osc3: ['osc1'], osc2: ['osc1'], osc1: ['output'] }
+            },
+            3: { // 4 -> 3, 2 -> 1 (Parallel stacks)
+                name: 'Parallel',
+                routing: { osc4: ['osc3'], osc3: ['output'], osc2: ['osc1'], osc1: ['output'] }
+            },
+            4: { // 4, 3, 2 -> 1 (Three modulators)
+                name: 'Triple Mod',
+                routing: { osc4: ['osc1'], osc3: ['osc1'], osc2: ['osc1'], osc1: ['output'] }
+            },
+            5: { // 4, 3, 2, 1 (All parallel - additive)
+                name: 'Additive',
+                routing: { osc4: ['output'], osc3: ['output'], osc2: ['output'], osc1: ['output'] }
+            },
+            6: { // (4, 3) -> 2 -> 1 (Two into modulator chain)
+                name: 'Dual Cascade',
+                routing: { osc4: ['osc2'], osc3: ['osc2'], osc2: ['osc1'], osc1: ['output'] }
+            },
+            7: { // 4 -> (3, 2, 1) (One modulates three carriers)
+                name: 'Fan Out',
+                routing: { osc4: ['osc3', 'osc2', 'osc1'], osc3: ['output'], osc2: ['output'], osc1: ['output'] }
+            },
+            8: { // (4 -> 3) -> (2 -> 1) (Dual parallel stacks)
+                name: 'Dual Stack',
+                routing: { osc4: ['osc3'], osc3: ['osc1'], osc2: ['osc1'], osc1: ['output'] }
+            }
         };
 
         this.isInitialized = true;
@@ -163,6 +255,69 @@ class FMSynth {
         voice.osc4.start();
 
         return voice;
+    }
+
+    setAlgorithm(algorithmNum) {
+        this.currentAlgorithm = algorithmNum;
+        this.params.algorithm = algorithmNum;
+
+        const algorithm = this.algorithms[algorithmNum];
+        if (!algorithm) {
+            console.error('Invalid algorithm:', algorithmNum);
+            return;
+        }
+
+        console.log(`🎛️ Switching to Algorithm ${algorithmNum}: ${algorithm.name}`);
+
+        // Reconfigure all voices
+        this.voices.forEach(voice => {
+            this.reconfigureVoiceRouting(voice, algorithm.routing);
+        });
+    }
+
+    reconfigureVoiceRouting(voice, routing) {
+        // Disconnect all FM connections
+        voice.osc2.disconnect(voice.fmGain1);
+        voice.osc3.disconnect(voice.fmGain2);
+        voice.osc4.disconnect(voice.fmGain3);
+
+        // Disconnect all audio connections from mixer
+        voice.level1.disconnect();
+        voice.level2.disconnect();
+        voice.level3.disconnect();
+        voice.level4.disconnect();
+
+        // Reconnect based on algorithm
+        // First, connect oscillators based on FM routing
+        Object.keys(routing).forEach(oscKey => {
+            const targets = routing[oscKey];
+            targets.forEach(target => {
+                if (target === 'output') {
+                    // This oscillator goes to audio output (mixer)
+                    const oscNum = oscKey.replace('osc', '');
+                    voice[`level${oscNum}`].connect(voice.mixer);
+                } else {
+                    // This oscillator modulates another oscillator
+                    const oscNum = oscKey.replace('osc', '');
+                    const targetNum = target.replace('osc', '');
+                    const fmGainIndex = parseInt(targetNum) - 1; // osc1 uses fmGain1, etc. (but index is 0-based)
+
+                    // For FM: osc2 -> fmGain1 -> osc1.frequency
+                    // So we need to map correctly:
+                    // If modulating osc1, use fmGain1
+                    // If modulating osc2, use fmGain2
+                    // If modulating osc3, use fmGain3
+
+                    if (targetNum === '1') {
+                        voice[oscKey].connect(voice.fmGain1);
+                    } else if (targetNum === '2') {
+                        voice[oscKey].connect(voice.fmGain2);
+                    } else if (targetNum === '3') {
+                        voice[oscKey].connect(voice.fmGain3);
+                    }
+                }
+            });
+        });
     }
 
     getFreeVoice() {
@@ -350,9 +505,24 @@ class FMSynth {
         this.params.lfo[param] = value;
 
         if (param === 'rate') {
-            this.lfo.frequency.rampTo(value, 0.1);
+            if (!this.lfoTempoSync) {
+                this.lfo.frequency.rampTo(value, 0.1);
+            }
         } else if (param === 'wave') {
             this.lfo.type = value;
+        } else if (param === 'tempoSync') {
+            this.lfoTempoSync = value;
+            if (value) {
+                this.updateLFOTempoSync();
+            } else {
+                // Switch back to free-running mode
+                this.lfo.frequency.rampTo(this.params.lfo.rate, 0.1);
+            }
+        } else if (param === 'division') {
+            this.params.lfo.division = value;
+            if (this.lfoTempoSync) {
+                this.updateLFOTempoSync();
+            }
         } else if (param === 'filter') {
             // Disconnect first
             this.lfo.disconnect();
@@ -379,6 +549,30 @@ class FMSynth {
                 });
             }
         }
+    }
+
+    updateLFOTempoSync() {
+        if (!this.lfoTempoSync || !this.tempo) return;
+
+        // Convert note division to frequency based on tempo
+        const division = this.params.lfo.division || '8n';
+        const secondsPerBeat = 60 / this.tempo;
+
+        // Calculate frequency based on note division
+        const divisionMap = {
+            '1n': 1,   // Whole note
+            '2n': 2,   // Half note
+            '4n': 4,   // Quarter note
+            '8n': 8,   // Eighth note
+            '16n': 16, // Sixteenth note
+            '32n': 32  // Thirty-second note
+        };
+
+        const divider = divisionMap[division] || 8;
+        const lfoFreq = 1 / (secondsPerBeat * (4 / divider));
+
+        this.lfo.frequency.rampTo(lfoFreq, 0.1);
+        console.log(`🎵 LFO synced to ${division} at ${this.tempo} BPM = ${lfoFreq.toFixed(2)} Hz`);
     }
 
     updateReverb(param, value) {
