@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame 4 - TRUE Pixel Art - 100×100</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2a2520;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #e8dcc8;
+        }
+        h1 {
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .info {
+            font-size: 12px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        #display {
+            border: 2px solid #8b7355;
+            background: #f4ead5;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 500px;
+            height: 500px;
+        }
+        #canvas {
+            display: none;
+        }
+        .note {
+            margin-top: 20px;
+            max-width: 600px;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>FRAME 4: SUSPENSION (TRUE PIXEL ART)</h1>
+    <div class="info">100×100 grid - Every pixel hand-placed</div>
+    <canvas id="canvas" width="100" height="100"></canvas>
+    <canvas id="display"></canvas>
+    <div class="note">
+        Authentic pixel art: Each pixel deliberately chosen to define anatomical features.<br>
+        Frame 4: All legs gathered, spine arched, head raised, tail streaming
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const display = document.getElementById('display');
+        const displayCtx = display.getContext('2d');
+
+        // Create a 100x100 pixel array (0 = background, 1 = horse)
+        const pixels = Array(100).fill(0).map(() => Array(100).fill(0));
+
+        // Helper to fill a circle of pixels
+        function fillCircle(cx, cy, radius) {
+            for (let y = -radius; y <= radius; y++) {
+                for (let x = -radius; x <= radius; x++) {
+                    if (x * x + y * y <= radius * radius) {
+                        const px = Math.round(cx + x);
+                        const py = Math.round(cy + y);
+                        if (px >= 0 && px < 100 && py >= 0 && py < 100) {
+                            pixels[py][px] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Helper to fill an ellipse
+        function fillEllipse(cx, cy, rx, ry) {
+            for (let y = -ry; y <= ry; y++) {
+                for (let x = -rx; x <= rx; x++) {
+                    if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) {
+                        const px = Math.round(cx + x);
+                        const py = Math.round(cy + y);
+                        if (px >= 0 && px < 100 && py >= 0 && py < 100) {
+                            pixels[py][px] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Helper to fill a line of pixels
+        function fillLine(x1, y1, x2, y2, thickness = 1) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            for (let i = 0; i <= length; i++) {
+                const t = i / length;
+                const x = Math.round(x1 + dx * t);
+                const y = Math.round(y1 + dy * t);
+
+                for (let ty = -thickness; ty <= thickness; ty++) {
+                    for (let tx = -thickness; tx <= thickness; tx++) {
+                        const px = x + tx;
+                        const py = y + ty;
+                        if (px >= 0 && px < 100 && py >= 0 && py < 100) {
+                            pixels[py][px] = 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build Frame 4 - SUSPENSION phase
+        // Horse faces RIGHT, all legs gathered underneath
+
+        // ===== TAIL - streaming back and down =====
+        fillEllipse(11, 38, 2, 4);  // Tail dock
+        fillEllipse(9, 43, 2, 5);
+        fillEllipse(7, 50, 2, 6);
+        fillEllipse(6, 58, 2, 7);
+        fillEllipse(5, 67, 1, 8);
+        fillEllipse(5, 76, 1, 6);
+
+        // ===== HINDQUARTERS - massive, rounded =====
+        fillEllipse(18, 36, 5, 6);  // Croup (top of hip)
+        fillEllipse(21, 41, 6, 7);  // Main haunch
+        fillEllipse(24, 47, 5, 6);  // Lower haunch
+        fillCircle(20, 39, 4);      // Gluteal mass
+        fillCircle(22, 44, 4);      // Hip bulge
+
+        // ===== BARREL/RIBCAGE - compressed =====
+        fillEllipse(30, 40, 5, 8);  // Rear barrel
+        fillEllipse(38, 41, 6, 9);  // Mid barrel
+        fillEllipse(46, 42, 6, 9);  // Front barrel
+        fillEllipse(52, 43, 5, 8);  // Chest
+
+        // ===== BACK/SPINE - arched =====
+        fillLine(17, 32, 54, 30, 1);  // Topline
+
+        // Withers (highest point)
+        fillCircle(50, 30, 2);
+        fillCircle(52, 30, 2);
+
+        // ===== SHOULDER - large scapula =====
+        fillEllipse(53, 37, 4, 7);  // Scapula blade
+        fillEllipse(56, 41, 3, 6);  // Shoulder point
+        fillCircle(54, 39, 3);      // Muscle mass
+
+        // ===== UNDERLINE - belly =====
+        fillLine(16, 52, 56, 54, 1);
+
+        // ===== NECK - powerfully arched =====
+        fillEllipse(55, 32, 3, 3);  // Base of neck
+        fillEllipse(58, 28, 3, 3);  // Rising
+        fillEllipse(61, 25, 3, 3);  // Mid crest
+        fillEllipse(64, 23, 2, 3);  // Upper crest
+        fillEllipse(67, 22, 2, 2);  // Poll
+
+        // Under-neck
+        fillLine(56, 35, 66, 26, 1);
+
+        // ===== HEAD - raised, refined =====
+        fillEllipse(69, 23, 2, 3);  // Forehead
+        fillEllipse(72, 24, 2, 3);  // Face
+        fillEllipse(75, 26, 2, 3);  // Nose
+        fillCircle(77, 28, 1);      // Muzzle
+
+        // Lower jaw
+        fillLine(75, 29, 70, 28, 1);
+        fillLine(70, 28, 67, 26, 1);
+
+        // ===== EAR - pricked forward =====
+        fillLine(68, 20, 67, 17, 1);
+        fillLine(67, 17, 69, 18, 1);
+        pixels[18][68] = 1;
+
+        // ===== EYE =====
+        pixels[23][71] = 1;
+
+        // ===== HIND LEG - LEFT (gathered, tucked) =====
+        // Upper thigh
+        fillEllipse(25, 52, 3, 5);
+        // Gaskin (lower thigh)
+        fillEllipse(27, 60, 2, 6);
+        // Hock joint
+        fillCircle(29, 68, 2);
+        // Cannon
+        fillLine(30, 70, 32, 80, 1);
+        // Fetlock
+        fillCircle(32, 81, 1);
+        // Pastern
+        fillLine(33, 82, 34, 86, 1);
+        // Hoof
+        fillEllipse(34, 87, 2, 2);
+
+        // ===== HIND LEG - RIGHT (gathered, forward) =====
+        fillEllipse(22, 52, 3, 5);
+        fillEllipse(24, 60, 2, 6);
+        fillCircle(26, 68, 2);
+        fillLine(27, 70, 29, 82, 1);
+        fillCircle(29, 83, 1);
+        fillLine(30, 84, 31, 89, 1);
+        fillEllipse(31, 90, 2, 2);
+
+        // ===== FRONT LEG - RIGHT (gathered, tucked) =====
+        // Forearm
+        fillEllipse(54, 50, 2, 5);
+        fillEllipse(55, 58, 2, 6);
+        // Knee (carpus)
+        fillCircle(56, 66, 2);
+        // Cannon
+        fillLine(57, 68, 58, 80, 1);
+        // Fetlock
+        fillCircle(58, 81, 1);
+        // Pastern
+        fillLine(59, 82, 59, 87, 1);
+        // Hoof
+        fillEllipse(59, 88, 2, 2);
+
+        // ===== FRONT LEG - LEFT (gathered, back) =====
+        fillEllipse(51, 50, 2, 5);
+        fillEllipse(52, 58, 2, 6);
+        fillCircle(53, 66, 2);
+        fillLine(54, 68, 55, 81, 1);
+        fillCircle(55, 82, 1);
+        fillLine(56, 83, 56, 88, 1);
+        fillEllipse(56, 89, 2, 2);
+
+        // ===== SMOOTHING - fill gaps between body parts =====
+        // Connect hindquarters to barrel
+        fillEllipse(26, 44, 4, 5);
+        // Connect barrel to shoulder
+        fillEllipse(50, 40, 4, 6);
+        // Connect shoulder to neck
+        fillEllipse(55, 34, 3, 4);
+        // Connect neck to head
+        fillEllipse(67, 24, 2, 3);
+        // Thicken body underline
+        fillEllipse(30, 52, 4, 3);
+        fillEllipse(40, 53, 5, 3);
+        fillEllipse(50, 54, 4, 3);
+
+        // ===== RENDER TO CANVAS =====
+        const imageData = ctx.createImageData(100, 100);
+
+        for (let y = 0; y < 100; y++) {
+            for (let x = 0; x < 100; x++) {
+                const index = (y * 100 + x) * 4;
+                if (pixels[y][x] === 1) {
+                    // Black pixel (horse silhouette)
+                    imageData.data[index] = 0;
+                    imageData.data[index + 1] = 0;
+                    imageData.data[index + 2] = 0;
+                    imageData.data[index + 3] = 255;
+                } else {
+                    // Sepia background
+                    imageData.data[index] = 244;
+                    imageData.data[index + 1] = 234;
+                    imageData.data[index + 2] = 213;
+                    imageData.data[index + 3] = 255;
+                }
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Scale up 5x for display
+        displayCtx.imageSmoothingEnabled = false;
+        displayCtx.drawImage(canvas, 0, 0, 500, 500);
+    </script>
+</body>
+</html>
