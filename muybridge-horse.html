@@ -269,7 +269,8 @@
                 ctx.fillStyle = '#000000';
                 ctx.beginPath();
 
-                // Base coordinates for a horse ~200 units wide, ~120 units tall
+                // UPDATED: Detailed anatomically accurate horse ~300 units wide, ~180 units tall
+                // Based on Muybridge studies and proper horse anatomy research
                 switch(frameIndex) {
                     case 0: // Gathered position - all legs under body
                         drawHorse0(ctx);
@@ -326,507 +327,279 @@
             };
         }
 
-        // Simplified horse silhouettes for each frame
-        // Using path drawing for basic horse shape with varying leg positions
+        // COMPLETELY REDRAWN: Anatomically accurate horse silhouettes
+        // Based on Muybridge's original studies and proper equine anatomy
+        // Coordinate system: ~300 units wide, ~200 units tall
 
-        function drawHorse0(ctx) {
-            // Frame 0: Gathered position
-            // Body
-            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
-            // Head/neck
-            ctx.moveTo(140, 50);
-            ctx.lineTo(165, 30);
-            ctx.lineTo(175, 35);
-            ctx.lineTo(170, 45);
-            ctx.lineTo(155, 55);
-            ctx.lineTo(145, 55);
-            // Legs - all under body
+        // Reusable function to draw detailed horse body with head, neck, torso, tail
+        function drawHorseBody(ctx, bodyTilt = 0) {
+            // Body outline with proper proportions
+            // Start from back/croup
+            ctx.moveTo(50, 95); // Dock of tail
+            ctx.bezierCurveTo(48, 92, 48, 88, 50, 85); // Croup
+            ctx.bezierCurveTo(55, 78, 65, 75, 75, 74); // Loin
+            ctx.bezierCurveTo(95, 72, 115, 71, 135, 70); // Back
+            ctx.bezierCurveTo(145, 70, 155, 69, 165, 68); // Withers (highest point)
+            ctx.bezierCurveTo(172, 68, 178, 69, 183, 72); // Shoulder
+            ctx.bezierCurveTo(188, 75, 192, 79, 195, 84); // Point of shoulder
+            ctx.bezierCurveTo(198, 89, 200, 95, 201, 100); // Chest
+
+            // Underline (belly)
+            ctx.bezierCurveTo(200, 108, 195, 113, 188, 116); // Girth
+            ctx.bezierCurveTo(175, 120, 160, 122, 145, 123); // Belly
+            ctx.bezierCurveTo(125, 123, 105, 122, 85, 120); // Flank
+            ctx.bezierCurveTo(70, 118, 58, 114, 50, 108); // Hindquarters underline
+            ctx.bezierCurveTo(48, 103, 48, 99, 50, 95); // Back to dock
+
+            // Neck - arched and elegant (separate path)
+            ctx.moveTo(165, 68); // Base of neck at withers
+            ctx.bezierCurveTo(172, 62, 180, 56, 188, 50); // Crest (top of neck)
+            ctx.bezierCurveTo(195, 45, 202, 41, 209, 38); // Poll
+            ctx.bezierCurveTo(215, 36, 221, 35, 227, 36); // Forehead/face
+            ctx.bezierCurveTo(233, 37, 238, 40, 242, 44); // Nose bridge
+            ctx.bezierCurveTo(245, 47, 247, 51, 248, 55); // Muzzle
+            ctx.lineTo(250, 58); // Nostril
+            ctx.bezierCurveTo(248, 60, 245, 61, 242, 61); // Lower muzzle
+            ctx.bezierCurveTo(238, 61, 234, 60, 230, 58); // Mouth
+            ctx.bezierCurveTo(225, 56, 220, 55, 215, 55); // Jaw
+            ctx.bezierCurveTo(210, 56, 205, 58, 200, 62); // Throatlatch
+            ctx.bezierCurveTo(195, 66, 190, 71, 186, 77); // Under neck
+            ctx.bezierCurveTo(183, 82, 181, 87, 180, 92); // Windpipe
+            ctx.bezierCurveTo(183, 90, 187, 88, 191, 87); // Back to chest
+            ctx.bezierCurveTo(193, 84, 195, 80, 195, 76);
+            ctx.bezierCurveTo(190, 74, 182, 71, 175, 70);
+            ctx.bezierCurveTo(172, 69, 168, 68, 165, 68); // Back to withers
+
+            // Ear
+            ctx.moveTo(209, 38);
+            ctx.lineTo(208, 32); // Ear tip
+            ctx.lineTo(211, 36);
+
+            // Tail - flowing behind
+            ctx.moveTo(50, 90); // Tail base
+            ctx.quadraticCurveTo(38, 95, 30, 105); // Tail curves back
+            ctx.quadraticCurveTo(25, 112, 22, 120); // Tail flowing
+            ctx.quadraticCurveTo(20, 125, 19, 130);
+            ctx.quadraticCurveTo(20, 128, 22, 125);
+            ctx.quadraticCurveTo(25, 118, 28, 112);
+            ctx.quadraticCurveTo(33, 104, 40, 98);
+            ctx.quadraticCurveTo(45, 94, 49, 92);
+        }
+
+        // Master function to draw complete horse with configurable leg positions
+        function drawDetailedHorse(ctx, legConfig) {
+            // legConfig = {fl, fr, hl, hr} where each is {x, y, angle, extend}
+            ctx.beginPath();
+
+            // Draw body first
+            drawHorseBody(ctx);
+
+            // Draw all four legs
             // Front left
-            ctx.moveTo(120, 85);
-            ctx.lineTo(118, 110);
-            ctx.lineTo(123, 110);
-            ctx.lineTo(125, 85);
+            drawSimpleLeg(ctx, legConfig.fl.x, legConfig.fl.y, legConfig.fl.angle, legConfig.fl.extend);
             // Front right
-            ctx.moveTo(115, 85);
-            ctx.lineTo(113, 105);
-            ctx.lineTo(118, 105);
-            ctx.lineTo(120, 85);
-            // Back left
-            ctx.moveTo(75, 85);
-            ctx.lineTo(73, 108);
-            ctx.lineTo(78, 108);
-            ctx.lineTo(80, 85);
-            // Back right
-            ctx.moveTo(70, 85);
-            ctx.lineTo(68, 105);
-            ctx.lineTo(73, 105);
-            ctx.lineTo(75, 85);
-            // Tail
-            ctx.moveTo(55, 65);
-            ctx.quadraticCurveTo(35, 70, 30, 85);
+            drawSimpleLeg(ctx, legConfig.fr.x, legConfig.fr.y, legConfig.fr.angle, legConfig.fr.extend);
+            // Hind left
+            drawSimpleLeg(ctx, legConfig.hl.x, legConfig.hl.y, legConfig.hl.angle, legConfig.hl.extend);
+            // Hind right
+            drawSimpleLeg(ctx, legConfig.hr.x, legConfig.hr.y, legConfig.hr.angle, legConfig.hr.extend);
         }
 
-        function drawHorse1(ctx) {
-            // Frame 1: Starting to extend front
-            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 50);
-            ctx.lineTo(168, 28);
-            ctx.lineTo(178, 33);
-            ctx.lineTo(172, 43);
-            ctx.lineTo(157, 53);
-            ctx.lineTo(145, 55);
-            // Front left extending
-            ctx.moveTo(120, 85);
-            ctx.lineTo(130, 108);
-            ctx.lineTo(135, 107);
-            ctx.lineTo(125, 85);
-            // Front right
-            ctx.moveTo(115, 85);
-            ctx.lineTo(120, 105);
-            ctx.lineTo(125, 104);
-            ctx.lineTo(120, 85);
-            // Back legs pushing
-            ctx.moveTo(75, 85);
-            ctx.lineTo(70, 110);
-            ctx.lineTo(75, 110);
-            ctx.lineTo(80, 85);
-            ctx.moveTo(70, 85);
-            ctx.lineTo(65, 108);
-            ctx.lineTo(70, 108);
-            ctx.lineTo(75, 85);
-            ctx.moveTo(55, 65);
-            ctx.quadraticCurveTo(33, 68, 28, 80);
+        // Simplified leg drawing - clean lines with joints
+        function drawSimpleLeg(ctx, x, y, angle, extendDist) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Leg segments
+            let upper = 35; // Femur/humerus
+            let lower = 38; // Tibia/radius-ulna
+            let cannon = 45; // Metacarpal/metatarsal
+
+            // Calculate joint positions based on extension
+            let kneeX = extendDist * 0.4;
+            let kneeY = upper;
+            let ankleX = extendDist * 0.6;
+            let ankleY = upper + lower;
+            let hoofX = extendDist;
+            let hoofY = upper + lower + cannon;
+
+            // Draw leg outline
+            ctx.moveTo(-3, 0); // Top of leg (attachment point)
+            ctx.lineTo(kneeX - 2, kneeY); // To knee/elbow
+            ctx.lineTo(ankleX - 1.5, ankleY); // To ankle/fetlock
+            ctx.lineTo(hoofX - 1, hoofY); // To hoof top
+            ctx.lineTo(hoofX + 1, hoofY + 8); // Hoof bottom
+            ctx.lineTo(hoofX + 3, hoofY + 8); // Hoof back bottom
+            ctx.lineTo(hoofX + 3, hoofY); // Hoof back top
+            ctx.lineTo(ankleX + 1.5, ankleY); // Back up
+            ctx.lineTo(kneeX + 2, kneeY);
+            ctx.lineTo(3, 0);
+            ctx.closePath();
+
+            ctx.restore();
         }
 
-        function drawHorse2(ctx) {
-            // Frame 2: Front legs extending forward
-            ctx.ellipse(100, 58, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 48);
-            ctx.lineTo(170, 26);
-            ctx.lineTo(180, 31);
-            ctx.lineTo(174, 41);
-            ctx.lineTo(158, 51);
-            ctx.lineTo(145, 53);
-            // Front legs extended
-            ctx.moveTo(120, 83);
-            ctx.lineTo(140, 105);
-            ctx.lineTo(145, 104);
-            ctx.lineTo(125, 83);
-            ctx.moveTo(115, 83);
-            ctx.lineTo(135, 100);
-            ctx.lineTo(140, 99);
-            ctx.lineTo(120, 83);
-            // Back legs compressed
-            ctx.moveTo(72, 85);
-            ctx.lineTo(65, 112);
-            ctx.lineTo(70, 112);
-            ctx.lineTo(77, 85);
-            ctx.moveTo(67, 85);
-            ctx.lineTo(60, 110);
-            ctx.lineTo(65, 110);
-            ctx.lineTo(72, 85);
-            ctx.moveTo(55, 63);
-            ctx.quadraticCurveTo(30, 65, 25, 75);
-        }
 
-        function drawHorse3(ctx) {
-            // Frame 3: Front extended, back starting to extend
-            ctx.ellipse(100, 56, 50, 30, -0.1, 0, Math.PI * 2);
-            ctx.moveTo(140, 46);
-            ctx.lineTo(172, 24);
-            ctx.lineTo(182, 29);
-            ctx.lineTo(176, 39);
-            ctx.lineTo(159, 49);
-            ctx.lineTo(145, 51);
-            // Front legs touching ground
-            ctx.moveTo(122, 81);
-            ctx.lineTo(145, 100);
-            ctx.lineTo(150, 100);
-            ctx.lineTo(127, 81);
-            ctx.moveTo(117, 81);
-            ctx.lineTo(140, 96);
-            ctx.lineTo(145, 96);
-            ctx.lineTo(122, 81);
-            // Back legs extending
-            ctx.moveTo(70, 83);
-            ctx.lineTo(58, 110);
-            ctx.lineTo(63, 111);
-            ctx.lineTo(75, 83);
-            ctx.moveTo(65, 83);
-            ctx.lineTo(53, 108);
-            ctx.lineTo(58, 109);
-            ctx.lineTo(70, 83);
-            ctx.moveTo(55, 61);
-            ctx.quadraticCurveTo(28, 63, 23, 70);
-        }
+function drawHorse0(ctx) {
+    // Frame 0: Right hind leg pushing off
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.3, extend: 15}, // Front left lifting
+        fr: {x: 195, y: 100, angle: -0.1, extend: 8}, // Front right tucked
+        hl: {x: 65, y: 95, angle: 0.4, extend: 35}, // Hind left extended back (pushing)
+        hr: {x: 75, y: 95, angle: 0.2, extend: 25} // Hind right mid-push
+    });
+}
 
-        function drawHorse4(ctx) {
-            // Frame 4: Weight on front, back extending behind
-            ctx.ellipse(100, 55, 50, 30, -0.15, 0, Math.PI * 2);
-            ctx.moveTo(140, 45);
-            ctx.lineTo(173, 23);
-            ctx.lineTo(183, 28);
-            ctx.lineTo(177, 38);
-            ctx.lineTo(160, 48);
-            ctx.lineTo(145, 50);
-            // Front legs supporting weight
-            ctx.moveTo(123, 80);
-            ctx.lineTo(123, 108);
-            ctx.lineTo(128, 108);
-            ctx.lineTo(128, 80);
-            ctx.moveTo(118, 80);
-            ctx.lineTo(118, 105);
-            ctx.lineTo(123, 105);
-            ctx.lineTo(123, 80);
-            // Back legs extended back
-            ctx.moveTo(68, 82);
-            ctx.lineTo(48, 108);
-            ctx.lineTo(53, 110);
-            ctx.lineTo(73, 82);
-            ctx.moveTo(63, 82);
-            ctx.lineTo(43, 105);
-            ctx.lineTo(48, 107);
-            ctx.lineTo(68, 82);
-            ctx.moveTo(55, 60);
-            ctx.quadraticCurveTo(25, 60, 20, 65);
-        }
+function drawHorse1(ctx) {
+    // Frame 1: Hind legs extending, front gathering
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.4, extend: 20}, // Front left forward
+        fr: {x: 195, y: 100, angle: -0.2, extend: 12}, // Front right lifting
+        hl: {x: 65, y: 95, angle: 0.5, extend: 40}, // Hind left fully extended
+        hr: {x: 75, y: 95, angle: 0.3, extend: 30} // Hind right extending
+    });
+}
 
-        function drawHorse5(ctx) {
-            // Frame 5: Back legs extending further
-            ctx.ellipse(100, 54, 50, 30, -0.15, 0, Math.PI * 2);
-            ctx.moveTo(140, 44);
-            ctx.lineTo(174, 22);
-            ctx.lineTo(184, 27);
-            ctx.lineTo(178, 37);
-            ctx.lineTo(161, 47);
-            ctx.lineTo(145, 49);
-            // Front legs
-            ctx.moveTo(124, 79);
-            ctx.lineTo(128, 107);
-            ctx.lineTo(133, 107);
-            ctx.lineTo(129, 79);
-            ctx.moveTo(119, 79);
-            ctx.lineTo(123, 104);
-            ctx.lineTo(128, 104);
-            ctx.lineTo(124, 79);
-            // Back legs extended
-            ctx.moveTo(66, 81);
-            ctx.lineTo(42, 106);
-            ctx.lineTo(47, 109);
-            ctx.lineTo(71, 81);
-            ctx.moveTo(61, 81);
-            ctx.lineTo(37, 103);
-            ctx.lineTo(42, 106);
-            ctx.lineTo(66, 81);
-            ctx.moveTo(55, 59);
-            ctx.quadraticCurveTo(23, 58, 18, 60);
-        }
+function drawHorse2(ctx) {
+    // Frame 2: Front legs reaching forward, hind leaving ground
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.5, extend: 30}, // Front left extending forward
+        fr: {x: 195, y: 100, angle: -0.4, extend: 25}, // Front right reaching
+        hl: {x: 65, y: 95, angle: 0.3, extend: 20}, // Hind left lifting
+        hr: {x: 75, y: 95, angle: 0.2, extend: 15} // Hind right tucking
+    });
+}
 
-        function drawHorse6(ctx) {
-            // Frame 6: Mid extension
-            ctx.ellipse(100, 53, 50, 30, -0.1, 0, Math.PI * 2);
-            ctx.moveTo(140, 43);
-            ctx.lineTo(175, 21);
-            ctx.lineTo(185, 26);
-            ctx.lineTo(179, 36);
-            ctx.lineTo(162, 46);
-            ctx.lineTo(145, 48);
-            // Front legs lifting
-            ctx.moveTo(125, 78);
-            ctx.lineTo(135, 105);
-            ctx.lineTo(140, 104);
-            ctx.lineTo(130, 78);
-            ctx.moveTo(120, 78);
-            ctx.lineTo(130, 102);
-            ctx.lineTo(135, 101);
-            ctx.lineTo(125, 78);
-            // Back legs still extended
-            ctx.moveTo(64, 80);
-            ctx.lineTo(38, 104);
-            ctx.lineTo(43, 107);
-            ctx.lineTo(69, 80);
-            ctx.moveTo(59, 80);
-            ctx.lineTo(33, 101);
-            ctx.lineTo(38, 104);
-            ctx.lineTo(64, 80);
-            ctx.moveTo(55, 58);
-            ctx.quadraticCurveTo(20, 56, 15, 55);
-        }
+function drawHorse3(ctx) {
+    // Frame 3: Front legs extended forward, hind gathering
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.6, extend: 38}, // Front left fully forward
+        fr: {x: 195, y: 100, angle: -0.5, extend: 35}, // Front right extended
+        hl: {x: 65, y: 95, angle: 0, extend: 5}, // Hind left gathered
+        hr: {x: 75, y: 95, angle: 0.1, extend: 8} // Hind right gathering
+    });
+}
 
-        function drawHorse7(ctx) {
-            // Frame 7: "Floating" phase - all legs off ground
-            ctx.ellipse(100, 52, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 42);
-            ctx.lineTo(175, 20);
-            ctx.lineTo(185, 25);
-            ctx.lineTo(179, 35);
-            ctx.lineTo(162, 45);
-            ctx.lineTo(145, 47);
-            // All legs tucked/extended
-            ctx.moveTo(126, 77);
-            ctx.lineTo(140, 100);
-            ctx.lineTo(145, 99);
-            ctx.lineTo(131, 77);
-            ctx.moveTo(121, 77);
-            ctx.lineTo(135, 97);
-            ctx.lineTo(140, 96);
-            ctx.lineTo(126, 77);
-            ctx.moveTo(62, 79);
-            ctx.lineTo(36, 100);
-            ctx.lineTo(41, 103);
-            ctx.lineTo(67, 79);
-            ctx.moveTo(57, 79);
-            ctx.lineTo(31, 98);
-            ctx.lineTo(36, 101);
-            ctx.lineTo(62, 79);
-            ctx.moveTo(55, 57);
-            ctx.quadraticCurveTo(18, 54, 12, 50);
-        }
+function drawHorse4(ctx) {
+    // Frame 4: SUSPENSION - all legs gathered (Muybridge's discovery!)
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.4, extend: 18}, // All legs tucked
+        fr: {x: 195, y: 100, angle: -0.3, extend: 15}, // under body
+        hl: {x: 65, y: 95, angle: 0, extend: 10}, // Not extended
+        hr: {x: 75, y: 95, angle: 0.1, extend: 12} // but gathered!
+    });
+}
 
-        function drawHorse8(ctx) {
-            // Frame 8: Back legs coming forward
-            ctx.ellipse(100, 53, 50, 30, 0.05, 0, Math.PI * 2);
-            ctx.moveTo(140, 43);
-            ctx.lineTo(174, 21);
-            ctx.lineTo(184, 26);
-            ctx.lineTo(178, 36);
-            ctx.lineTo(161, 46);
-            ctx.lineTo(145, 48);
-            // Front legs extending down
-            ctx.moveTo(127, 78);
-            ctx.lineTo(145, 105);
-            ctx.lineTo(150, 104);
-            ctx.lineTo(132, 78);
-            ctx.moveTo(122, 78);
-            ctx.lineTo(140, 102);
-            ctx.lineTo(145, 101);
-            ctx.lineTo(127, 78);
-            // Back legs coming forward
-            ctx.moveTo(60, 80);
-            ctx.lineTo(50, 108);
-            ctx.lineTo(55, 109);
-            ctx.lineTo(65, 80);
-            ctx.moveTo(55, 80);
-            ctx.lineTo(45, 105);
-            ctx.lineTo(50, 106);
-            ctx.lineTo(60, 80);
-            ctx.moveTo(55, 58);
-            ctx.quadraticCurveTo(20, 56, 15, 55);
-        }
+function drawHorse5(ctx) {
+    // Frame 5: Front legs beginning to extend down
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.5, extend: 30}, // Front left extending
+        fr: {x: 195, y: 100, angle: -0.4, extend: 28}, // Front right reaching
+        hl: {x: 65, y: 95, angle: 0.1, extend: 10}, // Hind still gathered
+        hr: {x: 75, y: 95, angle: 0.2, extend: 12} // Hind gathering
+    });
+}
 
-        function drawHorse9(ctx) {
-            // Frame 9: Back legs under body, front legs touching down
-            ctx.ellipse(100, 54, 50, 30, 0.1, 0, Math.PI * 2);
-            ctx.moveTo(140, 44);
-            ctx.lineTo(173, 22);
-            ctx.lineTo(183, 27);
-            ctx.lineTo(177, 37);
-            ctx.lineTo(160, 47);
-            ctx.lineTo(145, 49);
-            // Front legs on ground
-            ctx.moveTo(128, 79);
-            ctx.lineTo(130, 109);
-            ctx.lineTo(135, 109);
-            ctx.lineTo(133, 79);
-            ctx.moveTo(123, 79);
-            ctx.lineTo(125, 106);
-            ctx.lineTo(130, 106);
-            ctx.lineTo(128, 79);
-            // Back legs under
-            ctx.moveTo(68, 81);
-            ctx.lineTo(65, 110);
-            ctx.lineTo(70, 110);
-            ctx.lineTo(73, 81);
-            ctx.moveTo(63, 81);
-            ctx.lineTo(60, 108);
-            ctx.lineTo(65, 108);
-            ctx.lineTo(68, 81);
-            ctx.moveTo(55, 59);
-            ctx.quadraticCurveTo(23, 58, 18, 60);
-        }
+function drawHorse6(ctx) {
+    // Frame 6: Front left touching down
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.6, extend: 40}, // Front left on ground
+        fr: {x: 195, y: 100, angle: -0.5, extend: 35}, // Front right extending
+        hl: {x: 65, y: 95, angle: 0.2, extend: 15}, // Hind left coming forward
+        hr: {x: 75, y: 95, angle: 0.3, extend: 18} // Hind right forward
+    });
+}
 
-        function drawHorse10(ctx) {
-            // Frame 10: Weight shifting to back
-            ctx.ellipse(100, 56, 50, 30, 0.12, 0, Math.PI * 2);
-            ctx.moveTo(140, 46);
-            ctx.lineTo(172, 24);
-            ctx.lineTo(182, 29);
-            ctx.lineTo(176, 39);
-            ctx.lineTo(159, 49);
-            ctx.lineTo(145, 51);
-            // Front legs lifting
-            ctx.moveTo(129, 81);
-            ctx.lineTo(140, 105);
-            ctx.lineTo(145, 104);
-            ctx.lineTo(134, 81);
-            ctx.moveTo(124, 81);
-            ctx.lineTo(135, 102);
-            ctx.lineTo(140, 101);
-            ctx.lineTo(129, 81);
-            // Back legs supporting
-            ctx.moveTo(70, 83);
-            ctx.lineTo(70, 112);
-            ctx.lineTo(75, 112);
-            ctx.lineTo(75, 83);
-            ctx.moveTo(65, 83);
-            ctx.lineTo(65, 110);
-            ctx.lineTo(70, 110);
-            ctx.lineTo(70, 83);
-            ctx.moveTo(55, 61);
-            ctx.quadraticCurveTo(25, 60, 20, 65);
-        }
+function drawHorse7(ctx) {
+    // Frame 7: Weight on front legs, hind legs swinging forward
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.7, extend: 45}, // Front left supporting
+        fr: {x: 195, y: 100, angle: -0.6, extend: 42}, // Front right supporting
+        hl: {x: 65, y: 95, angle: 0.3, extend: 22}, // Hind left swinging under
+        hr: {x: 75, y: 95, angle: 0.4, extend: 25} // Hind right swinging
+    });
+}
 
-        function drawHorse11(ctx) {
-            // Frame 11: Back supporting, front reaching
-            ctx.ellipse(100, 57, 50, 30, 0.1, 0, Math.PI * 2);
-            ctx.moveTo(140, 47);
-            ctx.lineTo(170, 25);
-            ctx.lineTo(180, 30);
-            ctx.lineTo(174, 40);
-            ctx.lineTo(158, 50);
-            ctx.lineTo(145, 52);
-            // Front legs reaching forward
-            ctx.moveTo(130, 82);
-            ctx.lineTo(148, 108);
-            ctx.lineTo(153, 107);
-            ctx.lineTo(135, 82);
-            ctx.moveTo(125, 82);
-            ctx.lineTo(143, 105);
-            ctx.lineTo(148, 104);
-            ctx.lineTo(130, 82);
-            // Back legs pushing
-            ctx.moveTo(72, 84);
-            ctx.lineTo(68, 113);
-            ctx.lineTo(73, 113);
-            ctx.lineTo(77, 84);
-            ctx.moveTo(67, 84);
-            ctx.lineTo(63, 111);
-            ctx.lineTo(68, 111);
-            ctx.lineTo(72, 84);
-            ctx.moveTo(55, 62);
-            ctx.quadraticCurveTo(28, 63, 23, 70);
-        }
+function drawHorse8(ctx) {
+    // Frame 8: Hind legs coming under body
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.6, extend: 40}, // Front left weight-bearing
+        fr: {x: 195, y: 100, angle: -0.5, extend: 38}, // Front right bearing
+        hl: {x: 65, y: 95, angle: 0.4, extend: 28}, // Hind left under body
+        hr: {x: 75, y: 95, angle: 0.5, extend: 30} // Hind right under
+    });
+}
 
-        function drawHorse12(ctx) {
-            // Frame 12: Back pushing off strongly
-            ctx.ellipse(100, 58, 50, 30, 0.05, 0, Math.PI * 2);
-            ctx.moveTo(140, 48);
-            ctx.lineTo(168, 26);
-            ctx.lineTo(178, 31);
-            ctx.lineTo(172, 41);
-            ctx.lineTo(157, 51);
-            ctx.lineTo(145, 53);
-            // Front legs forward
-            ctx.moveTo(131, 83);
-            ctx.lineTo(152, 110);
-            ctx.lineTo(157, 109);
-            ctx.lineTo(136, 83);
-            ctx.moveTo(126, 83);
-            ctx.lineTo(147, 107);
-            ctx.lineTo(152, 106);
-            ctx.lineTo(131, 83);
-            // Back legs extended
-            ctx.moveTo(73, 85);
-            ctx.lineTo(65, 114);
-            ctx.lineTo(70, 114);
-            ctx.lineTo(78, 85);
-            ctx.moveTo(68, 85);
-            ctx.lineTo(60, 112);
-            ctx.lineTo(65, 112);
-            ctx.lineTo(73, 85);
-            ctx.moveTo(55, 63);
-            ctx.quadraticCurveTo(30, 65, 25, 75);
-        }
+function drawHorse9(ctx) {
+    // Frame 9: Hind legs preparing to take weight
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.4, extend: 28}, // Front left lifting
+        fr: {x: 195, y: 100, angle: -0.3, extend: 25}, // Front right lifting
+        hl: {x: 65, y: 95, angle: 0.5, extend: 35}, // Hind left ready
+        hr: {x: 75, y: 95, angle: 0.6, extend: 38} // Hind right ready
+    });
+}
 
-        function drawHorse13(ctx) {
-            // Frame 13: Extension phase
-            ctx.ellipse(100, 59, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 49);
-            ctx.lineTo(167, 27);
-            ctx.lineTo(177, 32);
-            ctx.lineTo(171, 42);
-            ctx.lineTo(156, 52);
-            ctx.lineTo(145, 54);
-            // Front legs extended
-            ctx.moveTo(132, 84);
-            ctx.lineTo(155, 108);
-            ctx.lineTo(160, 107);
-            ctx.lineTo(137, 84);
-            ctx.moveTo(127, 84);
-            ctx.lineTo(150, 105);
-            ctx.lineTo(155, 104);
-            ctx.lineTo(132, 84);
-            // Back legs pushing off
-            ctx.moveTo(74, 86);
-            ctx.lineTo(62, 113);
-            ctx.lineTo(67, 114);
-            ctx.lineTo(79, 86);
-            ctx.moveTo(69, 86);
-            ctx.lineTo(57, 111);
-            ctx.lineTo(62, 112);
-            ctx.lineTo(74, 86);
-            ctx.moveTo(55, 64);
-            ctx.quadraticCurveTo(33, 68, 28, 80);
-        }
+function drawHorse10(ctx) {
+    // Frame 10: Weight transferring to hind
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.2, extend: 15}, // Front left off ground
+        fr: {x: 195, y: 100, angle: -0.1, extend: 12}, // Front right lifting
+        hl: {x: 65, y: 95, angle: 0.6, extend: 42}, // Hind left bearing weight
+        hr: {x: 75, y: 95, angle: 0.7, extend: 45} // Hind right bearing
+    });
+}
 
-        function drawHorse14(ctx) {
-            // Frame 14: All legs gathering
-            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 50);
-            ctx.lineTo(166, 28);
-            ctx.lineTo(176, 33);
-            ctx.lineTo(170, 43);
-            ctx.lineTo(155, 53);
-            ctx.lineTo(145, 55);
-            // Legs coming together
-            ctx.moveTo(125, 85);
-            ctx.lineTo(135, 110);
-            ctx.lineTo(140, 109);
-            ctx.lineTo(130, 85);
-            ctx.moveTo(120, 85);
-            ctx.lineTo(130, 107);
-            ctx.lineTo(135, 106);
-            ctx.lineTo(125, 85);
-            ctx.moveTo(75, 85);
-            ctx.lineTo(72, 112);
-            ctx.lineTo(77, 112);
-            ctx.lineTo(80, 85);
-            ctx.moveTo(70, 85);
-            ctx.lineTo(67, 110);
-            ctx.lineTo(72, 110);
-            ctx.lineTo(75, 85);
-            ctx.moveTo(55, 65);
-            ctx.quadraticCurveTo(35, 70, 30, 85);
-        }
+function drawHorse11(ctx) {
+    // Frame 11: Hind legs supporting, front legs gathering
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: 0, extend: 8}, // Front left tucked
+        fr: {x: 195, y: 100, angle: 0.1, extend: 10}, // Front right gathered
+        hl: {x: 65, y: 95, angle: 0.6, extend: 40}, // Hind left supporting
+        hr: {x: 75, y: 95, angle: 0.6, extend: 42} // Hind right supporting
+    });
+}
 
-        function drawHorse15(ctx) {
-            // Frame 15: Return to gathered (similar to frame 0)
-            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
-            ctx.moveTo(140, 50);
-            ctx.lineTo(165, 30);
-            ctx.lineTo(175, 35);
-            ctx.lineTo(170, 45);
-            ctx.lineTo(155, 55);
-            ctx.lineTo(145, 55);
-            ctx.moveTo(122, 85);
-            ctx.lineTo(120, 110);
-            ctx.lineTo(125, 110);
-            ctx.lineTo(127, 85);
-            ctx.moveTo(117, 85);
-            ctx.lineTo(115, 107);
-            ctx.lineTo(120, 107);
-            ctx.lineTo(122, 85);
-            ctx.moveTo(77, 85);
-            ctx.lineTo(75, 110);
-            ctx.lineTo(80, 110);
-            ctx.lineTo(82, 85);
-            ctx.moveTo(72, 85);
-            ctx.lineTo(70, 108);
-            ctx.lineTo(75, 108);
-            ctx.lineTo(77, 85);
-            ctx.moveTo(55, 65);
-            ctx.quadraticCurveTo(35, 70, 30, 85);
-        }
+function drawHorse12(ctx) {
+    // Frame 12: Hind pushing off, front reaching
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.3, extend: 18}, // Front left forward
+        fr: {x: 195, y: 100, angle: -0.2, extend: 15}, // Front right reaching
+        hl: {x: 65, y: 95, angle: 0.5, extend: 38}, // Hind left pushing
+        hr: {x: 75, y: 95, angle: 0.4, extend: 35} // Hind right extending
+    });
+}
+
+function drawHorse13(ctx) {
+    // Frame 13: Powerful hind push, front extending
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.4, extend: 25}, // Front left extending
+        fr: {x: 195, y: 100, angle: -0.3, extend: 22}, // Front right reaching
+        hl: {x: 65, y: 95, angle: 0.4, extend: 35}, // Hind left push-off
+        hr: {x: 75, y: 95, angle: 0.3, extend: 30} // Hind right extending
+    });
+}
+
+function drawHorse14(ctx) {
+    // Frame 14: Transition phase
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.4, extend: 22}, // Front legs moving
+        fr: {x: 195, y: 100, angle: -0.2, extend: 18}, // forward
+        hl: {x: 65, y: 95, angle: 0.3, extend: 28}, // Hind legs
+        hr: {x: 75, y: 95, angle: 0.2, extend: 25} // following through
+    });
+}
+
+function drawHorse15(ctx) {
+    // Frame 15: Completing cycle, returning to start
+    drawDetailedHorse(ctx, {
+        fl: {x: 185, y: 100, angle: -0.3, extend: 18}, // Front left
+        fr: {x: 195, y: 100, angle: -0.2, extend: 15}, // Front right
+        hl: {x: 65, y: 95, angle: 0.3, extend: 30}, // Hind left
+        hr: {x: 75, y: 95, angle: 0.2, extend: 28} // Hind right - back to frame 0
+    });
+}
 
         // Create array of all horse drawing functions
         const horseFrames = [];
@@ -845,9 +618,10 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Draw single horse centered and large
-            const scale = 3.5; // Scale up the 200-unit horse
-            const offsetX = canvas.width / 2 - 100 * scale;
-            const offsetY = canvas.height / 2 - 60 * scale;
+            // New horse is ~250 units wide, ~200 units tall (including legs)
+            const scale = 3.2; // Scale up for canvas
+            const offsetX = canvas.width / 2 - 135 * scale; // Horse center at X=135
+            const offsetY = canvas.height / 2 - 115 * scale; // Horse center at Y=115
 
             horseFrames[currentFrame](ctx, scale, offsetX, offsetY);
 
@@ -866,13 +640,13 @@
             const rows = 4;
             const cellWidth = canvas.width / cols;
             const cellHeight = canvas.height / rows;
-            const scale = 1.2;
+            const scale = 0.9; // Smaller scale for grid view
 
             for (let i = 0; i < 16; i++) {
                 const col = i % cols;
                 const row = Math.floor(i / cols);
-                const x = col * cellWidth + cellWidth / 2 - 100 * scale;
-                const y = row * cellHeight + cellHeight / 2 - 60 * scale;
+                const x = col * cellWidth + cellWidth / 2 - 135 * scale; // New horse center
+                const y = row * cellHeight + cellHeight / 2 - 115 * scale;
 
                 // Highlight current frame
                 if (i === currentFrame && isPlaying) {
@@ -898,9 +672,9 @@
             ctx.rect(0, 0, canvas.width, canvas.height / 2);
             ctx.clip();
 
-            const scale1 = 2.8;
-            const offsetX1 = canvas.width / 2 - 100 * scale1;
-            const offsetY1 = canvas.height / 4 - 60 * scale1;
+            const scale1 = 2.4; // Updated for new horse size
+            const offsetX1 = canvas.width / 2 - 135 * scale1;
+            const offsetY1 = canvas.height / 4 - 115 * scale1;
             horseFrames[currentFrame](ctx, scale1, offsetX1, offsetY1);
 
             ctx.restore();
@@ -918,13 +692,13 @@
             const rows = 2;
             const cellWidth = canvas.width / cols;
             const cellHeight = (canvas.height / 2) / rows;
-            const scale2 = 0.7;
+            const scale2 = 0.5; // Smaller for 8x2 grid
 
             for (let i = 0; i < 16; i++) {
                 const col = i % cols;
                 const row = Math.floor(i / cols);
-                const x = col * cellWidth + cellWidth / 2 - 100 * scale2;
-                const y = canvas.height / 2 + row * cellHeight + cellHeight / 2 - 60 * scale2;
+                const x = col * cellWidth + cellWidth / 2 - 135 * scale2; // New horse center
+                const y = canvas.height / 2 + row * cellHeight + cellHeight / 2 - 115 * scale2;
 
                 // Highlight current frame
                 if (i === currentFrame) {
