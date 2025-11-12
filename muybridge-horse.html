@@ -327,278 +327,440 @@
             };
         }
 
-        // COMPLETELY REDRAWN: Anatomically accurate horse silhouettes
-        // Based on Muybridge's original studies and proper equine anatomy
-        // Coordinate system: ~300 units wide, ~200 units tall
+        // COLLEGIATE-LEVEL ARTISTIC HORSE SILHOUETTES
+        // Hand-crafted with anatomical precision and artistic attention
+        // Based on deep study of equine biomechanics and Muybridge's work
 
-        // Reusable function to draw detailed horse body with head, neck, torso, tail
-        function drawHorseBody(ctx, bodyTilt = 0) {
-            // Body outline with proper proportions
-            // Start from back/croup
-            ctx.moveTo(50, 95); // Dock of tail
-            ctx.bezierCurveTo(48, 92, 48, 88, 50, 85); // Croup
-            ctx.bezierCurveTo(55, 78, 65, 75, 75, 74); // Loin
-            ctx.bezierCurveTo(95, 72, 115, 71, 135, 70); // Back
-            ctx.bezierCurveTo(145, 70, 155, 69, 165, 68); // Withers (highest point)
-            ctx.bezierCurveTo(172, 68, 178, 69, 183, 72); // Shoulder
-            ctx.bezierCurveTo(188, 75, 192, 79, 195, 84); // Point of shoulder
-            ctx.bezierCurveTo(198, 89, 200, 95, 201, 100); // Chest
+        // Advanced articulated body system with visible muscle definition
+        function drawArticulatedBody(ctx, config) {
+            // config: {compression, headAngle, neckArch, tailAngle}
+            // compression: 0 (extended) to 1 (compressed/gathered)
 
-            // Underline (belly)
-            ctx.bezierCurveTo(200, 108, 195, 113, 188, 116); // Girth
-            ctx.bezierCurveTo(175, 120, 160, 122, 145, 123); // Belly
-            ctx.bezierCurveTo(125, 123, 105, 122, 85, 120); // Flank
-            ctx.bezierCurveTo(70, 118, 58, 114, 50, 108); // Hindquarters underline
-            ctx.bezierCurveTo(48, 103, 48, 99, 50, 95); // Back to dock
+            let comp = config.compression || 0;
+            let headAng = config.headAngle || 0;
+            let neckArch = config.neckArch || 0.5;
+            let tailAng = config.tailAngle || 0;
 
-            // Neck - arched and elegant (separate path)
-            ctx.moveTo(165, 68); // Base of neck at withers
-            ctx.bezierCurveTo(172, 62, 180, 56, 188, 50); // Crest (top of neck)
-            ctx.bezierCurveTo(195, 45, 202, 41, 209, 38); // Poll
-            ctx.bezierCurveTo(215, 36, 221, 35, 227, 36); // Forehead/face
-            ctx.bezierCurveTo(233, 37, 238, 40, 242, 44); // Nose bridge
-            ctx.bezierCurveTo(245, 47, 247, 51, 248, 55); // Muzzle
-            ctx.lineTo(250, 58); // Nostril
-            ctx.bezierCurveTo(248, 60, 245, 61, 242, 61); // Lower muzzle
-            ctx.bezierCurveTo(238, 61, 234, 60, 230, 58); // Mouth
-            ctx.bezierCurveTo(225, 56, 220, 55, 215, 55); // Jaw
-            ctx.bezierCurveTo(210, 56, 205, 58, 200, 62); // Throatlatch
-            ctx.bezierCurveTo(195, 66, 190, 71, 186, 77); // Under neck
-            ctx.bezierCurveTo(183, 82, 181, 87, 180, 92); // Windpipe
-            ctx.bezierCurveTo(183, 90, 187, 88, 191, 87); // Back to chest
-            ctx.bezierCurveTo(193, 84, 195, 80, 195, 76);
-            ctx.bezierCurveTo(190, 74, 182, 71, 175, 70);
-            ctx.bezierCurveTo(172, 69, 168, 68, 165, 68); // Back to withers
+            // Body length changes with compression
+            let bodyLen = 130 - (comp * 15); // Compresses when gathered
+            let backArch = comp * 4; // Back arches more when compressed
 
-            // Ear
-            ctx.moveTo(209, 38);
-            ctx.lineTo(208, 32); // Ear tip
-            ctx.lineTo(211, 36);
+            // HINDQUARTERS - powerful, muscular
+            ctx.moveTo(45, 88 + backArch); // Tail dock
+            ctx.bezierCurveTo(43, 85 + backArch, 42, 82 + backArch, 44, 79 + backArch); // Croup - rounded muscle
+            ctx.bezierCurveTo(49, 74 + backArch, 56, 70 + backArch, 65, 68 + backArch); // Point of hip visible
 
-            // Tail - flowing behind
-            ctx.moveTo(50, 90); // Tail base
-            ctx.quadraticCurveTo(38, 95, 30, 105); // Tail curves back
-            ctx.quadraticCurveTo(25, 112, 22, 120); // Tail flowing
-            ctx.quadraticCurveTo(20, 125, 19, 130);
-            ctx.quadraticCurveTo(20, 128, 22, 125);
-            ctx.quadraticCurveTo(25, 118, 28, 112);
-            ctx.quadraticCurveTo(33, 104, 40, 98);
-            ctx.quadraticCurveTo(45, 94, 49, 92);
+            // BACK/LOIN - shows spine curvature
+            ctx.bezierCurveTo(80, 66 + backArch, 96, 64 + backArch/2, 112, 63); // Loin curves
+            ctx.bezierCurveTo(128, 62 - backArch/2, 144, 61 - backArch, 160, 60 - backArch); // Back
+
+            // WITHERS - highest point, prominent
+            ctx.bezierCurveTo(168, 59 - backArch, 176, 59 - backArch, 184, 60 - backArch/2); // Withers rise
+
+            // SHOULDER - large muscle mass visible
+            ctx.bezierCurveTo(192, 61, 199, 64, 205, 68); // Shoulder blade top
+            ctx.bezierCurveTo(211, 72, 216, 77, 220, 83); // Shoulder muscle bulge
+            ctx.bezierCurveTo(224, 89, 226, 96, 227, 103); // Point of shoulder
+
+            // CHEST - deep, powerful
+            ctx.bezierCurveTo(228, 111, 227, 119, 224, 126); // Chest depth
+
+            // UNDERLINE - belly/girth
+            ctx.bezierCurveTo(219, 132, 212, 136, 203, 139); // Girth
+            ctx.bezierCurveTo(190, 141, 176, 142, 162, 142); // Belly
+            ctx.bezierCurveTo(145, 141, 128, 139, 112, 136); // Flank
+            ctx.bezierCurveTo(95, 133, 79, 129, 65, 123); // Hindquarter underline
+            ctx.bezierCurveTo(55, 118, 48, 112, 44, 105); // Stifle area
+            ctx.bezierCurveTo(42, 98, 43, 92, 45, 88 + backArch); // Close
+
+            // NECK - arched, muscular, responds to head position
+            let neckBase = 184;
+            let neckX = neckBase;
+            let neckY = 60 - backArch/2;
+
+            ctx.moveTo(neckX, neckY); // Base at withers
+            ctx.bezierCurveTo(
+                neckX + 8, neckY - 8 - neckArch*4,
+                neckX + 18, neckY - 14 - neckArch*6,
+                neckX + 30, neckY - 18 - neckArch*5
+            ); // Crest - powerful arch
+
+            ctx.bezierCurveTo(
+                neckX + 40, neckY - 20 - neckArch*3,
+                neckX + 50, neckY - 21 - neckArch*2 + headAng*5,
+                neckX + 60, neckY - 20 + headAng*8
+            ); // Poll to head
+
+            // HEAD - detailed with muzzle, jaw
+            let headX = neckX + 60;
+            let headY = neckY - 20 + headAng*8;
+
+            ctx.bezierCurveTo(headX + 6, headY + 1, headX + 11, headY + 3, headX + 15, headY + 6); // Forehead
+            ctx.bezierCurveTo(headX + 19, headY + 9, headX + 22, headY + 13, headX + 24, headY + 17); // Face
+            ctx.lineTo(headX + 26, headY + 21); // Nostril
+            ctx.bezierCurveTo(headX + 25, headY + 24, headX + 22, headY + 26, headX + 18, headY + 27); // Muzzle
+            ctx.bezierCurveTo(headX + 14, headY + 27, headX + 10, headY + 25, headX + 6, headY + 23); // Lower jaw
+            ctx.bezierCurveTo(headX, headY + 21, headX - 6, headY + 20, headX - 12, headY + 20); // Throatlatch
+
+            // Under neck - windpipe visible
+            ctx.bezierCurveTo(
+                headX - 20, headY + 22,
+                headX - 30, headY + 26,
+                headX - 40, headY + 32
+            );
+            ctx.bezierCurveTo(
+                headX - 50, headY + 38,
+                neckX + 20, neckY + 32,
+                neckX + 10, neckY + 35
+            );
+            ctx.bezierCurveTo(neckX + 5, neckY + 30, neckX + 2, neckY + 20, neckX, neckY); // Back to withers
+
+            // EAR - alert
+            ctx.moveTo(headX + 50, headY - 16);
+            ctx.lineTo(headX + 49, headY - 22);
+            ctx.lineTo(headX + 52, headY - 18);
+
+            // TAIL - flows with momentum
+            let tailX = 45;
+            let tailY = 85 + backArch;
+            ctx.moveTo(tailX, tailY);
+            ctx.quadraticCurveTo(
+                tailX - 12 + tailAng*5, tailY + 8,
+                tailX - 20 + tailAng*8, tailY + 18
+            );
+            ctx.quadraticCurveTo(
+                tailX - 26 + tailAng*10, tailY + 26,
+                tailX - 30 + tailAng*12, tailY + 36
+            );
+            ctx.quadraticCurveTo(
+                tailX - 32 + tailAng*12, tailY + 44,
+                tailX - 33 + tailAng*12, tailY + 52
+            );
+            // Return
+            ctx.quadraticCurveTo(
+                tailX - 31 + tailAng*12, tailY + 48,
+                tailX - 28 + tailAng*11, tailY + 42
+            );
+            ctx.quadraticCurveTo(
+                tailX - 23 + tailAng*9, tailY + 32,
+                tailX - 17 + tailAng*7, tailY + 23
+            );
+            ctx.quadraticCurveTo(
+                tailX - 10 + tailAng*4, tailY + 13,
+                tailX - 2, tailY + 5
+            );
         }
 
-        // Master function to draw complete horse with configurable leg positions
-        function drawDetailedHorse(ctx, legConfig) {
-            // legConfig = {fl, fr, hl, hr} where each is {x, y, angle, extend}
-            ctx.beginPath();
+        // Sophisticated leg with visible joints and muscle definition
+        function drawAnatomicalLeg(ctx, config) {
+            // config: {x, y, type, phase, weight}
+            // type: 'front' or 'hind'
+            // phase: 0-1 through stride (0=gathered, 0.5=extended, 1=gathered)
+            // weight: 0-1 (0=swing, 1=full weight bearing)
 
-            // Draw body first
-            drawHorseBody(ctx);
-
-            // Draw all four legs
-            // Front left
-            drawSimpleLeg(ctx, legConfig.fl.x, legConfig.fl.y, legConfig.fl.angle, legConfig.fl.extend);
-            // Front right
-            drawSimpleLeg(ctx, legConfig.fr.x, legConfig.fr.y, legConfig.fr.angle, legConfig.fr.extend);
-            // Hind left
-            drawSimpleLeg(ctx, legConfig.hl.x, legConfig.hl.y, legConfig.hl.angle, legConfig.hl.extend);
-            // Hind right
-            drawSimpleLeg(ctx, legConfig.hr.x, legConfig.hr.y, legConfig.hr.angle, legConfig.hr.extend);
-        }
-
-        // Simplified leg drawing - clean lines with joints
-        function drawSimpleLeg(ctx, x, y, angle, extendDist) {
             ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(angle);
+            ctx.translate(config.x, config.y);
 
-            // Leg segments
-            let upper = 35; // Femur/humerus
-            let lower = 38; // Tibia/radius-ulna
-            let cannon = 45; // Metacarpal/metatarsal
+            let isHind = config.type === 'hind';
+            let phase = config.phase || 0;
+            let weight = config.weight || 0;
 
-            // Calculate joint positions based on extension
-            let kneeX = extendDist * 0.4;
-            let kneeY = upper;
-            let ankleX = extendDist * 0.6;
-            let ankleY = upper + lower;
-            let hoofX = extendDist;
-            let hoofY = upper + lower + cannon;
+            // Joint angles change through stride
+            let upperAngle, lowerAngle, cannonAngle;
 
-            // Draw leg outline
-            ctx.moveTo(-3, 0); // Top of leg (attachment point)
-            ctx.lineTo(kneeX - 2, kneeY); // To knee/elbow
-            ctx.lineTo(ankleX - 1.5, ankleY); // To ankle/fetlock
-            ctx.lineTo(hoofX - 1, hoofY); // To hoof top
-            ctx.lineTo(hoofX + 1, hoofY + 8); // Hoof bottom
-            ctx.lineTo(hoofX + 3, hoofY + 8); // Hoof back bottom
-            ctx.lineTo(hoofX + 3, hoofY); // Hoof back top
-            ctx.lineTo(ankleX + 1.5, ankleY); // Back up
-            ctx.lineTo(kneeX + 2, kneeY);
-            ctx.lineTo(3, 0);
+            if (isHind) {
+                // Hind leg - more angulated, provides propulsion
+                if (phase < 0.3) { // Gathered/lifting
+                    upperAngle = -0.3; lowerAngle = 0.8; cannonAngle = 0.4;
+                } else if (phase < 0.7) { // Extended/pushing
+                    upperAngle = 0.5; lowerAngle = -0.2; cannonAngle = -0.1;
+                } else { // Returning
+                    upperAngle = 0.2; lowerAngle = 0.5; cannonAngle = 0.3;
+                }
+            } else {
+                // Front leg - straighter, weight bearing
+                if (phase < 0.3) { // Gathered
+                    upperAngle = -0.4; lowerAngle = 0.6; cannonAngle = 0.3;
+                } else if (phase < 0.7) { // Extended
+                    upperAngle = 0.3; lowerAngle = -0.1; cannonAngle = 0;
+                } else { // Returning
+                    upperAngle = 0; lowerAngle = 0.4; cannonAngle = 0.2;
+                }
+            }
+
+            // Muscle bulge when weight-bearing
+            let muscleBulge = weight * 3;
+
+            // Upper segment (femur/humerus)
+            let upperLen = isHind ? 40 : 38;
+            let upperX = Math.sin(upperAngle) * upperLen;
+            let upperY = Math.cos(upperAngle) * upperLen;
+
+            ctx.moveTo(-3, 0);
+            ctx.quadraticCurveTo(
+                upperX * 0.3 - 4 - muscleBulge,
+                upperY * 0.3,
+                upperX - 3,
+                upperY
+            );
+
+            // Lower segment (tibia/radius)
+            let lowerLen = isHind ? 42 : 40;
+            let lowerX = upperX + Math.sin(upperAngle + lowerAngle) * lowerLen;
+            let lowerY = upperY + Math.cos(upperAngle + lowerAngle) * lowerLen;
+
+            ctx.lineTo(lowerX - 2, lowerY);
+
+            // Cannon (metacarpal/metatarsal)
+            let cannonLen = 48;
+            let cannonX = lowerX + Math.sin(upperAngle + lowerAngle + cannonAngle) * cannonLen;
+            let cannonY = lowerY + Math.cos(upperAngle + lowerAngle + cannonAngle) * cannonLen;
+
+            ctx.lineTo(cannonX - 1, cannonY);
+
+            // Hoof
+            ctx.lineTo(cannonX + 1, cannonY + 10);
+            ctx.lineTo(cannonX + 5, cannonY + 10);
+            ctx.lineTo(cannonX + 5, cannonY);
+
+            // Back of leg - shows tendons
+            ctx.lineTo(lowerX + 4, lowerY);
+            ctx.quadraticCurveTo(
+                upperX * 0.7 + 5,
+                upperY * 0.7,
+                upperX + 4,
+                upperY
+            );
+            ctx.quadraticCurveTo(
+                upperX * 0.3 + 3 + muscleBulge,
+                upperY * 0.3,
+                3,
+                0
+            );
             ctx.closePath();
 
             ctx.restore();
         }
 
+        // Master drawing function
+        function drawArtisticHorse(ctx, bodyConfig, legs) {
+            ctx.beginPath();
+            drawArticulatedBody(ctx, bodyConfig);
+
+            // Draw legs with proper layering (back legs first)
+            drawAnatomicalLeg(ctx, legs.hr);
+            drawAnatomicalLeg(ctx, legs.hl);
+            drawAnatomicalLeg(ctx, legs.fr);
+            drawAnatomicalLeg(ctx, legs.fl);
+        }
+
 
 function drawHorse0(ctx) {
-    // Frame 0: Right hind leg pushing off
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.3, extend: 15}, // Front left lifting
-        fr: {x: 195, y: 100, angle: -0.1, extend: 8}, // Front right tucked
-        hl: {x: 65, y: 95, angle: 0.4, extend: 35}, // Hind left extended back (pushing)
-        hr: {x: 75, y: 95, angle: 0.2, extend: 25} // Hind right mid-push
-    });
+    // Frame 0: Right hind pushing off - body compressing, gathering power
+    drawArtisticHorse(ctx,
+        {compression: 0.4, headAngle: 0.1, neckArch: 0.6, tailAngle: 0.3},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.25, weight: 0.1}, // Lifting
+            fr: {x: 227, y: 126, type: 'front', phase: 0.15, weight: 0.05}, // Gathered
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.65, weight: 0.2}, // Extended, pushing
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.55, weight: 0.8} // Weight-bearing, pushing
+        }
+    );
 }
 
 function drawHorse1(ctx) {
-    // Frame 1: Hind legs extending, front gathering
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.4, extend: 20}, // Front left forward
-        fr: {x: 195, y: 100, angle: -0.2, extend: 12}, // Front right lifting
-        hl: {x: 65, y: 95, angle: 0.5, extend: 40}, // Hind left fully extended
-        hr: {x: 75, y: 95, angle: 0.3, extend: 30} // Hind right extending
-    });
+    // Frame 1: Both hinds pushing, body extending forward
+    drawArtisticHorse(ctx,
+        {compression: 0.3, headAngle: 0.15, neckArch: 0.65, tailAngle: 0.4},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.3, weight: 0.15},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.2, weight: 0.1},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.7, weight: 0.25},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.6, weight: 0.9}
+        }
+    );
 }
 
 function drawHorse2(ctx) {
-    // Frame 2: Front legs reaching forward, hind leaving ground
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.5, extend: 30}, // Front left extending forward
-        fr: {x: 195, y: 100, angle: -0.4, extend: 25}, // Front right reaching
-        hl: {x: 65, y: 95, angle: 0.3, extend: 20}, // Hind left lifting
-        hr: {x: 75, y: 95, angle: 0.2, extend: 15} // Hind right tucking
-    });
+    // Frame 2: Hinds leaving ground, front legs reaching
+    drawArtisticHorse(ctx,
+        {compression: 0.15, headAngle: 0.2, neckArch: 0.7, tailAngle: 0.5},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.45, weight: 0.3},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.35, weight: 0.25},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.75, weight: 0.05},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.7, weight: 0.1}
+        }
+    );
 }
 
 function drawHorse3(ctx) {
-    // Frame 3: Front legs extended forward, hind gathering
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.6, extend: 38}, // Front left fully forward
-        fr: {x: 195, y: 100, angle: -0.5, extend: 35}, // Front right extended
-        hl: {x: 65, y: 95, angle: 0, extend: 5}, // Hind left gathered
-        hr: {x: 75, y: 95, angle: 0.1, extend: 8} // Hind right gathering
-    });
+    // Frame 3: Front legs extended, body elongating
+    drawArtisticHorse(ctx,
+        {compression: 0.05, headAngle: 0.25, neckArch: 0.75, tailAngle: 0.6},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.55, weight: 0.5},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.5, weight: 0.45},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.9, weight: 0},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.85, weight: 0}
+        }
+    );
 }
 
 function drawHorse4(ctx) {
     // Frame 4: SUSPENSION - all legs gathered (Muybridge's discovery!)
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.4, extend: 18}, // All legs tucked
-        fr: {x: 195, y: 100, angle: -0.3, extend: 15}, // under body
-        hl: {x: 65, y: 95, angle: 0, extend: 10}, // Not extended
-        hr: {x: 75, y: 95, angle: 0.1, extend: 12} // but gathered!
-    });
+    drawArtisticHorse(ctx,
+        {compression: 0.7, headAngle: 0.3, neckArch: 0.8, tailAngle: 0.7},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.15, weight: 0},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.1, weight: 0},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.1, weight: 0},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.15, weight: 0}
+        }
+    );
 }
 
 function drawHorse5(ctx) {
-    // Frame 5: Front legs beginning to extend down
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.5, extend: 30}, // Front left extending
-        fr: {x: 195, y: 100, angle: -0.4, extend: 28}, // Front right reaching
-        hl: {x: 65, y: 95, angle: 0.1, extend: 10}, // Hind still gathered
-        hr: {x: 75, y: 95, angle: 0.2, extend: 12} // Hind gathering
-    });
+    // Frame 5: Front legs extending downward
+    drawArtisticHorse(ctx,
+        {compression: 0.5, headAngle: 0.25, neckArch: 0.75, tailAngle: 0.65},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.5, weight: 0.1},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.45, weight: 0.05},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.2, weight: 0},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.25, weight: 0}
+        }
+    );
 }
 
 function drawHorse6(ctx) {
-    // Frame 6: Front left touching down
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.6, extend: 40}, // Front left on ground
-        fr: {x: 195, y: 100, angle: -0.5, extend: 35}, // Front right extending
-        hl: {x: 65, y: 95, angle: 0.2, extend: 15}, // Hind left coming forward
-        hr: {x: 75, y: 95, angle: 0.3, extend: 18} // Hind right forward
-    });
+    // Frame 6: Front left landing, taking weight
+    drawArtisticHorse(ctx,
+        {compression: 0.3, headAngle: 0.2, neckArch: 0.7, tailAngle: 0.6},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.65, weight: 0.7},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.6, weight: 0.5},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.3, weight: 0},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.35, weight: 0}
+        }
+    );
 }
 
 function drawHorse7(ctx) {
-    // Frame 7: Weight on front legs, hind legs swinging forward
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.7, extend: 45}, // Front left supporting
-        fr: {x: 195, y: 100, angle: -0.6, extend: 42}, // Front right supporting
-        hl: {x: 65, y: 95, angle: 0.3, extend: 22}, // Hind left swinging under
-        hr: {x: 75, y: 95, angle: 0.4, extend: 25} // Hind right swinging
-    });
+    // Frame 7: Weight on front legs, hind swinging forward
+    drawArtisticHorse(ctx,
+        {compression: 0.15, headAngle: 0.15, neckArch: 0.65, tailAngle: 0.5},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.7, weight: 0.9},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.65, weight: 0.85},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.4, weight: 0},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.45, weight: 0}
+        }
+    );
 }
 
 function drawHorse8(ctx) {
     // Frame 8: Hind legs coming under body
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.6, extend: 40}, // Front left weight-bearing
-        fr: {x: 195, y: 100, angle: -0.5, extend: 38}, // Front right bearing
-        hl: {x: 65, y: 95, angle: 0.4, extend: 28}, // Hind left under body
-        hr: {x: 75, y: 95, angle: 0.5, extend: 30} // Hind right under
-    });
+    drawArtisticHorse(ctx,
+        {compression: 0.1, headAngle: 0.1, neckArch: 0.6, tailAngle: 0.4},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.65, weight: 0.8},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.6, weight: 0.75},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.5, weight: 0.1},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.55, weight: 0.15}
+        }
+    );
 }
 
 function drawHorse9(ctx) {
-    // Frame 9: Hind legs preparing to take weight
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.4, extend: 28}, // Front left lifting
-        fr: {x: 195, y: 100, angle: -0.3, extend: 25}, // Front right lifting
-        hl: {x: 65, y: 95, angle: 0.5, extend: 35}, // Hind left ready
-        hr: {x: 75, y: 95, angle: 0.6, extend: 38} // Hind right ready
-    });
+    // Frame 9: Hind legs approaching ground
+    drawArtisticHorse(ctx,
+        {compression: 0.2, headAngle: 0.05, neckArch: 0.55, tailAngle: 0.3},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.5, weight: 0.6},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.45, weight: 0.55},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.6, weight: 0.3},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.65, weight: 0.35}
+        }
+    );
 }
 
 function drawHorse10(ctx) {
-    // Frame 10: Weight transferring to hind
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.2, extend: 15}, // Front left off ground
-        fr: {x: 195, y: 100, angle: -0.1, extend: 12}, // Front right lifting
-        hl: {x: 65, y: 95, angle: 0.6, extend: 42}, // Hind left bearing weight
-        hr: {x: 75, y: 95, angle: 0.7, extend: 45} // Hind right bearing
-    });
+    // Frame 10: Weight transferring to hind legs
+    drawArtisticHorse(ctx,
+        {compression: 0.35, headAngle: 0, neckArch: 0.5, tailAngle: 0.25},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.3, weight: 0.3},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.25, weight: 0.25},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.7, weight: 0.7},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.75, weight: 0.75}
+        }
+    );
 }
 
 function drawHorse11(ctx) {
-    // Frame 11: Hind legs supporting, front legs gathering
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: 0, extend: 8}, // Front left tucked
-        fr: {x: 195, y: 100, angle: 0.1, extend: 10}, // Front right gathered
-        hl: {x: 65, y: 95, angle: 0.6, extend: 40}, // Hind left supporting
-        hr: {x: 75, y: 95, angle: 0.6, extend: 42} // Hind right supporting
-    });
+    // Frame 11: Hind legs supporting, front gathering
+    drawArtisticHorse(ctx,
+        {compression: 0.5, headAngle: -0.05, neckArch: 0.45, tailAngle: 0.2},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.15, weight: 0.1},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.1, weight: 0.05},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.65, weight: 0.9},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.65, weight: 0.95}
+        }
+    );
 }
 
 function drawHorse12(ctx) {
-    // Frame 12: Hind pushing off, front reaching
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.3, extend: 18}, // Front left forward
-        fr: {x: 195, y: 100, angle: -0.2, extend: 15}, // Front right reaching
-        hl: {x: 65, y: 95, angle: 0.5, extend: 38}, // Hind left pushing
-        hr: {x: 75, y: 95, angle: 0.4, extend: 35} // Hind right extending
-    });
+    // Frame 12: Hind pushing off powerfully
+    drawArtisticHorse(ctx,
+        {compression: 0.45, headAngle: 0, neckArch: 0.55, tailAngle: 0.3},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.25, weight: 0.15},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.2, weight: 0.1},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.6, weight: 0.85},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.55, weight: 0.8}
+        }
+    );
 }
 
 function drawHorse13(ctx) {
-    // Frame 13: Powerful hind push, front extending
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.4, extend: 25}, // Front left extending
-        fr: {x: 195, y: 100, angle: -0.3, extend: 22}, // Front right reaching
-        hl: {x: 65, y: 95, angle: 0.4, extend: 35}, // Hind left push-off
-        hr: {x: 75, y: 95, angle: 0.3, extend: 30} // Hind right extending
-    });
+    // Frame 13: Maximum extension beginning
+    drawArtisticHorse(ctx,
+        {compression: 0.35, headAngle: 0.05, neckArch: 0.6, tailAngle: 0.35},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.35, weight: 0.2},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.3, weight: 0.15},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.65, weight: 0.7},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.6, weight: 0.75}
+        }
+    );
 }
 
 function drawHorse14(ctx) {
-    // Frame 14: Transition phase
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.4, extend: 22}, // Front legs moving
-        fr: {x: 195, y: 100, angle: -0.2, extend: 18}, // forward
-        hl: {x: 65, y: 95, angle: 0.3, extend: 28}, // Hind legs
-        hr: {x: 75, y: 95, angle: 0.2, extend: 25} // following through
-    });
+    // Frame 14: Transition - preparing for next cycle
+    drawArtisticHorse(ctx,
+        {compression: 0.4, headAngle: 0.08, neckArch: 0.58, tailAngle: 0.32},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.28, weight: 0.12},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.22, weight: 0.08},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.62, weight: 0.6},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.57, weight: 0.65}
+        }
+    );
 }
 
 function drawHorse15(ctx) {
-    // Frame 15: Completing cycle, returning to start
-    drawDetailedHorse(ctx, {
-        fl: {x: 185, y: 100, angle: -0.3, extend: 18}, // Front left
-        fr: {x: 195, y: 100, angle: -0.2, extend: 15}, // Front right
-        hl: {x: 65, y: 95, angle: 0.3, extend: 30}, // Hind left
-        hr: {x: 75, y: 95, angle: 0.2, extend: 28} // Hind right - back to frame 0
-    });
+    // Frame 15: Completing cycle, flowing back to frame 0
+    drawArtisticHorse(ctx,
+        {compression: 0.42, headAngle: 0.1, neckArch: 0.6, tailAngle: 0.3},
+        {
+            fl: {x: 220, y: 126, type: 'front', phase: 0.26, weight: 0.1},
+            fr: {x: 227, y: 126, type: 'front', phase: 0.18, weight: 0.06},
+            hl: {x: 62, y: 120, type: 'hind', phase: 0.64, weight: 0.25},
+            hr: {x: 70, y: 120, type: 'hind', phase: 0.56, weight: 0.75}
+        }
+    );
 }
 
         // Create array of all horse drawing functions
@@ -618,10 +780,10 @@ function drawHorse15(ctx) {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Draw single horse centered and large
-            // New horse is ~250 units wide, ~200 units tall (including legs)
-            const scale = 3.2; // Scale up for canvas
-            const offsetX = canvas.width / 2 - 135 * scale; // Horse center at X=135
-            const offsetY = canvas.height / 2 - 115 * scale; // Horse center at Y=115
+            // Artistic horse is ~226 units wide, ~210 units tall (including legs)
+            const scale = 3.5; // Scale up for canvas
+            const offsetX = canvas.width / 2 - 157 * scale; // Horse center at X=157
+            const offsetY = canvas.height / 2 - 125 * scale; // Horse center at Y=125
 
             horseFrames[currentFrame](ctx, scale, offsetX, offsetY);
 
@@ -640,13 +802,13 @@ function drawHorse15(ctx) {
             const rows = 4;
             const cellWidth = canvas.width / cols;
             const cellHeight = canvas.height / rows;
-            const scale = 0.9; // Smaller scale for grid view
+            const scale = 0.85; // Scale for grid view
 
             for (let i = 0; i < 16; i++) {
                 const col = i % cols;
                 const row = Math.floor(i / cols);
-                const x = col * cellWidth + cellWidth / 2 - 135 * scale; // New horse center
-                const y = row * cellHeight + cellHeight / 2 - 115 * scale;
+                const x = col * cellWidth + cellWidth / 2 - 157 * scale; // Artistic horse center
+                const y = row * cellHeight + cellHeight / 2 - 125 * scale;
 
                 // Highlight current frame
                 if (i === currentFrame && isPlaying) {
@@ -672,9 +834,9 @@ function drawHorse15(ctx) {
             ctx.rect(0, 0, canvas.width, canvas.height / 2);
             ctx.clip();
 
-            const scale1 = 2.4; // Updated for new horse size
-            const offsetX1 = canvas.width / 2 - 135 * scale1;
-            const offsetY1 = canvas.height / 4 - 115 * scale1;
+            const scale1 = 2.6; // Artistic horse size
+            const offsetX1 = canvas.width / 2 - 157 * scale1;
+            const offsetY1 = canvas.height / 4 - 125 * scale1;
             horseFrames[currentFrame](ctx, scale1, offsetX1, offsetY1);
 
             ctx.restore();
@@ -692,13 +854,13 @@ function drawHorse15(ctx) {
             const rows = 2;
             const cellWidth = canvas.width / cols;
             const cellHeight = (canvas.height / 2) / rows;
-            const scale2 = 0.5; // Smaller for 8x2 grid
+            const scale2 = 0.48; // Small scale for 8x2 grid
 
             for (let i = 0; i < 16; i++) {
                 const col = i % cols;
                 const row = Math.floor(i / cols);
-                const x = col * cellWidth + cellWidth / 2 - 135 * scale2; // New horse center
-                const y = canvas.height / 2 + row * cellHeight + cellHeight / 2 - 115 * scale2;
+                const x = col * cellWidth + cellWidth / 2 - 157 * scale2; // Artistic horse center
+                const y = canvas.height / 2 + row * cellHeight + cellHeight / 2 - 125 * scale2;
 
                 // Highlight current frame
                 if (i === currentFrame) {

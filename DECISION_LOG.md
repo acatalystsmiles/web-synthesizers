@@ -444,3 +444,131 @@ Created intelligent, reusable system instead of hand-coding each frame:
 - Hybrid mode: top scale 2.4× (was 2.8×), bottom scale 0.5× (was 0.7×)
 
 **Result**: Horses now look like REAL horses with proper anatomy, recognizable silhouettes, and scientifically accurate gallop mechanics matching Muybridge's groundbreaking 1878 discovery!
+
+---
+
+## VERSION 3.0 UPDATES - COLLEGIATE-LEVEL ARTISTRY (2025-11-12)
+
+### COMPLETE ARTISTIC REDESIGN: From 4th Grade to Collegiate Level
+
+**Problem**: Version 2.0 horses were better but still too simplistic - "went from Kindergarten to 4th grade" but needed "collegiate level artistry."
+
+**Goal**: Create horses that show every bend, muscle, and anatomical detail like a curious art student spending time to articulate each frame.
+
+**Enhanced Research**:
+1. **Muscle Anatomy Study**:
+   - Discovered major visible muscle groups: shoulder mass, hindquarter power, neck crest
+   - Forelimbs are pillar-like for weight-bearing vs. hindlimbs which are angulated for propulsion
+   - Muscle bulges visible when weight-bearing
+
+2. **Biomechanics Deep Dive**:
+   - Spine FLEXES significantly during gallop - body shortens when compressed, extends when reaching
+   - Stance phase vs. swing phase: compression forces affect leg appearance
+   - Division of labor: forelimbs bear weight, hindlimbs generate propulsion
+
+3. **Gallop Mechanics Details**:
+   - Body compression creates visible back arch
+   - Head position changes with balance through stride
+   - Tail reflects momentum at each phase
+   - Each joint angle is unique to stride phase and weight distribution
+
+**Solution - Advanced Articulated System**:
+
+Created a sophisticated parametric system capable of collegiate-level anatomical art:
+
+#### 1. **`drawArticulatedBody(config)`** - Dynamic body with visible anatomy
+**Parameters**: `{compression, headAngle, neckArch, tailAngle}`
+
+**Features**:
+- **Body compression**: 0 (extended) to 1 (gathered)
+  - Body length changes: 130 - (compression × 15) units
+  - Back arches more when compressed: `backArch = compression × 4`
+- **Hindquarters**: Rounded, powerful muscle mass (croup, point of hip)
+- **Back/Loin**: Spine curvature shows with bezier curves responding to compression
+- **Withers**: Prominent highest point
+- **Shoulder**: Large muscle bulge visible - rotates through stride
+- **Chest**: Deep, powerful - changes with breathing/effort
+- **Neck**: Arched crest, responds to head angle dynamically
+- **Head**: Detailed muzzle, jaw, throatlatch, forehead
+- **Ear**: Alert, points forward
+- **Tail**: Flows with momentum, position reflects stride phase
+
+#### 2. **`drawAnatomicalLeg(config)`** - Sophisticated leg system
+**Parameters**: `{x, y, type, phase, weight}`
+- **type**: 'front' (straighter, weight-bearing) or 'hind' (angulated, propulsion)
+- **phase**: 0-1 through stride cycle (determines joint angles)
+- **weight**: 0-1 (0=swinging, 1=full weight-bearing)
+
+**Anatomical Features**:
+- Three segments with proper lengths:
+  - Upper: 40 units (hind) / 38 units (front) - femur/humerus
+  - Lower: 42 units (hind) / 40 units (front) - tibia/radius
+  - Cannon: 48 units - metacarpal/metatarsal
+- **Joint angles change through stride**:
+  - Gathered (phase 0-0.3): Bent, tucked under body
+  - Extended (phase 0.4-0.7): Reaching, straightening
+  - Returning (phase 0.8-1.0): Coming back, flexing
+- **Muscle bulge**: `muscleBulge = weight × 3`
+  - Visible thickening when bearing weight
+  - Shows muscle engagement
+- **Proper angulation**:
+  - Hind legs: More angular, powerful curves for propulsion
+  - Front legs: Straighter, pillar-like for support
+
+#### 3. **`drawArtisticHorse(bodyConfig, legs)`** - Master assembly
+Combines articulated body with four independently configured legs:
+- Proper layering (back legs drawn first, then front)
+- Each frame specifies unique parameters
+
+#### 4. **16 Frames - Hand-Configured with Artistic Precision**
+
+Each frame carefully crafted with attention to biomechanics:
+
+| Frame | Phase | Compression | Head Angle | Tail | Key Features |
+|-------|-------|-------------|------------|------|--------------|
+| 0 | Right hind pushing | 0.4 | 0.1 | 0.3 | Weight on right hind, power gathering |
+| 1 | Both hinds pushing | 0.3 | 0.15 | 0.4 | Body extending forward |
+| 2 | Hinds leaving ground | 0.15 | 0.2 | 0.5 | Front legs reaching |
+| 3 | Front extended | 0.05 | 0.25 | 0.6 | Body maximum elongation |
+| 4 | **SUSPENSION** | **0.7** | 0.3 | 0.7 | **All legs gathered - Muybridge's discovery!** |
+| 5 | Front extending down | 0.5 | 0.25 | 0.65 | Preparing to land |
+| 6 | Front landing | 0.3 | 0.2 | 0.6 | Taking weight |
+| 7 | Weight on front | 0.15 | 0.15 | 0.5 | Hinds swinging forward |
+| 8 | Hinds coming under | 0.1 | 0.1 | 0.4 | Transitioning weight |
+| 9 | Hinds approaching | 0.2 | 0.05 | 0.3 | Preparing to take weight |
+| 10 | Weight to hind | 0.35 | 0 | 0.25 | Front lifting |
+| 11 | Hinds supporting | 0.5 | -0.05 | 0.2 | Front gathered |
+| 12 | Hind pushing | 0.45 | 0 | 0.3 | Power phase |
+| 13 | Extension beginning | 0.35 | 0.05 | 0.35 | Building momentum |
+| 14 | Transition | 0.4 | 0.08 | 0.32 | Preparing for cycle |
+| 15 | Completing cycle | 0.42 | 0.1 | 0.3 | Flowing back to frame 0 |
+
+**Artistic Attention to Detail**:
+- Head angle shifts with balance (0.3 during suspension to -0.05 when hinds support)
+- Neck arch varies with head position and effort (0.45 to 0.8)
+- Tail angle reflects momentum (0.2 when compressed to 0.7 during suspension)
+- Each leg's phase and weight carefully calibrated for that stride moment
+- Visible muscle engagement when legs bear weight
+
+**Technical Implementation**:
+- Sophisticated bezier curves for all body parts
+- Quadratic curves for muscle bulges
+- Parametric joint angle calculations
+- Weight-dependent rendering (thicker when bearing load)
+- Layered drawing for proper depth
+
+**Scaling Updates** (Version 3.0):
+- Horse dimensions: ~226 units wide × ~210 units tall (with legs)
+- Center point: X=157, Y=125
+- Animated mode: 3.5× scale
+- Grid mode: 0.85× scale
+- Hybrid mode: top 2.6×, bottom 0.48×
+
+**Result**: COLLEGIATE-LEVEL ARTISTRY! Horses now show:
+- Visible muscle definition in silhouette
+- Proper spine flexion and body compression
+- Anatomically accurate joint angles that change realistically
+- Weight distribution affecting posture and muscle engagement
+- Head/neck balance responding to momentum
+- Tail movement reflecting each phase
+- Every bend and articulation a serious art student would notice
