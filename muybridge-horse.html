@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muybridge Horse - Galloping Study (1878)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #2a2520;
+            color: #e8dcc8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 1200px;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .title h1 {
+            font-size: 24px;
+            font-weight: normal;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .title p {
+            font-size: 12px;
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        .canvas-wrapper {
+            background: #f4ead5;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        /* Film strip sprocket holes */
+        .canvas-wrapper::before,
+        .canvas-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 50px;
+            bottom: 50px;
+            width: 15px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 10px,
+                #2a2520 10px,
+                #2a2520 20px
+            );
+        }
+
+        .canvas-wrapper::before {
+            left: 10px;
+        }
+
+        .canvas-wrapper::after {
+            right: 10px;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 10px;
+            background: #f4ead5;
+        }
+
+        .controls {
+            background: rgba(244, 234, 213, 0.1);
+            padding: 20px 30px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 500px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        button {
+            background: #e8dcc8;
+            color: #2a2520;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #d4c7b0;
+            transform: translateY(-1px);
+        }
+
+        button.active {
+            background: #8b7355;
+            color: #f4ead5;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .info {
+            font-size: 11px;
+            opacity: 0.6;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .fps-display {
+            font-size: 12px;
+            min-width: 60px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .control-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h1>THE HORSE IN MOTION</h1>
+            <p>After Eadweard Muybridge, 1878</p>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="canvas" width="1080" height="1080"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>View Mode:</label>
+                <div class="button-group">
+                    <button id="modeAnimated" class="active">Animated</button>
+                    <button id="modeGrid">Grid</button>
+                    <button id="modeHybrid">Hybrid</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Playback:</label>
+                <div class="button-group">
+                    <button id="playPause">Pause</button>
+                    <button id="prevFrame">← Prev</button>
+                    <button id="nextFrame">Next →</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Speed (FPS):</label>
+                <input type="range" id="fpsSlider" min="2" max="24" value="12" step="1">
+                <span class="fps-display" id="fpsDisplay">12 FPS</span>
+            </div>
+
+            <div class="control-group">
+                <button id="fullscreen">Enter Fullscreen</button>
+            </div>
+        </div>
+
+        <div class="info">
+            Keyboard: [SPACE] Play/Pause • [1] Animated • [2] Grid • [3] Hybrid • [←/→] Navigate Frames • [F] Fullscreen
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // MUYBRIDGE HORSE ANIMATION
+        // Decision Log embedded in code comments
+        // ============================================
+
+        // DECISION: Canvas resolution set to 1080x1080
+        // RATIONALE: Largest square that fits within 1920x1080 target resolution.
+        //            Square format honors the film frame aesthetic and works well
+        //            for exhibition display centered on standard screens.
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // DECISION: 16 frames for complete gallop cycle
+        // RATIONALE: Muybridge's original studies used 12-16 frames. 16 provides
+        //            smooth motion while maintaining the sequential study aesthetic.
+        //            Each frame represents approximately 1/16 of a second at gallop speed.
+
+        // Animation state
+        let currentFrame = 0;
+        let isPlaying = true;
+        let fps = 12;
+        let mode = 'animated'; // 'animated', 'grid', or 'hybrid'
+        let lastFrameTime = 0;
+
+        // DECISION: Horse silhouettes coded as simplified vector paths
+        // RATIONALE: Each frame hand-coded as path coordinates representing
+        //            key positions in the gallop cycle. Silhouette style matches
+        //            Muybridge's high-contrast photography aesthetic.
+        //
+        // Gallop cycle phases:
+        // Frames 0-3: Gathered/compression phase
+        // Frames 4-7: Extension phase (including "floating" moment)
+        // Frames 8-11: Mid-stride phase
+        // Frames 12-15: Recovery/gathering phase
+
+        function createHorseFrame(frameIndex) {
+            // Returns a function that draws the horse for this frame
+            // Each horse is designed to fit in a normalized coordinate space
+            // that will be scaled to fit the canvas
+
+            return function(ctx, scale, offsetX, offsetY) {
+                ctx.save();
+                ctx.translate(offsetX, offsetY);
+                ctx.scale(scale, scale);
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+
+                // Base coordinates for a horse ~200 units wide, ~120 units tall
+                switch(frameIndex) {
+                    case 0: // Gathered position - all legs under body
+                        drawHorse0(ctx);
+                        break;
+                    case 1: // Starting to extend front
+                        drawHorse1(ctx);
+                        break;
+                    case 2: // Front legs extending forward
+                        drawHorse2(ctx);
+                        break;
+                    case 3: // Front extended, back gathering
+                        drawHorse3(ctx);
+                        break;
+                    case 4: // Front touching down, back extending
+                        drawHorse4(ctx);
+                        break;
+                    case 5: // Weight on front, back extending
+                        drawHorse5(ctx);
+                        break;
+                    case 6: // Mid extension
+                        drawHorse6(ctx);
+                        break;
+                    case 7: // All legs extended - "floating" phase
+                        drawHorse7(ctx);
+                        break;
+                    case 8: // Back legs forward, front lifting
+                        drawHorse8(ctx);
+                        break;
+                    case 9: // Back legs under, front legs gathering
+                        drawHorse9(ctx);
+                        break;
+                    case 10: // Back supporting, front gathering
+                        drawHorse10(ctx);
+                        break;
+                    case 11: // Weight on back, front extending
+                        drawHorse11(ctx);
+                        break;
+                    case 12: // Back pushing off, front reaching
+                        drawHorse12(ctx);
+                        break;
+                    case 13: // Extension phase beginning
+                        drawHorse13(ctx);
+                        break;
+                    case 14: // All legs gathering
+                        drawHorse14(ctx);
+                        break;
+                    case 15: // Return to gathered position
+                        drawHorse15(ctx);
+                        break;
+                }
+
+                ctx.fill();
+                ctx.restore();
+            };
+        }
+
+        // Simplified horse silhouettes for each frame
+        // Using path drawing for basic horse shape with varying leg positions
+
+        function drawHorse0(ctx) {
+            // Frame 0: Gathered position
+            // Body
+            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
+            // Head/neck
+            ctx.moveTo(140, 50);
+            ctx.lineTo(165, 30);
+            ctx.lineTo(175, 35);
+            ctx.lineTo(170, 45);
+            ctx.lineTo(155, 55);
+            ctx.lineTo(145, 55);
+            // Legs - all under body
+            // Front left
+            ctx.moveTo(120, 85);
+            ctx.lineTo(118, 110);
+            ctx.lineTo(123, 110);
+            ctx.lineTo(125, 85);
+            // Front right
+            ctx.moveTo(115, 85);
+            ctx.lineTo(113, 105);
+            ctx.lineTo(118, 105);
+            ctx.lineTo(120, 85);
+            // Back left
+            ctx.moveTo(75, 85);
+            ctx.lineTo(73, 108);
+            ctx.lineTo(78, 108);
+            ctx.lineTo(80, 85);
+            // Back right
+            ctx.moveTo(70, 85);
+            ctx.lineTo(68, 105);
+            ctx.lineTo(73, 105);
+            ctx.lineTo(75, 85);
+            // Tail
+            ctx.moveTo(55, 65);
+            ctx.quadraticCurveTo(35, 70, 30, 85);
+        }
+
+        function drawHorse1(ctx) {
+            // Frame 1: Starting to extend front
+            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 50);
+            ctx.lineTo(168, 28);
+            ctx.lineTo(178, 33);
+            ctx.lineTo(172, 43);
+            ctx.lineTo(157, 53);
+            ctx.lineTo(145, 55);
+            // Front left extending
+            ctx.moveTo(120, 85);
+            ctx.lineTo(130, 108);
+            ctx.lineTo(135, 107);
+            ctx.lineTo(125, 85);
+            // Front right
+            ctx.moveTo(115, 85);
+            ctx.lineTo(120, 105);
+            ctx.lineTo(125, 104);
+            ctx.lineTo(120, 85);
+            // Back legs pushing
+            ctx.moveTo(75, 85);
+            ctx.lineTo(70, 110);
+            ctx.lineTo(75, 110);
+            ctx.lineTo(80, 85);
+            ctx.moveTo(70, 85);
+            ctx.lineTo(65, 108);
+            ctx.lineTo(70, 108);
+            ctx.lineTo(75, 85);
+            ctx.moveTo(55, 65);
+            ctx.quadraticCurveTo(33, 68, 28, 80);
+        }
+
+        function drawHorse2(ctx) {
+            // Frame 2: Front legs extending forward
+            ctx.ellipse(100, 58, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 48);
+            ctx.lineTo(170, 26);
+            ctx.lineTo(180, 31);
+            ctx.lineTo(174, 41);
+            ctx.lineTo(158, 51);
+            ctx.lineTo(145, 53);
+            // Front legs extended
+            ctx.moveTo(120, 83);
+            ctx.lineTo(140, 105);
+            ctx.lineTo(145, 104);
+            ctx.lineTo(125, 83);
+            ctx.moveTo(115, 83);
+            ctx.lineTo(135, 100);
+            ctx.lineTo(140, 99);
+            ctx.lineTo(120, 83);
+            // Back legs compressed
+            ctx.moveTo(72, 85);
+            ctx.lineTo(65, 112);
+            ctx.lineTo(70, 112);
+            ctx.lineTo(77, 85);
+            ctx.moveTo(67, 85);
+            ctx.lineTo(60, 110);
+            ctx.lineTo(65, 110);
+            ctx.lineTo(72, 85);
+            ctx.moveTo(55, 63);
+            ctx.quadraticCurveTo(30, 65, 25, 75);
+        }
+
+        function drawHorse3(ctx) {
+            // Frame 3: Front extended, back starting to extend
+            ctx.ellipse(100, 56, 50, 30, -0.1, 0, Math.PI * 2);
+            ctx.moveTo(140, 46);
+            ctx.lineTo(172, 24);
+            ctx.lineTo(182, 29);
+            ctx.lineTo(176, 39);
+            ctx.lineTo(159, 49);
+            ctx.lineTo(145, 51);
+            // Front legs touching ground
+            ctx.moveTo(122, 81);
+            ctx.lineTo(145, 100);
+            ctx.lineTo(150, 100);
+            ctx.lineTo(127, 81);
+            ctx.moveTo(117, 81);
+            ctx.lineTo(140, 96);
+            ctx.lineTo(145, 96);
+            ctx.lineTo(122, 81);
+            // Back legs extending
+            ctx.moveTo(70, 83);
+            ctx.lineTo(58, 110);
+            ctx.lineTo(63, 111);
+            ctx.lineTo(75, 83);
+            ctx.moveTo(65, 83);
+            ctx.lineTo(53, 108);
+            ctx.lineTo(58, 109);
+            ctx.lineTo(70, 83);
+            ctx.moveTo(55, 61);
+            ctx.quadraticCurveTo(28, 63, 23, 70);
+        }
+
+        function drawHorse4(ctx) {
+            // Frame 4: Weight on front, back extending behind
+            ctx.ellipse(100, 55, 50, 30, -0.15, 0, Math.PI * 2);
+            ctx.moveTo(140, 45);
+            ctx.lineTo(173, 23);
+            ctx.lineTo(183, 28);
+            ctx.lineTo(177, 38);
+            ctx.lineTo(160, 48);
+            ctx.lineTo(145, 50);
+            // Front legs supporting weight
+            ctx.moveTo(123, 80);
+            ctx.lineTo(123, 108);
+            ctx.lineTo(128, 108);
+            ctx.lineTo(128, 80);
+            ctx.moveTo(118, 80);
+            ctx.lineTo(118, 105);
+            ctx.lineTo(123, 105);
+            ctx.lineTo(123, 80);
+            // Back legs extended back
+            ctx.moveTo(68, 82);
+            ctx.lineTo(48, 108);
+            ctx.lineTo(53, 110);
+            ctx.lineTo(73, 82);
+            ctx.moveTo(63, 82);
+            ctx.lineTo(43, 105);
+            ctx.lineTo(48, 107);
+            ctx.lineTo(68, 82);
+            ctx.moveTo(55, 60);
+            ctx.quadraticCurveTo(25, 60, 20, 65);
+        }
+
+        function drawHorse5(ctx) {
+            // Frame 5: Back legs extending further
+            ctx.ellipse(100, 54, 50, 30, -0.15, 0, Math.PI * 2);
+            ctx.moveTo(140, 44);
+            ctx.lineTo(174, 22);
+            ctx.lineTo(184, 27);
+            ctx.lineTo(178, 37);
+            ctx.lineTo(161, 47);
+            ctx.lineTo(145, 49);
+            // Front legs
+            ctx.moveTo(124, 79);
+            ctx.lineTo(128, 107);
+            ctx.lineTo(133, 107);
+            ctx.lineTo(129, 79);
+            ctx.moveTo(119, 79);
+            ctx.lineTo(123, 104);
+            ctx.lineTo(128, 104);
+            ctx.lineTo(124, 79);
+            // Back legs extended
+            ctx.moveTo(66, 81);
+            ctx.lineTo(42, 106);
+            ctx.lineTo(47, 109);
+            ctx.lineTo(71, 81);
+            ctx.moveTo(61, 81);
+            ctx.lineTo(37, 103);
+            ctx.lineTo(42, 106);
+            ctx.lineTo(66, 81);
+            ctx.moveTo(55, 59);
+            ctx.quadraticCurveTo(23, 58, 18, 60);
+        }
+
+        function drawHorse6(ctx) {
+            // Frame 6: Mid extension
+            ctx.ellipse(100, 53, 50, 30, -0.1, 0, Math.PI * 2);
+            ctx.moveTo(140, 43);
+            ctx.lineTo(175, 21);
+            ctx.lineTo(185, 26);
+            ctx.lineTo(179, 36);
+            ctx.lineTo(162, 46);
+            ctx.lineTo(145, 48);
+            // Front legs lifting
+            ctx.moveTo(125, 78);
+            ctx.lineTo(135, 105);
+            ctx.lineTo(140, 104);
+            ctx.lineTo(130, 78);
+            ctx.moveTo(120, 78);
+            ctx.lineTo(130, 102);
+            ctx.lineTo(135, 101);
+            ctx.lineTo(125, 78);
+            // Back legs still extended
+            ctx.moveTo(64, 80);
+            ctx.lineTo(38, 104);
+            ctx.lineTo(43, 107);
+            ctx.lineTo(69, 80);
+            ctx.moveTo(59, 80);
+            ctx.lineTo(33, 101);
+            ctx.lineTo(38, 104);
+            ctx.lineTo(64, 80);
+            ctx.moveTo(55, 58);
+            ctx.quadraticCurveTo(20, 56, 15, 55);
+        }
+
+        function drawHorse7(ctx) {
+            // Frame 7: "Floating" phase - all legs off ground
+            ctx.ellipse(100, 52, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 42);
+            ctx.lineTo(175, 20);
+            ctx.lineTo(185, 25);
+            ctx.lineTo(179, 35);
+            ctx.lineTo(162, 45);
+            ctx.lineTo(145, 47);
+            // All legs tucked/extended
+            ctx.moveTo(126, 77);
+            ctx.lineTo(140, 100);
+            ctx.lineTo(145, 99);
+            ctx.lineTo(131, 77);
+            ctx.moveTo(121, 77);
+            ctx.lineTo(135, 97);
+            ctx.lineTo(140, 96);
+            ctx.lineTo(126, 77);
+            ctx.moveTo(62, 79);
+            ctx.lineTo(36, 100);
+            ctx.lineTo(41, 103);
+            ctx.lineTo(67, 79);
+            ctx.moveTo(57, 79);
+            ctx.lineTo(31, 98);
+            ctx.lineTo(36, 101);
+            ctx.lineTo(62, 79);
+            ctx.moveTo(55, 57);
+            ctx.quadraticCurveTo(18, 54, 12, 50);
+        }
+
+        function drawHorse8(ctx) {
+            // Frame 8: Back legs coming forward
+            ctx.ellipse(100, 53, 50, 30, 0.05, 0, Math.PI * 2);
+            ctx.moveTo(140, 43);
+            ctx.lineTo(174, 21);
+            ctx.lineTo(184, 26);
+            ctx.lineTo(178, 36);
+            ctx.lineTo(161, 46);
+            ctx.lineTo(145, 48);
+            // Front legs extending down
+            ctx.moveTo(127, 78);
+            ctx.lineTo(145, 105);
+            ctx.lineTo(150, 104);
+            ctx.lineTo(132, 78);
+            ctx.moveTo(122, 78);
+            ctx.lineTo(140, 102);
+            ctx.lineTo(145, 101);
+            ctx.lineTo(127, 78);
+            // Back legs coming forward
+            ctx.moveTo(60, 80);
+            ctx.lineTo(50, 108);
+            ctx.lineTo(55, 109);
+            ctx.lineTo(65, 80);
+            ctx.moveTo(55, 80);
+            ctx.lineTo(45, 105);
+            ctx.lineTo(50, 106);
+            ctx.lineTo(60, 80);
+            ctx.moveTo(55, 58);
+            ctx.quadraticCurveTo(20, 56, 15, 55);
+        }
+
+        function drawHorse9(ctx) {
+            // Frame 9: Back legs under body, front legs touching down
+            ctx.ellipse(100, 54, 50, 30, 0.1, 0, Math.PI * 2);
+            ctx.moveTo(140, 44);
+            ctx.lineTo(173, 22);
+            ctx.lineTo(183, 27);
+            ctx.lineTo(177, 37);
+            ctx.lineTo(160, 47);
+            ctx.lineTo(145, 49);
+            // Front legs on ground
+            ctx.moveTo(128, 79);
+            ctx.lineTo(130, 109);
+            ctx.lineTo(135, 109);
+            ctx.lineTo(133, 79);
+            ctx.moveTo(123, 79);
+            ctx.lineTo(125, 106);
+            ctx.lineTo(130, 106);
+            ctx.lineTo(128, 79);
+            // Back legs under
+            ctx.moveTo(68, 81);
+            ctx.lineTo(65, 110);
+            ctx.lineTo(70, 110);
+            ctx.lineTo(73, 81);
+            ctx.moveTo(63, 81);
+            ctx.lineTo(60, 108);
+            ctx.lineTo(65, 108);
+            ctx.lineTo(68, 81);
+            ctx.moveTo(55, 59);
+            ctx.quadraticCurveTo(23, 58, 18, 60);
+        }
+
+        function drawHorse10(ctx) {
+            // Frame 10: Weight shifting to back
+            ctx.ellipse(100, 56, 50, 30, 0.12, 0, Math.PI * 2);
+            ctx.moveTo(140, 46);
+            ctx.lineTo(172, 24);
+            ctx.lineTo(182, 29);
+            ctx.lineTo(176, 39);
+            ctx.lineTo(159, 49);
+            ctx.lineTo(145, 51);
+            // Front legs lifting
+            ctx.moveTo(129, 81);
+            ctx.lineTo(140, 105);
+            ctx.lineTo(145, 104);
+            ctx.lineTo(134, 81);
+            ctx.moveTo(124, 81);
+            ctx.lineTo(135, 102);
+            ctx.lineTo(140, 101);
+            ctx.lineTo(129, 81);
+            // Back legs supporting
+            ctx.moveTo(70, 83);
+            ctx.lineTo(70, 112);
+            ctx.lineTo(75, 112);
+            ctx.lineTo(75, 83);
+            ctx.moveTo(65, 83);
+            ctx.lineTo(65, 110);
+            ctx.lineTo(70, 110);
+            ctx.lineTo(70, 83);
+            ctx.moveTo(55, 61);
+            ctx.quadraticCurveTo(25, 60, 20, 65);
+        }
+
+        function drawHorse11(ctx) {
+            // Frame 11: Back supporting, front reaching
+            ctx.ellipse(100, 57, 50, 30, 0.1, 0, Math.PI * 2);
+            ctx.moveTo(140, 47);
+            ctx.lineTo(170, 25);
+            ctx.lineTo(180, 30);
+            ctx.lineTo(174, 40);
+            ctx.lineTo(158, 50);
+            ctx.lineTo(145, 52);
+            // Front legs reaching forward
+            ctx.moveTo(130, 82);
+            ctx.lineTo(148, 108);
+            ctx.lineTo(153, 107);
+            ctx.lineTo(135, 82);
+            ctx.moveTo(125, 82);
+            ctx.lineTo(143, 105);
+            ctx.lineTo(148, 104);
+            ctx.lineTo(130, 82);
+            // Back legs pushing
+            ctx.moveTo(72, 84);
+            ctx.lineTo(68, 113);
+            ctx.lineTo(73, 113);
+            ctx.lineTo(77, 84);
+            ctx.moveTo(67, 84);
+            ctx.lineTo(63, 111);
+            ctx.lineTo(68, 111);
+            ctx.lineTo(72, 84);
+            ctx.moveTo(55, 62);
+            ctx.quadraticCurveTo(28, 63, 23, 70);
+        }
+
+        function drawHorse12(ctx) {
+            // Frame 12: Back pushing off strongly
+            ctx.ellipse(100, 58, 50, 30, 0.05, 0, Math.PI * 2);
+            ctx.moveTo(140, 48);
+            ctx.lineTo(168, 26);
+            ctx.lineTo(178, 31);
+            ctx.lineTo(172, 41);
+            ctx.lineTo(157, 51);
+            ctx.lineTo(145, 53);
+            // Front legs forward
+            ctx.moveTo(131, 83);
+            ctx.lineTo(152, 110);
+            ctx.lineTo(157, 109);
+            ctx.lineTo(136, 83);
+            ctx.moveTo(126, 83);
+            ctx.lineTo(147, 107);
+            ctx.lineTo(152, 106);
+            ctx.lineTo(131, 83);
+            // Back legs extended
+            ctx.moveTo(73, 85);
+            ctx.lineTo(65, 114);
+            ctx.lineTo(70, 114);
+            ctx.lineTo(78, 85);
+            ctx.moveTo(68, 85);
+            ctx.lineTo(60, 112);
+            ctx.lineTo(65, 112);
+            ctx.lineTo(73, 85);
+            ctx.moveTo(55, 63);
+            ctx.quadraticCurveTo(30, 65, 25, 75);
+        }
+
+        function drawHorse13(ctx) {
+            // Frame 13: Extension phase
+            ctx.ellipse(100, 59, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 49);
+            ctx.lineTo(167, 27);
+            ctx.lineTo(177, 32);
+            ctx.lineTo(171, 42);
+            ctx.lineTo(156, 52);
+            ctx.lineTo(145, 54);
+            // Front legs extended
+            ctx.moveTo(132, 84);
+            ctx.lineTo(155, 108);
+            ctx.lineTo(160, 107);
+            ctx.lineTo(137, 84);
+            ctx.moveTo(127, 84);
+            ctx.lineTo(150, 105);
+            ctx.lineTo(155, 104);
+            ctx.lineTo(132, 84);
+            // Back legs pushing off
+            ctx.moveTo(74, 86);
+            ctx.lineTo(62, 113);
+            ctx.lineTo(67, 114);
+            ctx.lineTo(79, 86);
+            ctx.moveTo(69, 86);
+            ctx.lineTo(57, 111);
+            ctx.lineTo(62, 112);
+            ctx.lineTo(74, 86);
+            ctx.moveTo(55, 64);
+            ctx.quadraticCurveTo(33, 68, 28, 80);
+        }
+
+        function drawHorse14(ctx) {
+            // Frame 14: All legs gathering
+            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 50);
+            ctx.lineTo(166, 28);
+            ctx.lineTo(176, 33);
+            ctx.lineTo(170, 43);
+            ctx.lineTo(155, 53);
+            ctx.lineTo(145, 55);
+            // Legs coming together
+            ctx.moveTo(125, 85);
+            ctx.lineTo(135, 110);
+            ctx.lineTo(140, 109);
+            ctx.lineTo(130, 85);
+            ctx.moveTo(120, 85);
+            ctx.lineTo(130, 107);
+            ctx.lineTo(135, 106);
+            ctx.lineTo(125, 85);
+            ctx.moveTo(75, 85);
+            ctx.lineTo(72, 112);
+            ctx.lineTo(77, 112);
+            ctx.lineTo(80, 85);
+            ctx.moveTo(70, 85);
+            ctx.lineTo(67, 110);
+            ctx.lineTo(72, 110);
+            ctx.lineTo(75, 85);
+            ctx.moveTo(55, 65);
+            ctx.quadraticCurveTo(35, 70, 30, 85);
+        }
+
+        function drawHorse15(ctx) {
+            // Frame 15: Return to gathered (similar to frame 0)
+            ctx.ellipse(100, 60, 50, 30, 0, 0, Math.PI * 2);
+            ctx.moveTo(140, 50);
+            ctx.lineTo(165, 30);
+            ctx.lineTo(175, 35);
+            ctx.lineTo(170, 45);
+            ctx.lineTo(155, 55);
+            ctx.lineTo(145, 55);
+            ctx.moveTo(122, 85);
+            ctx.lineTo(120, 110);
+            ctx.lineTo(125, 110);
+            ctx.lineTo(127, 85);
+            ctx.moveTo(117, 85);
+            ctx.lineTo(115, 107);
+            ctx.lineTo(120, 107);
+            ctx.lineTo(122, 85);
+            ctx.moveTo(77, 85);
+            ctx.lineTo(75, 110);
+            ctx.lineTo(80, 110);
+            ctx.lineTo(82, 85);
+            ctx.moveTo(72, 85);
+            ctx.lineTo(70, 108);
+            ctx.lineTo(75, 108);
+            ctx.lineTo(77, 85);
+            ctx.moveTo(55, 65);
+            ctx.quadraticCurveTo(35, 70, 30, 85);
+        }
+
+        // Create array of all horse drawing functions
+        const horseFrames = [];
+        for (let i = 0; i < 16; i++) {
+            horseFrames.push(createHorseFrame(i));
+        }
+
+        // DECISION: Three viewing modes with easy switching
+        // RATIONALE:
+        //   - ANIMATED: Primary exhibition mode, single horse loops continuously
+        //   - GRID: Study mode showing all 16 frames simultaneously
+        //   - HYBRID: Both animated and grid, with current frame highlighted
+
+        function drawAnimatedMode() {
+            ctx.fillStyle = '#f4ead5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw single horse centered and large
+            const scale = 3.5; // Scale up the 200-unit horse
+            const offsetX = canvas.width / 2 - 100 * scale;
+            const offsetY = canvas.height / 2 - 60 * scale;
+
+            horseFrames[currentFrame](ctx, scale, offsetX, offsetY);
+
+            // Frame number indicator
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.font = '16px Courier New';
+            ctx.fillText(`Frame ${currentFrame + 1}/16`, 20, canvas.height - 20);
+        }
+
+        function drawGridMode() {
+            ctx.fillStyle = '#f4ead5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw 4x4 grid of all frames
+            const cols = 4;
+            const rows = 4;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            const scale = 1.2;
+
+            for (let i = 0; i < 16; i++) {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const x = col * cellWidth + cellWidth / 2 - 100 * scale;
+                const y = row * cellHeight + cellHeight / 2 - 60 * scale;
+
+                // Highlight current frame
+                if (i === currentFrame && isPlaying) {
+                    ctx.fillStyle = 'rgba(139, 115, 85, 0.2)';
+                    ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
+                }
+
+                horseFrames[i](ctx, scale, x, y);
+
+                // Frame numbers
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.font = '12px Courier New';
+                ctx.fillText((i + 1).toString(), col * cellWidth + 10, row * cellHeight + 25);
+            }
+        }
+
+        function drawHybridMode() {
+            ctx.fillStyle = '#f4ead5';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Top half: Large animated horse
+            ctx.save();
+            ctx.rect(0, 0, canvas.width, canvas.height / 2);
+            ctx.clip();
+
+            const scale1 = 2.8;
+            const offsetX1 = canvas.width / 2 - 100 * scale1;
+            const offsetY1 = canvas.height / 4 - 60 * scale1;
+            horseFrames[currentFrame](ctx, scale1, offsetX1, offsetY1);
+
+            ctx.restore();
+
+            // Divider line
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+
+            // Bottom half: Grid of all frames
+            const cols = 8;
+            const rows = 2;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = (canvas.height / 2) / rows;
+            const scale2 = 0.7;
+
+            for (let i = 0; i < 16; i++) {
+                const col = i % cols;
+                const row = Math.floor(i / cols);
+                const x = col * cellWidth + cellWidth / 2 - 100 * scale2;
+                const y = canvas.height / 2 + row * cellHeight + cellHeight / 2 - 60 * scale2;
+
+                // Highlight current frame
+                if (i === currentFrame) {
+                    ctx.fillStyle = 'rgba(139, 115, 85, 0.3)';
+                    ctx.fillRect(col * cellWidth, canvas.height / 2 + row * cellHeight, cellWidth, cellHeight);
+                }
+
+                horseFrames[i](ctx, scale2, x, y);
+            }
+        }
+
+        function draw() {
+            switch(mode) {
+                case 'animated':
+                    drawAnimatedMode();
+                    break;
+                case 'grid':
+                    drawGridMode();
+                    break;
+                case 'hybrid':
+                    drawHybridMode();
+                    break;
+            }
+        }
+
+        // Animation loop
+        function animate(timestamp) {
+            if (isPlaying) {
+                const frameInterval = 1000 / fps;
+                if (timestamp - lastFrameTime >= frameInterval) {
+                    currentFrame = (currentFrame + 1) % 16;
+                    lastFrameTime = timestamp;
+                }
+            }
+
+            draw();
+            requestAnimationFrame(animate);
+        }
+
+        // UI Controls
+        document.getElementById('modeAnimated').addEventListener('click', () => {
+            mode = 'animated';
+            updateModeButtons();
+        });
+
+        document.getElementById('modeGrid').addEventListener('click', () => {
+            mode = 'grid';
+            updateModeButtons();
+        });
+
+        document.getElementById('modeHybrid').addEventListener('click', () => {
+            mode = 'hybrid';
+            updateModeButtons();
+        });
+
+        function updateModeButtons() {
+            document.querySelectorAll('.button-group button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (mode === 'animated') document.getElementById('modeAnimated').classList.add('active');
+            if (mode === 'grid') document.getElementById('modeGrid').classList.add('active');
+            if (mode === 'hybrid') document.getElementById('modeHybrid').classList.add('active');
+        }
+
+        document.getElementById('playPause').addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            document.getElementById('playPause').textContent = isPlaying ? 'Pause' : 'Play';
+        });
+
+        document.getElementById('prevFrame').addEventListener('click', () => {
+            currentFrame = (currentFrame - 1 + 16) % 16;
+            draw();
+        });
+
+        document.getElementById('nextFrame').addEventListener('click', () => {
+            currentFrame = (currentFrame + 1) % 16;
+            draw();
+        });
+
+        document.getElementById('fpsSlider').addEventListener('input', (e) => {
+            fps = parseInt(e.target.value);
+            document.getElementById('fpsDisplay').textContent = `${fps} FPS`;
+        });
+
+        document.getElementById('fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                document.getElementById('fullscreen').textContent = 'Exit Fullscreen';
+            } else {
+                document.exitFullscreen();
+                document.getElementById('fullscreen').textContent = 'Enter Fullscreen';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    isPlaying = !isPlaying;
+                    document.getElementById('playPause').textContent = isPlaying ? 'Pause' : 'Play';
+                    break;
+                case '1':
+                    mode = 'animated';
+                    updateModeButtons();
+                    break;
+                case '2':
+                    mode = 'grid';
+                    updateModeButtons();
+                    break;
+                case '3':
+                    mode = 'hybrid';
+                    updateModeButtons();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    currentFrame = (currentFrame - 1 + 16) % 16;
+                    draw();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    currentFrame = (currentFrame + 1) % 16;
+                    draw();
+                    break;
+                case 'f':
+                case 'F':
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen();
+                    } else {
+                        document.exitFullscreen();
+                    }
+                    break;
+            }
+        });
+
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => {
+            document.getElementById('fullscreen').textContent =
+                document.fullscreenElement ? 'Exit Fullscreen' : 'Enter Fullscreen';
+        });
+
+        // Start animation
+        requestAnimationFrame(animate);
+
+        // DECISION LOG SUMMARY:
+        // - Canvas: 1080x1080 square format
+        // - Frames: 16 hand-coded horse silhouettes
+        // - Style: Black silhouettes on sepia (#f4ead5)
+        // - Modes: Three viewing modes (animated/grid/hybrid)
+        // - Controls: FPS slider (2-24), play/pause, frame navigation
+        // - Keyboard shortcuts for exhibition use
+        // - Fullscreen support for installation display
+
+    </script>
+</body>
+</html>
