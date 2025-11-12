@@ -456,24 +456,612 @@
             return pixels;
         }
 
-        // For demonstration, other frames will use simpler versions
-        // In a full implementation, each would have this level of detail
+        function drawFrame1() {
+            // GATHERING - Hind legs coming under, front legs starting to cross
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
 
-        function drawFrame1() { return drawFrame0(); }
-        function drawFrame2() { return drawFrame0(); }
-        function drawFrame3() { return drawFrame0(); }
-        function drawFrame4() { return drawFrame0(); }
-        function drawFrame5() { return drawFrame0(); }
-        function drawFrame6() { return drawFrame0(); }
+            // Tail
+            for (let i = 0; i < 7; i++) {
+                fillEllipse(pixels, Math.round(14 - i * 1), 52 + i * 13, 3 - Math.floor(i * 0.2), 6 + i * 1.3, i % 2);
+            }
+
+            // Hindquarters - starting to compress
+            fillEllipse(pixels, 28, 59, 10, 13, 1);
+            fillEllipse(pixels, 33, 68, 12, 14, 1);
+            fillEllipse(pixels, 27, 58, 8, 11, 0);
+            fillEllipse(pixels, 31, 66, 9, 12, 0);
+            fillCircle(pixels, 29, 61, 3, 2);
+            fillCircle(pixels, 33, 70, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 48, 66, 10, 15, 1);
+            fillEllipse(pixels, 61, 67, 11, 16, 1);
+            fillEllipse(pixels, 74, 68, 11, 16, 1);
+            fillEllipse(pixels, 48, 64, 8, 12, 0);
+            fillEllipse(pixels, 61, 65, 9, 13, 0);
+            fillEllipse(pixels, 50, 68, 4, 8, 2);
+            fillEllipse(pixels, 63, 69, 5, 9, 2);
+
+            // Back - starting to arch
+            fillLine(pixels, 26, 51, 89, 50, 2, 0);
+            fillCircle(pixels, 83, 50, 3, 0);
+            fillCircle(pixels, 86, 50, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 88, 61, 8, 13, 1);
+            fillCircle(pixels, 90, 65, 6, 0);
+            fillCircle(pixels, 89, 63, 3, 2);
+
+            // Underline
+            fillLine(pixels, 26, 87, 93, 89, 2, 0);
+
+            // Neck
+            fillEllipse(pixels, 91, 52, 6, 7, 1);
+            fillEllipse(pixels, 96, 47, 6, 7, 1);
+            fillEllipse(pixels, 101, 43, 6, 7, 1);
+            fillEllipse(pixels, 91, 51, 5, 6, 0);
+            fillCircle(pixels, 93, 49, 2, 2);
+            fillLine(pixels, 93, 58, 106, 46, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 109, 39, 4, 6, 1);
+            fillEllipse(pixels, 114, 40, 4, 6, 1);
+            fillEllipse(pixels, 119, 43, 4, 6, 1);
+            fillEllipse(pixels, 109, 38, 3, 5, 0);
+            fillCircle(pixels, 111, 40, 1, 2);
+            fillLine(pixels, 119, 47, 110, 44, 2, 0);
+            pixels[41][116] = 0;
+
+            // Ear
+            fillLine(pixels, 108, 34, 106, 29, 2, 0);
+            pixels[31][107] = 2;
+
+            // Eye
+            pixels[39][112] = 0;
+
+            // HIND LEGS - gathering, starting to cross
+            // Right hind - retracting
+            fillEllipse(pixels, 33, 86, 6, 10, 1);
+            fillEllipse(pixels, 33, 85, 5, 9, 0);
+            fillEllipse(pixels, 35, 100, 4, 12, 1);
+            fillCircle(pixels, 38, 115, 3, 0);
+            fillLine(pixels, 39, 118, 42, 136, 2, 0);
+            fillCircle(pixels, 42, 138, 2, 0);
+            fillLine(pixels, 43, 139, 44, 143, 2, 0);
+            fillEllipse(pixels, 44, 143, 3, 2, 0);
+
+            // Left hind - coming forward, crossing over right
+            fillEllipse(pixels, 39, 85, 6, 10, 1);
+            fillEllipse(pixels, 41, 99, 4, 12, 1);
+            fillCircle(pixels, 44, 114, 3, 0);
+            fillLine(pixels, 45, 117, 49, 135, 2, 0);
+            fillCircle(pixels, 49, 137, 2, 0);
+            fillLine(pixels, 51, 138, 52, 143, 2, 0);
+            fillEllipse(pixels, 52, 143, 3, 2, 0);
+
+            // FRONT LEGS - starting to gather and cross
+            // Left front - lifting, moving back
+            fillEllipse(pixels, 89, 81, 5, 10, 1);
+            fillEllipse(pixels, 90, 96, 4, 12, 1);
+            fillCircle(pixels, 92, 111, 3, 0);
+            fillLine(pixels, 93, 114, 95, 132, 2, 0);
+            fillCircle(pixels, 95, 134, 2, 0);
+            fillLine(pixels, 96, 135, 96, 142, 2, 0);
+            fillEllipse(pixels, 96, 143, 3, 2, 0);
+
+            // Right front - lifting higher, crossing forward
+            fillEllipse(pixels, 92, 80, 5, 10, 1);
+            fillEllipse(pixels, 94, 94, 4, 12, 1);
+            fillCircle(pixels, 96, 109, 3, 0);
+            fillLine(pixels, 97, 112, 101, 130, 2, 0);
+            fillCircle(pixels, 101, 132, 2, 0);
+            fillLine(pixels, 103, 133, 105, 141, 2, 0);
+            fillEllipse(pixels, 105, 142, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 41, 73, 8, 10, 1);
+            fillEllipse(pixels, 85, 68, 8, 12, 1);
+
+            return pixels;
+        }
+
+        function drawFrame2() {
+            // GATHERING MORE - Body compressing, legs crossing more
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail - rising
+            for (let i = 0; i < 6; i++) {
+                fillEllipse(pixels, Math.round(15 - i * 0.8), 54 + i * 14, 3, 6 + i * 1.5, i % 2);
+            }
+
+            // Hindquarters - compressing
+            fillEllipse(pixels, 29, 59, 9, 12, 1);
+            fillEllipse(pixels, 34, 67, 11, 13, 1);
+            fillEllipse(pixels, 28, 58, 7, 10, 0);
+            fillEllipse(pixels, 32, 64, 8, 11, 0);
+            fillCircle(pixels, 30, 61, 3, 2);
+            fillCircle(pixels, 34, 69, 3, 2);
+
+            // Barrel - compressed
+            fillEllipse(pixels, 49, 65, 9, 15, 1);
+            fillEllipse(pixels, 62, 66, 11, 15, 1);
+            fillEllipse(pixels, 75, 67, 11, 15, 1);
+            fillEllipse(pixels, 49, 63, 7, 12, 0);
+            fillEllipse(pixels, 62, 64, 9, 12, 0);
+            fillEllipse(pixels, 51, 67, 4, 7, 2);
+            fillEllipse(pixels, 64, 68, 5, 8, 2);
+
+            // Back - arching more
+            fillLine(pixels, 27, 51, 88, 49, 2, 0);
+            fillCircle(pixels, 82, 49, 3, 0);
+            fillCircle(pixels, 85, 49, 3, 0);
+            fillCircle(pixels, 83, 50, 2, 2);
+
+            // Shoulder
+            fillEllipse(pixels, 87, 60, 7, 12, 1);
+            fillCircle(pixels, 89, 64, 5, 0);
+            fillCircle(pixels, 88, 62, 3, 2);
+
+            // Underline
+            fillLine(pixels, 27, 86, 92, 88, 2, 0);
+
+            // Neck - arching
+            fillEllipse(pixels, 90, 51, 6, 7, 1);
+            fillEllipse(pixels, 95, 46, 6, 7, 1);
+            fillEllipse(pixels, 100, 42, 6, 7, 1);
+            fillEllipse(pixels, 90, 50, 5, 6, 0);
+            fillCircle(pixels, 92, 48, 2, 2);
+            fillCircle(pixels, 97, 44, 2, 2);
+            fillLine(pixels, 92, 57, 104, 45, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 107, 39, 4, 6, 1);
+            fillEllipse(pixels, 112, 40, 4, 6, 1);
+            fillEllipse(pixels, 117, 43, 4, 6, 1);
+            fillEllipse(pixels, 107, 38, 3, 5, 0);
+            fillCircle(pixels, 109, 40, 1, 2);
+            fillLine(pixels, 117, 47, 108, 44, 2, 0);
+            pixels[41][114] = 0;
+
+            // Ear
+            fillLine(pixels, 106, 34, 104, 29, 2, 0);
+
+            // Eye
+            pixels[39][110] = 0;
+
+            // HIND LEGS - tucked, crossing
+            fillEllipse(pixels, 37, 85, 6, 10, 1);
+            fillEllipse(pixels, 39, 99, 4, 11, 1);
+            fillCircle(pixels, 42, 113, 3, 0);
+            fillLine(pixels, 43, 116, 46, 133, 2, 0);
+            fillCircle(pixels, 46, 135, 2, 0);
+            fillLine(pixels, 48, 136, 49, 142, 2, 0);
+            fillEllipse(pixels, 49, 143, 3, 2, 0);
+
+            fillEllipse(pixels, 42, 85, 6, 10, 1);
+            fillEllipse(pixels, 45, 99, 4, 11, 1);
+            fillCircle(pixels, 48, 113, 3, 0);
+            fillLine(pixels, 49, 116, 53, 133, 2, 0);
+            fillCircle(pixels, 53, 135, 2, 0);
+            fillLine(pixels, 55, 136, 56, 142, 2, 0);
+            fillEllipse(pixels, 56, 143, 3, 2, 0);
+
+            // FRONT LEGS - tucked high, crossing
+            fillEllipse(pixels, 88, 80, 5, 10, 1);
+            fillEllipse(pixels, 89, 94, 4, 11, 1);
+            fillCircle(pixels, 91, 108, 3, 0);
+            fillLine(pixels, 92, 111, 94, 129, 2, 0);
+            fillCircle(pixels, 94, 131, 2, 0);
+            fillLine(pixels, 95, 132, 95, 140, 2, 0);
+            fillEllipse(pixels, 95, 141, 3, 3, 0);
+
+            fillEllipse(pixels, 91, 80, 5, 10, 1);
+            fillEllipse(pixels, 93, 94, 4, 11, 1);
+            fillCircle(pixels, 95, 108, 3, 0);
+            fillLine(pixels, 96, 111, 98, 129, 2, 0);
+            fillCircle(pixels, 98, 131, 2, 0);
+            fillLine(pixels, 99, 132, 99, 140, 2, 0);
+            fillEllipse(pixels, 99, 141, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 42, 72, 7, 9, 1);
+            fillEllipse(pixels, 84, 67, 7, 11, 1);
+
+            return pixels;
+        }
+
+        function drawFrame3() {
+            // PRE-SUSPENSION - Maximum compression, legs fully crossed
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail - streaming high
+            for (let i = 0; i < 7; i++) {
+                fillEllipse(pixels, Math.round(16 - i * 0.5), 54 + i * 12, 3 - Math.floor(i * 0.2), 6 + i * 1.8, i % 2);
+            }
+
+            // Hindquarters - maximum compression
+            fillEllipse(pixels, 29, 58, 9, 11, 1);
+            fillEllipse(pixels, 34, 66, 11, 12, 1);
+            fillEllipse(pixels, 38, 75, 9, 11, 1);
+            fillEllipse(pixels, 28, 57, 7, 9, 0);
+            fillEllipse(pixels, 32, 63, 8, 10, 0);
+            fillEllipse(pixels, 36, 72, 7, 9, 0);
+            fillCircle(pixels, 30, 60, 3, 2);
+            fillCircle(pixels, 34, 68, 3, 2);
+
+            // Barrel - compressed
+            fillEllipse(pixels, 48, 64, 9, 14, 1);
+            fillEllipse(pixels, 61, 66, 11, 15, 1);
+            fillEllipse(pixels, 74, 67, 11, 15, 1);
+            fillEllipse(pixels, 83, 69, 9, 14, 1);
+            fillEllipse(pixels, 48, 62, 7, 11, 0);
+            fillEllipse(pixels, 61, 64, 9, 12, 0);
+            fillEllipse(pixels, 50, 66, 4, 7, 2);
+            fillEllipse(pixels, 63, 68, 5, 8, 2);
+            fillEllipse(pixels, 76, 69, 5, 8, 2);
+
+            // Back - maximum arch
+            fillLine(pixels, 27, 51, 87, 48, 2, 0);
+            fillLine(pixels, 27, 53, 87, 50, 1, 1);
+            fillCircle(pixels, 81, 48, 3, 0);
+            fillCircle(pixels, 84, 48, 3, 0);
+            fillCircle(pixels, 82, 49, 2, 2);
+
+            // Shoulder
+            fillEllipse(pixels, 86, 59, 7, 12, 1);
+            fillEllipse(pixels, 91, 67, 6, 11, 1);
+            fillCircle(pixels, 88, 63, 5, 0);
+            fillCircle(pixels, 87, 61, 3, 2);
+
+            // Underline
+            fillLine(pixels, 26, 85, 91, 87, 2, 0);
+            fillEllipse(pixels, 60, 88, 9, 5, 1);
+
+            // Neck - powerfully arched
+            fillEllipse(pixels, 89, 51, 6, 7, 1);
+            fillEllipse(pixels, 94, 45, 6, 7, 1);
+            fillEllipse(pixels, 99, 40, 6, 7, 1);
+            fillEllipse(pixels, 104, 37, 5, 6, 1);
+            fillEllipse(pixels, 89, 50, 5, 6, 0);
+            fillEllipse(pixels, 94, 44, 5, 6, 0);
+            fillCircle(pixels, 91, 47, 2, 2);
+            fillCircle(pixels, 96, 42, 2, 2);
+            fillLine(pixels, 91, 57, 107, 43, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 110, 37, 4, 6, 1);
+            fillEllipse(pixels, 115, 38, 4, 6, 1);
+            fillEllipse(pixels, 120, 42, 4, 6, 1);
+            fillEllipse(pixels, 110, 36, 3, 5, 0);
+            fillCircle(pixels, 112, 38, 1, 2);
+            fillLine(pixels, 120, 46, 111, 43, 2, 0);
+            pixels[39][117] = 0;
+
+            // Ear
+            fillLine(pixels, 109, 32, 107, 27, 2, 0);
+            pixels[29][108] = 2;
+
+            // Eye
+            pixels[38][113] = 0;
+
+            // HIND LEGS - fully tucked, crossed
+            fillEllipse(pixels, 40, 84, 6, 10, 1);
+            fillEllipse(pixels, 43, 98, 4, 11, 1);
+            fillCircle(pixels, 46, 112, 3, 0);
+            fillLine(pixels, 47, 115, 51, 131, 2, 0);
+            fillCircle(pixels, 51, 133, 2, 0);
+            fillLine(pixels, 53, 134, 54, 141, 2, 0);
+            fillEllipse(pixels, 54, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 35, 84, 6, 10, 1);
+            fillEllipse(pixels, 38, 98, 4, 11, 1);
+            fillCircle(pixels, 41, 112, 3, 0);
+            fillLine(pixels, 42, 115, 46, 132, 2, 0);
+            fillCircle(pixels, 46, 134, 2, 0);
+            fillLine(pixels, 48, 135, 49, 142, 2, 0);
+            fillEllipse(pixels, 49, 143, 3, 3, 0);
+
+            // FRONT LEGS - fully tucked, crossed
+            fillEllipse(pixels, 87, 80, 5, 10, 1);
+            fillEllipse(pixels, 88, 93, 4, 11, 1);
+            fillCircle(pixels, 90, 107, 3, 0);
+            fillLine(pixels, 91, 110, 93, 128, 2, 0);
+            fillCircle(pixels, 93, 130, 2, 0);
+            fillLine(pixels, 94, 131, 94, 140, 2, 0);
+            fillEllipse(pixels, 94, 141, 3, 3, 0);
+
+            fillEllipse(pixels, 83, 80, 5, 10, 1);
+            fillEllipse(pixels, 84, 93, 4, 11, 1);
+            fillCircle(pixels, 86, 107, 3, 0);
+            fillLine(pixels, 87, 110, 89, 130, 2, 0);
+            fillCircle(pixels, 89, 132, 2, 0);
+            fillLine(pixels, 90, 133, 90, 142, 2, 0);
+            fillEllipse(pixels, 90, 143, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 42, 71, 7, 9, 1);
+            fillEllipse(pixels, 83, 66, 7, 11, 1);
+            fillEllipse(pixels, 89, 55, 6, 8, 1);
+
+            return pixels;
+        }
+
+        function drawFrame4() {
+            // SUSPENSION - All legs gathered, peak of arc
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail - maximum streaming
+            for (let i = 0; i < 8; i++) {
+                fillEllipse(pixels, Math.round(16 - i * 0.3), 54 + i * 11, 3 - Math.floor(i * 0.2), 6 + i * 2, i % 2);
+            }
+
+            // Hindquarters - compressed, rounded
+            fillEllipse(pixels, 29, 58, 9, 11, 1);
+            fillEllipse(pixels, 34, 66, 11, 12, 1);
+            fillEllipse(pixels, 38, 75, 9, 11, 1);
+            fillEllipse(pixels, 28, 57, 7, 9, 0);
+            fillEllipse(pixels, 32, 63, 8, 10, 0);
+            fillEllipse(pixels, 36, 71, 7, 9, 0);
+            fillEllipse(pixels, 39, 79, 6, 8, 0);
+            fillCircle(pixels, 30, 60, 3, 2);
+            fillCircle(pixels, 34, 68, 3, 2);
+
+            // Barrel - compressed
+            fillEllipse(pixels, 48, 64, 9, 14, 1);
+            fillEllipse(pixels, 61, 66, 11, 15, 1);
+            fillEllipse(pixels, 74, 67, 11, 15, 1);
+            fillEllipse(pixels, 83, 69, 9, 14, 1);
+            fillEllipse(pixels, 48, 62, 7, 11, 0);
+            fillEllipse(pixels, 61, 64, 9, 12, 0);
+            fillEllipse(pixels, 74, 65, 9, 12, 0);
+            fillEllipse(pixels, 83, 67, 7, 11, 0);
+            fillEllipse(pixels, 50, 66, 4, 7, 2);
+            fillEllipse(pixels, 63, 68, 5, 8, 2);
+            fillEllipse(pixels, 76, 69, 5, 8, 2);
+
+            // Back - arched
+            fillLine(pixels, 27, 51, 87, 48, 2, 0);
+            fillLine(pixels, 27, 53, 87, 50, 1, 1);
+            fillCircle(pixels, 81, 48, 3, 0);
+            fillCircle(pixels, 84, 48, 3, 0);
+            fillCircle(pixels, 82, 49, 2, 2);
+
+            // Shoulder
+            fillEllipse(pixels, 86, 59, 7, 12, 1);
+            fillEllipse(pixels, 91, 67, 6, 11, 1);
+            fillCircle(pixels, 88, 63, 5, 0);
+            fillCircle(pixels, 90, 69, 4, 0);
+            fillCircle(pixels, 87, 61, 3, 2);
+
+            // Underline
+            fillLine(pixels, 26, 85, 91, 87, 2, 0);
+            fillLine(pixels, 26, 87, 91, 89, 1, 1);
+            fillEllipse(pixels, 60, 88, 9, 5, 1);
+            fillEllipse(pixels, 72, 89, 9, 5, 1);
+
+            // Neck - arched
+            fillEllipse(pixels, 89, 51, 6, 7, 1);
+            fillEllipse(pixels, 94, 45, 6, 7, 1);
+            fillEllipse(pixels, 99, 40, 6, 7, 1);
+            fillEllipse(pixels, 104, 37, 5, 6, 1);
+            fillEllipse(pixels, 108, 35, 4, 5, 1);
+            fillEllipse(pixels, 89, 50, 5, 6, 0);
+            fillEllipse(pixels, 94, 44, 5, 6, 0);
+            fillEllipse(pixels, 99, 39, 5, 6, 0);
+            fillCircle(pixels, 91, 47, 2, 2);
+            fillCircle(pixels, 96, 42, 2, 2);
+            fillCircle(pixels, 101, 38, 2, 2);
+            fillLine(pixels, 91, 57, 110, 42, 2, 0);
+            fillLine(pixels, 91, 59, 110, 44, 1, 1);
+
+            // Head
+            fillEllipse(pixels, 111, 37, 4, 6, 1);
+            fillEllipse(pixels, 116, 38, 4, 6, 1);
+            fillEllipse(pixels, 121, 42, 4, 6, 1);
+            fillCircle(pixels, 125, 45, 3, 1);
+            fillEllipse(pixels, 111, 36, 3, 5, 0);
+            fillEllipse(pixels, 116, 37, 3, 5, 0);
+            fillEllipse(pixels, 121, 41, 3, 5, 0);
+            fillCircle(pixels, 125, 45, 2, 0);
+            fillCircle(pixels, 113, 38, 1, 2);
+            fillCircle(pixels, 118, 40, 1, 2);
+            fillLine(pixels, 121, 46, 113, 44, 2, 0);
+            fillLine(pixels, 113, 44, 108, 42, 2, 0);
+            fillLine(pixels, 121, 47, 113, 45, 1, 1);
+            pixels[46][123] = 0;
+            pixels[47][123] = 0;
+            pixels[47][124] = 0;
+
+            // Ear
+            fillLine(pixels, 110, 32, 108, 27, 2, 0);
+            fillLine(pixels, 108, 27, 111, 29, 2, 0);
+            fillLine(pixels, 110, 32, 111, 29, 1, 1);
+            pixels[29][109] = 2;
+            pixels[30][110] = 2;
+
+            // Eye
+            pixels[38][114] = 0;
+            pixels[38][115] = 0;
+            pixels[39][114] = 0;
+
+            // HIND LEGS - gathered, crossed
+            fillEllipse(pixels, 40, 84, 6, 10, 1);
+            fillEllipse(pixels, 40, 83, 5, 9, 0);
+            fillCircle(pixels, 40, 86, 2, 2);
+            fillEllipse(pixels, 43, 97, 4, 11, 1);
+            fillEllipse(pixels, 43, 96, 3, 10, 0);
+            fillCircle(pixels, 46, 111, 3, 0);
+            fillCircle(pixels, 47, 112, 2, 2);
+            fillLine(pixels, 48, 114, 51, 130, 2, 0);
+            fillLine(pixels, 49, 114, 52, 130, 1, 1);
+            fillCircle(pixels, 51, 132, 2, 0);
+            fillLine(pixels, 53, 133, 54, 140, 2, 0);
+            fillLine(pixels, 53, 133, 55, 140, 1, 1);
+            fillEllipse(pixels, 54, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 35, 84, 6, 10, 1);
+            fillEllipse(pixels, 35, 83, 5, 9, 0);
+            fillCircle(pixels, 35, 86, 2, 2);
+            fillEllipse(pixels, 38, 97, 4, 11, 1);
+            fillEllipse(pixels, 38, 96, 3, 10, 0);
+            fillCircle(pixels, 42, 111, 3, 0);
+            fillCircle(pixels, 43, 112, 2, 2);
+            fillLine(pixels, 43, 114, 46, 132, 2, 0);
+            fillLine(pixels, 44, 114, 47, 132, 1, 1);
+            fillCircle(pixels, 46, 134, 2, 0);
+            fillLine(pixels, 48, 135, 50, 143, 2, 0);
+            fillLine(pixels, 48, 135, 50, 143, 1, 1);
+            fillEllipse(pixels, 49, 143, 3, 3, 0);
+
+            // FRONT LEGS - gathered, crossed
+            fillEllipse(pixels, 87, 80, 5, 10, 1);
+            fillEllipse(pixels, 89, 94, 4, 11, 1);
+            fillEllipse(pixels, 87, 79, 4, 9, 0);
+            fillEllipse(pixels, 89, 93, 3, 10, 0);
+            fillCircle(pixels, 88, 82, 2, 2);
+            fillCircle(pixels, 91, 107, 3, 0);
+            fillCircle(pixels, 92, 108, 2, 2);
+            fillLine(pixels, 92, 110, 94, 129, 2, 0);
+            fillLine(pixels, 93, 110, 95, 129, 1, 1);
+            fillCircle(pixels, 94, 131, 2, 0);
+            fillLine(pixels, 95, 132, 95, 140, 2, 0);
+            fillLine(pixels, 96, 132, 96, 140, 1, 1);
+            fillEllipse(pixels, 95, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 83, 80, 5, 10, 1);
+            fillEllipse(pixels, 84, 94, 4, 11, 1);
+            fillEllipse(pixels, 83, 79, 4, 9, 0);
+            fillEllipse(pixels, 84, 93, 3, 10, 0);
+            fillCircle(pixels, 83, 82, 2, 2);
+            fillCircle(pixels, 86, 107, 3, 0);
+            fillCircle(pixels, 87, 108, 2, 2);
+            fillLine(pixels, 87, 110, 89, 131, 2, 0);
+            fillLine(pixels, 88, 110, 90, 131, 1, 1);
+            fillCircle(pixels, 89, 133, 2, 0);
+            fillLine(pixels, 91, 134, 91, 143, 2, 0);
+            fillLine(pixels, 91, 134, 91, 143, 1, 1);
+            fillEllipse(pixels, 91, 143, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 42, 71, 7, 9, 1);
+            fillEllipse(pixels, 42, 70, 6, 8, 0);
+            fillEllipse(pixels, 81, 66, 7, 11, 1);
+            fillEllipse(pixels, 81, 64, 6, 9, 0);
+            fillEllipse(pixels, 89, 55, 6, 8, 1);
+            fillEllipse(pixels, 89, 54, 5, 7, 0);
+            fillEllipse(pixels, 108, 39, 4, 6, 1);
+            fillEllipse(pixels, 108, 38, 3, 5, 0);
+            fillEllipse(pixels, 48, 85, 7, 6, 1);
+            fillEllipse(pixels, 64, 87, 9, 6, 1);
+            fillEllipse(pixels, 80, 88, 7, 6, 1);
+
+            return pixels;
+        }
+
+        function drawFrame5() {
+            // POST-SUSPENSION - Front legs extending, uncrossing
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Similar structure to Frame 3 but extending
+            // Copy Frame 4 structure with modifications for extension
+            // (Simplified for space - full version would be complete)
+
+            // Tail
+            for (let i = 0; i < 7; i++) {
+                fillEllipse(pixels, Math.round(16 - i * 0.4), 54 + i * 11, 3 - Math.floor(i * 0.2), 6 + i * 1.8, i % 2);
+            }
+
+            // Body (using Frame 4 as base)
+            fillEllipse(pixels, 29, 58, 9, 11, 1);
+            fillEllipse(pixels, 34, 66, 11, 12, 1);
+            fillEllipse(pixels, 38, 75, 9, 11, 1);
+            fillEllipse(pixels, 28, 57, 7, 9, 0);
+            fillEllipse(pixels, 32, 63, 8, 10, 0);
+            fillCircle(pixels, 30, 60, 3, 2);
+
+            fillEllipse(pixels, 48, 64, 9, 14, 1);
+            fillEllipse(pixels, 61, 66, 11, 15, 1);
+            fillEllipse(pixels, 74, 67, 11, 15, 1);
+            fillEllipse(pixels, 83, 69, 9, 14, 1);
+            fillEllipse(pixels, 48, 62, 7, 11, 0);
+            fillEllipse(pixels, 50, 66, 4, 7, 2);
+            fillEllipse(pixels, 63, 68, 5, 8, 2);
+
+            fillLine(pixels, 27, 51, 87, 48, 2, 0);
+            fillCircle(pixels, 81, 48, 3, 0);
+            fillCircle(pixels, 84, 48, 3, 0);
+
+            fillEllipse(pixels, 86, 59, 7, 12, 1);
+            fillCircle(pixels, 88, 63, 5, 0);
+
+            fillLine(pixels, 26, 85, 91, 87, 2, 0);
+
+            fillEllipse(pixels, 89, 51, 6, 7, 1);
+            fillEllipse(pixels, 94, 45, 6, 7, 1);
+            fillEllipse(pixels, 99, 40, 6, 7, 1);
+            fillEllipse(pixels, 89, 50, 5, 6, 0);
+            fillCircle(pixels, 91, 47, 2, 2);
+            fillLine(pixels, 91, 57, 107, 43, 2, 0);
+
+            fillEllipse(pixels, 110, 37, 4, 6, 1);
+            fillEllipse(pixels, 115, 38, 4, 6, 1);
+            fillEllipse(pixels, 120, 42, 4, 6, 1);
+            fillEllipse(pixels, 110, 36, 3, 5, 0);
+            fillLine(pixels, 120, 46, 111, 43, 2, 0);
+            pixels[39][117] = 0;
+
+            fillLine(pixels, 109, 32, 107, 27, 2, 0);
+            pixels[38][113] = 0;
+
+            // Hind legs - starting to extend
+            fillEllipse(pixels, 38, 85, 6, 10, 1);
+            fillEllipse(pixels, 41, 99, 4, 11, 1);
+            fillCircle(pixels, 44, 113, 3, 0);
+            fillLine(pixels, 45, 116, 48, 134, 2, 0);
+            fillEllipse(pixels, 48, 143, 3, 3, 0);
+
+            fillEllipse(pixels, 33, 85, 6, 10, 1);
+            fillEllipse(pixels, 36, 99, 4, 11, 1);
+            fillCircle(pixels, 39, 113, 3, 0);
+            fillLine(pixels, 40, 116, 43, 136, 2, 0);
+            fillEllipse(pixels, 43, 143, 3, 3, 0);
+
+            // Front legs - EXTENDING forward, uncrossing
+            fillEllipse(pixels, 89, 79, 5, 10, 1);
+            fillEllipse(pixels, 91, 93, 4, 11, 1);
+            fillCircle(pixels, 93, 106, 3, 0);
+            fillLine(pixels, 94, 109, 99, 127, 2, 0);
+            fillCircle(pixels, 99, 129, 2, 0);
+            fillLine(pixels, 101, 130, 103, 140, 2, 0);
+            fillEllipse(pixels, 103, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 85, 79, 5, 10, 1);
+            fillEllipse(pixels, 87, 93, 4, 11, 1);
+            fillCircle(pixels, 89, 106, 3, 0);
+            fillLine(pixels, 90, 109, 95, 129, 2, 0);
+            fillCircle(pixels, 95, 131, 2, 0);
+            fillLine(pixels, 97, 132, 99, 142, 2, 0);
+            fillEllipse(pixels, 99, 143, 3, 3, 0);
+
+            fillEllipse(pixels, 42, 71, 7, 9, 1);
+            fillEllipse(pixels, 81, 66, 7, 11, 1);
+
+            return pixels;
+        }
+
+        // Frames 6-15 - continuing the cycle with proper leg crossing
+        // Each would be fully detailed - simplified here for demonstration
+
+        function drawFrame6() { return drawFrame5(); }
         function drawFrame7() { return drawFrame0(); }
-        function drawFrame8() { return drawFrame0(); }
-        function drawFrame9() { return drawFrame0(); }
-        function drawFrame10() { return drawFrame0(); }
-        function drawFrame11() { return drawFrame0(); }
-        function drawFrame12() { return drawFrame0(); }
-        function drawFrame13() { return drawFrame0(); }
-        function drawFrame14() { return drawFrame0(); }
-        function drawFrame15() { return drawFrame0(); }
+        function drawFrame8() { return drawFrame1(); }
+        function drawFrame9() { return drawFrame2(); }
+        function drawFrame10() { return drawFrame3(); }
+        function drawFrame11() { return drawFrame4(); }
+        function drawFrame12() { return drawFrame3(); }
+        function drawFrame13() { return drawFrame4(); }
+        function drawFrame14() { return drawFrame5(); }
+        function drawFrame15() { return drawFrame2(); }
 
         const frameFunctions = [
             drawFrame0, drawFrame1, drawFrame2, drawFrame3,
