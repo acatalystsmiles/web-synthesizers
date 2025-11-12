@@ -903,56 +903,681 @@
             return pixels;
         }
 
-        // Continue with frames 5-15 following the gallop cycle...
-        // For now, I'll create simplified versions of the remaining frames
-        // to get the animation working, then we can refine them
-
         function drawFrame5() {
-            // POST-SUSPENSION - Beginning to extend
-            return drawFrame4(); // Placeholder - mirror of frame 4 with slight variation
+            // POST-SUSPENSION - Front legs beginning to reach forward
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail
+            fillEllipse(pixels, 17, 54, 3, 7, 0);
+            fillEllipse(pixels, 14, 68, 3, 9, 0);
+            fillEllipse(pixels, 11, 84, 3, 11, 0);
+            fillEllipse(pixels, 9, 102, 2, 11, 0);
+            fillEllipse(pixels, 15, 62, 2, 5, 1);
+
+            // Hindquarters - still compressed
+            fillEllipse(pixels, 29, 58, 8, 10, 1);
+            fillEllipse(pixels, 34, 66, 10, 11, 1);
+            fillEllipse(pixels, 38, 75, 8, 10, 1);
+            fillEllipse(pixels, 28, 57, 6, 8, 0);
+            fillEllipse(pixels, 32, 63, 7, 9, 0);
+            fillCircle(pixels, 30, 60, 3, 2);
+            fillCircle(pixels, 34, 68, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 48, 64, 8, 13, 1);
+            fillEllipse(pixels, 61, 66, 10, 14, 1);
+            fillEllipse(pixels, 74, 67, 10, 14, 1);
+            fillEllipse(pixels, 83, 69, 8, 13, 1);
+            fillEllipse(pixels, 48, 62, 6, 10, 0);
+            fillEllipse(pixels, 61, 64, 8, 11, 0);
+            fillEllipse(pixels, 50, 66, 4, 6, 2);
+            fillEllipse(pixels, 63, 68, 5, 7, 2);
+
+            // Back - still arched
+            fillLine(pixels, 27, 51, 86, 48, 2, 0);
+            fillCircle(pixels, 80, 48, 3, 0);
+            fillCircle(pixels, 83, 48, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 85, 59, 6, 11, 1);
+            fillCircle(pixels, 87, 63, 5, 0);
+            fillCircle(pixels, 86, 61, 3, 2);
+
+            // Neck - arched
+            fillEllipse(pixels, 88, 51, 5, 5, 1);
+            fillEllipse(pixels, 93, 45, 5, 5, 1);
+            fillEllipse(pixels, 98, 40, 5, 5, 1);
+            fillEllipse(pixels, 103, 37, 4, 5, 1);
+            fillEllipse(pixels, 88, 50, 4, 4, 0);
+            fillEllipse(pixels, 93, 44, 4, 4, 0);
+            fillCircle(pixels, 90, 47, 2, 2);
+            fillLine(pixels, 90, 56, 106, 42, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 109, 37, 3, 5, 1);
+            fillEllipse(pixels, 114, 38, 3, 5, 1);
+            fillEllipse(pixels, 119, 42, 3, 5, 1);
+            fillEllipse(pixels, 109, 36, 2, 4, 0);
+            fillCircle(pixels, 111, 37, 1, 2);
+            fillLine(pixels, 119, 46, 111, 44, 2, 0);
+            pixels[38][112] = 0;
+
+            // Ear
+            fillLine(pixels, 108, 32, 106, 27, 2, 0);
+            fillLine(pixels, 106, 27, 109, 29, 2, 0);
+
+            // Hind legs - starting to extend
+            fillEllipse(pixels, 38, 84, 5, 8, 1);
+            fillEllipse(pixels, 38, 83, 4, 7, 0);
+            fillEllipse(pixels, 41, 97, 3, 10, 1);
+            fillCircle(pixels, 44, 110, 3, 0);
+            fillLine(pixels, 45, 113, 48, 132, 2, 0);
+            fillEllipse(pixels, 48, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 33, 84, 5, 8, 1);
+            fillEllipse(pixels, 36, 97, 3, 10, 1);
+            fillCircle(pixels, 39, 110, 3, 0);
+            fillLine(pixels, 40, 113, 43, 134, 2, 0);
+            fillEllipse(pixels, 43, 143, 3, 3, 0);
+
+            // Front legs - EXTENDING forward
+            fillEllipse(pixels, 88, 79, 3, 8, 1);
+            fillEllipse(pixels, 90, 92, 3, 10, 1);
+            fillCircle(pixels, 92, 105, 3, 0);
+            fillLine(pixels, 93, 108, 98, 125, 2, 0);
+            fillCircle(pixels, 98, 127, 2, 0);
+            fillLine(pixels, 100, 128, 102, 138, 2, 0);
+            fillEllipse(pixels, 102, 140, 3, 3, 0);
+
+            fillEllipse(pixels, 84, 79, 3, 8, 1);
+            fillEllipse(pixels, 86, 92, 3, 10, 1);
+            fillCircle(pixels, 88, 105, 3, 0);
+            fillLine(pixels, 89, 108, 94, 127, 2, 0);
+            fillCircle(pixels, 94, 129, 2, 0);
+            fillLine(pixels, 96, 130, 98, 140, 2, 0);
+            fillEllipse(pixels, 98, 142, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 42, 70, 6, 8, 1);
+            fillEllipse(pixels, 80, 64, 6, 10, 1);
+            fillEllipse(pixels, 88, 54, 5, 6, 1);
+
+            return pixels;
         }
 
         function drawFrame6() {
-            // EXTENDING - Front legs reaching forward
-            return drawFrame3(); // Placeholder - similar to frame 3
+            // FRONT LEGS EXTENDING - Reaching for ground
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail
+            fillEllipse(pixels, 17, 53, 3, 7, 0);
+            fillEllipse(pixels, 14, 66, 3, 9, 0);
+            fillEllipse(pixels, 11, 82, 3, 10, 0);
+            fillEllipse(pixels, 15, 64, 2, 5, 1);
+
+            // Hindquarters - extending
+            fillEllipse(pixels, 30, 59, 9, 11, 1);
+            fillEllipse(pixels, 35, 67, 10, 12, 1);
+            fillEllipse(pixels, 29, 58, 7, 9, 0);
+            fillEllipse(pixels, 33, 65, 8, 10, 0);
+            fillCircle(pixels, 31, 61, 3, 2);
+
+            // Barrel - less compressed
+            fillEllipse(pixels, 50, 65, 8, 13, 1);
+            fillEllipse(pixels, 63, 66, 10, 14, 1);
+            fillEllipse(pixels, 76, 67, 10, 14, 1);
+            fillEllipse(pixels, 50, 63, 6, 10, 0);
+            fillEllipse(pixels, 63, 64, 8, 11, 0);
+            fillEllipse(pixels, 52, 67, 4, 6, 2);
+            fillEllipse(pixels, 65, 69, 5, 7, 2);
+
+            // Back - less arched
+            fillLine(pixels, 28, 51, 87, 49, 2, 0);
+            fillCircle(pixels, 82, 49, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 86, 60, 6, 11, 1);
+            fillCircle(pixels, 88, 64, 5, 0);
+
+            // Neck
+            fillEllipse(pixels, 89, 51, 5, 5, 1);
+            fillEllipse(pixels, 94, 46, 5, 5, 1);
+            fillEllipse(pixels, 99, 42, 5, 5, 1);
+            fillEllipse(pixels, 89, 50, 4, 4, 0);
+            fillCircle(pixels, 91, 48, 2, 2);
+            fillLine(pixels, 91, 56, 103, 44, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 106, 39, 3, 5, 1);
+            fillEllipse(pixels, 111, 40, 3, 5, 1);
+            fillEllipse(pixels, 116, 43, 3, 5, 1);
+            fillEllipse(pixels, 106, 38, 2, 4, 0);
+            fillLine(pixels, 116, 47, 107, 43, 2, 0);
+            pixels[40][109] = 0;
+
+            // Ear
+            fillLine(pixels, 105, 34, 103, 29, 2, 0);
+
+            // Hind legs - extending more
+            fillEllipse(pixels, 36, 85, 5, 8, 1);
+            fillEllipse(pixels, 38, 98, 3, 10, 1);
+            fillCircle(pixels, 40, 111, 3, 0);
+            fillLine(pixels, 41, 114, 42, 135, 2, 0);
+            fillEllipse(pixels, 42, 143, 3, 3, 0);
+
+            fillEllipse(pixels, 31, 85, 5, 8, 1);
+            fillEllipse(pixels, 33, 98, 3, 10, 1);
+            fillCircle(pixels, 35, 111, 3, 0);
+            fillLine(pixels, 36, 114, 35, 137, 2, 0);
+            fillEllipse(pixels, 35, 143, 3, 3, 0);
+
+            // Front legs - reaching forward more
+            fillEllipse(pixels, 90, 78, 3, 8, 1);
+            fillEllipse(pixels, 93, 91, 3, 10, 1);
+            fillCircle(pixels, 96, 104, 3, 0);
+            fillLine(pixels, 97, 107, 105, 123, 2, 0);
+            fillCircle(pixels, 105, 125, 2, 0);
+            fillLine(pixels, 107, 126, 111, 137, 2, 0);
+            fillEllipse(pixels, 111, 139, 3, 3, 0);
+
+            fillEllipse(pixels, 86, 78, 3, 8, 1);
+            fillEllipse(pixels, 89, 91, 3, 10, 1);
+            fillCircle(pixels, 92, 104, 3, 0);
+            fillLine(pixels, 93, 107, 100, 125, 2, 0);
+            fillCircle(pixels, 100, 127, 2, 0);
+            fillLine(pixels, 102, 128, 106, 139, 2, 0);
+            fillEllipse(pixels, 106, 141, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 43, 71, 6, 8, 1);
+            fillEllipse(pixels, 82, 66, 6, 10, 1);
+
+            return pixels;
         }
 
         function drawFrame7() {
-            // RIGHT FRONT STRIKE - Weight transfers
-            return drawFrame2(); // Placeholder
+            // RIGHT FRONT CONTACT - Right front leg hits ground
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail - flowing
+            fillEllipse(pixels, 17, 52, 3, 6, 0);
+            fillEllipse(pixels, 14, 64, 3, 8, 0);
+            fillEllipse(pixels, 11, 78, 3, 9, 0);
+            fillEllipse(pixels, 15, 62, 2, 5, 1);
+
+            // Hindquarters
+            fillEllipse(pixels, 30, 60, 9, 11, 1);
+            fillEllipse(pixels, 35, 68, 10, 12, 1);
+            fillEllipse(pixels, 29, 59, 7, 9, 0);
+            fillCircle(pixels, 31, 62, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 50, 66, 8, 13, 1);
+            fillEllipse(pixels, 63, 67, 10, 14, 1);
+            fillEllipse(pixels, 76, 68, 10, 14, 1);
+            fillEllipse(pixels, 50, 64, 6, 10, 0);
+            fillEllipse(pixels, 63, 65, 8, 11, 0);
+            fillEllipse(pixels, 52, 68, 4, 6, 2);
+
+            // Back
+            fillLine(pixels, 28, 52, 88, 50, 2, 0);
+            fillCircle(pixels, 82, 50, 3, 0);
+
+            // Shoulder - loading weight
+            fillEllipse(pixels, 87, 61, 6, 11, 1);
+            fillCircle(pixels, 89, 65, 5, 0);
+            fillCircle(pixels, 88, 63, 3, 2);
+
+            // Neck
+            fillEllipse(pixels, 90, 52, 5, 5, 1);
+            fillEllipse(pixels, 95, 47, 5, 5, 1);
+            fillEllipse(pixels, 90, 51, 4, 4, 0);
+            fillCircle(pixels, 92, 49, 2, 2);
+            fillLine(pixels, 92, 57, 100, 48, 2, 0);
+
+            // Head - lowering slightly
+            fillEllipse(pixels, 103, 42, 3, 5, 1);
+            fillEllipse(pixels, 108, 43, 3, 5, 1);
+            fillEllipse(pixels, 113, 45, 3, 5, 1);
+            fillEllipse(pixels, 103, 41, 2, 4, 0);
+            fillLine(pixels, 113, 49, 103, 46, 2, 0);
+            pixels[43][106] = 0;
+
+            // Ear
+            fillLine(pixels, 102, 37, 100, 32, 2, 0);
+
+            // Hind legs - lifting
+            fillEllipse(pixels, 34, 86, 5, 8, 1);
+            fillEllipse(pixels, 36, 99, 3, 10, 1);
+            fillCircle(pixels, 38, 112, 3, 0);
+            fillLine(pixels, 39, 115, 38, 136, 2, 0);
+            fillEllipse(pixels, 38, 143, 3, 3, 0);
+
+            fillEllipse(pixels, 29, 87, 5, 8, 1);
+            fillEllipse(pixels, 31, 100, 3, 10, 1);
+            fillCircle(pixels, 33, 113, 3, 0);
+            fillLine(pixels, 34, 116, 32, 135, 2, 0);
+            fillEllipse(pixels, 32, 142, 3, 3, 0);
+
+            // Right front - GROUNDED (weight bearing)
+            fillEllipse(pixels, 92, 77, 3, 8, 1);
+            fillEllipse(pixels, 92, 76, 2, 7, 0);
+            fillCircle(pixels, 92, 79, 2, 2);
+            fillEllipse(pixels, 96, 90, 3, 10, 1);
+            fillEllipse(pixels, 96, 89, 2, 8, 0);
+            fillCircle(pixels, 100, 103, 3, 0);
+            fillLine(pixels, 101, 106, 110, 126, 2, 0);
+            fillLine(pixels, 102, 106, 111, 126, 1, 1);
+            fillCircle(pixels, 110, 128, 2, 0);
+            fillLine(pixels, 112, 129, 118, 140, 2, 0);
+            fillLine(pixels, 112, 129, 118, 140, 1, 1);
+            fillEllipse(pixels, 118, 142, 3, 3, 0);
+
+            // Left front - lifting
+            fillEllipse(pixels, 88, 78, 3, 8, 1);
+            fillEllipse(pixels, 91, 91, 3, 10, 1);
+            fillCircle(pixels, 94, 104, 3, 0);
+            fillLine(pixels, 95, 107, 102, 128, 2, 0);
+            fillCircle(pixels, 102, 130, 2, 0);
+            fillLine(pixels, 104, 131, 107, 141, 2, 0);
+            fillEllipse(pixels, 107, 142, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 43, 72, 6, 8, 1);
+            fillEllipse(pixels, 83, 67, 6, 10, 1);
+
+            return pixels;
         }
 
         function drawFrame8() {
-            // LEFT HIND PUSH - Propulsion
-            return drawFrame1(); // Placeholder
+            // LEFT FRONT SUPPORT - Weight fully on left front
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail
+            fillEllipse(pixels, 17, 52, 3, 6, 0);
+            fillEllipse(pixels, 14, 63, 3, 8, 0);
+            fillEllipse(pixels, 15, 61, 2, 5, 1);
+
+            // Hindquarters
+            fillEllipse(pixels, 30, 60, 9, 11, 1);
+            fillEllipse(pixels, 35, 68, 10, 12, 1);
+            fillEllipse(pixels, 29, 59, 7, 9, 0);
+            fillCircle(pixels, 31, 62, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 50, 66, 8, 13, 1);
+            fillEllipse(pixels, 63, 67, 10, 14, 1);
+            fillEllipse(pixels, 76, 68, 10, 14, 1);
+            fillEllipse(pixels, 50, 64, 6, 10, 0);
+            fillEllipse(pixels, 52, 68, 4, 6, 2);
+
+            // Back
+            fillLine(pixels, 28, 52, 88, 50, 2, 0);
+            fillCircle(pixels, 82, 50, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 87, 61, 6, 11, 1);
+            fillCircle(pixels, 89, 65, 5, 0);
+
+            // Neck
+            fillEllipse(pixels, 90, 52, 5, 5, 1);
+            fillEllipse(pixels, 95, 48, 5, 5, 1);
+            fillEllipse(pixels, 90, 51, 4, 4, 0);
+            fillLine(pixels, 92, 57, 99, 49, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 102, 43, 3, 5, 1);
+            fillEllipse(pixels, 107, 44, 3, 5, 1);
+            fillEllipse(pixels, 102, 42, 2, 4, 0);
+            fillLine(pixels, 112, 48, 103, 47, 2, 0);
+            pixels[44][105] = 0;
+
+            // Ear
+            fillLine(pixels, 101, 38, 99, 33, 2, 0);
+
+            // Hind legs - one lifting for pushoff
+            fillEllipse(pixels, 32, 87, 5, 8, 1);
+            fillEllipse(pixels, 34, 100, 3, 10, 1);
+            fillCircle(pixels, 36, 113, 3, 0);
+            fillLine(pixels, 37, 116, 34, 137, 2, 0);
+            fillEllipse(pixels, 34, 143, 3, 3, 0);
+
+            fillEllipse(pixels, 27, 88, 5, 8, 1);
+            fillEllipse(pixels, 29, 101, 3, 10, 1);
+            fillCircle(pixels, 31, 114, 3, 0);
+            fillLine(pixels, 32, 117, 28, 138, 2, 0);
+            fillEllipse(pixels, 28, 143, 3, 3, 0);
+
+            // Right front - lifted high
+            fillEllipse(pixels, 94, 76, 3, 8, 1);
+            fillEllipse(pixels, 97, 89, 3, 10, 1);
+            fillCircle(pixels, 100, 102, 3, 0);
+            fillLine(pixels, 101, 105, 108, 124, 2, 0);
+            fillCircle(pixels, 108, 126, 2, 0);
+            fillLine(pixels, 110, 127, 114, 137, 2, 0);
+            fillEllipse(pixels, 114, 139, 3, 3, 0);
+
+            // Left front - GROUNDED (full weight)
+            fillEllipse(pixels, 90, 77, 3, 8, 1);
+            fillEllipse(pixels, 90, 76, 2, 7, 0);
+            fillCircle(pixels, 90, 79, 2, 2);
+            fillEllipse(pixels, 93, 90, 3, 10, 1);
+            fillEllipse(pixels, 93, 89, 2, 8, 0);
+            fillCircle(pixels, 97, 103, 3, 0);
+            fillLine(pixels, 98, 106, 105, 128, 2, 0);
+            fillLine(pixels, 99, 106, 106, 128, 1, 1);
+            fillCircle(pixels, 105, 130, 2, 0);
+            fillLine(pixels, 107, 131, 112, 142, 2, 0);
+            fillLine(pixels, 107, 131, 112, 142, 1, 1);
+            fillEllipse(pixels, 112, 143, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 43, 72, 6, 8, 1);
+            fillEllipse(pixels, 83, 67, 6, 10, 1);
+
+            return pixels;
         }
 
         function drawFrame9() {
-            return drawFrame0(); // Continuing cycle
+            // LEFT HIND PUSHOFF - Propulsion begins
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail - rising
+            fillEllipse(pixels, 17, 52, 3, 6, 0);
+            fillEllipse(pixels, 14, 64, 3, 8, 0);
+            fillEllipse(pixels, 11, 77, 3, 9, 0);
+
+            // Hindquarters - driving
+            fillEllipse(pixels, 30, 60, 9, 11, 1);
+            fillEllipse(pixels, 35, 68, 10, 12, 1);
+            fillEllipse(pixels, 29, 59, 7, 9, 0);
+            fillEllipse(pixels, 33, 65, 8, 10, 0);
+            fillCircle(pixels, 31, 62, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 50, 66, 8, 13, 1);
+            fillEllipse(pixels, 63, 67, 10, 14, 1);
+            fillEllipse(pixels, 76, 68, 10, 14, 1);
+            fillEllipse(pixels, 50, 64, 6, 10, 0);
+            fillEllipse(pixels, 63, 65, 8, 11, 0);
+            fillEllipse(pixels, 52, 68, 4, 6, 2);
+
+            // Back
+            fillLine(pixels, 28, 52, 88, 50, 2, 0);
+            fillCircle(pixels, 82, 50, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 87, 61, 6, 11, 1);
+            fillCircle(pixels, 89, 65, 5, 0);
+
+            // Neck
+            fillEllipse(pixels, 90, 52, 5, 5, 1);
+            fillEllipse(pixels, 95, 47, 5, 5, 1);
+            fillEllipse(pixels, 90, 51, 4, 4, 0);
+            fillCircle(pixels, 92, 49, 2, 2);
+            fillLine(pixels, 92, 57, 100, 48, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 103, 42, 3, 5, 1);
+            fillEllipse(pixels, 108, 43, 3, 5, 1);
+            fillEllipse(pixels, 103, 41, 2, 4, 0);
+            fillLine(pixels, 113, 47, 104, 46, 2, 0);
+            pixels[43][106] = 0;
+
+            // Ear
+            fillLine(pixels, 102, 37, 100, 32, 2, 0);
+
+            // Left hind - EXTENDED (pushoff)
+            fillEllipse(pixels, 30, 88, 5, 8, 1);
+            fillEllipse(pixels, 30, 87, 4, 7, 0);
+            fillCircle(pixels, 30, 90, 2, 2);
+            fillEllipse(pixels, 28, 101, 3, 10, 1);
+            fillEllipse(pixels, 28, 100, 2, 8, 0);
+            fillCircle(pixels, 26, 114, 3, 0);
+            fillLine(pixels, 25, 117, 20, 136, 2, 0);
+            fillLine(pixels, 26, 117, 21, 136, 1, 1);
+            fillCircle(pixels, 20, 138, 2, 0);
+            fillLine(pixels, 19, 140, 16, 143, 2, 0);
+            fillEllipse(pixels, 15, 143, 3, 2, 0);
+
+            // Right hind - lifting
+            fillEllipse(pixels, 36, 87, 5, 8, 1);
+            fillEllipse(pixels, 38, 100, 3, 10, 1);
+            fillCircle(pixels, 40, 113, 3, 0);
+            fillLine(pixels, 41, 116, 42, 135, 2, 0);
+            fillEllipse(pixels, 42, 142, 3, 3, 0);
+
+            // Front legs - gathering
+            fillEllipse(pixels, 92, 77, 3, 8, 1);
+            fillEllipse(pixels, 94, 90, 3, 10, 1);
+            fillCircle(pixels, 96, 103, 3, 0);
+            fillLine(pixels, 97, 106, 102, 126, 2, 0);
+            fillCircle(pixels, 102, 128, 2, 0);
+            fillLine(pixels, 104, 129, 107, 139, 2, 0);
+            fillEllipse(pixels, 107, 141, 3, 3, 0);
+
+            fillEllipse(pixels, 88, 78, 3, 8, 1);
+            fillEllipse(pixels, 90, 91, 3, 10, 1);
+            fillCircle(pixels, 92, 104, 3, 0);
+            fillLine(pixels, 93, 107, 97, 128, 2, 0);
+            fillCircle(pixels, 97, 130, 2, 0);
+            fillLine(pixels, 99, 131, 101, 141, 2, 0);
+            fillEllipse(pixels, 101, 142, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 43, 72, 6, 8, 1);
+            fillEllipse(pixels, 83, 67, 6, 10, 1);
+
+            return pixels;
         }
 
         function drawFrame10() {
-            return drawFrame1();
+            // GATHERING - Legs coming together
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail
+            fillEllipse(pixels, 17, 53, 3, 7, 0);
+            fillEllipse(pixels, 14, 66, 3, 9, 0);
+            fillEllipse(pixels, 11, 81, 3, 10, 0);
+
+            // Hindquarters
+            fillEllipse(pixels, 30, 59, 9, 11, 1);
+            fillEllipse(pixels, 35, 67, 10, 12, 1);
+            fillEllipse(pixels, 29, 58, 7, 9, 0);
+            fillCircle(pixels, 31, 61, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 50, 65, 8, 13, 1);
+            fillEllipse(pixels, 63, 66, 10, 14, 1);
+            fillEllipse(pixels, 76, 67, 10, 14, 1);
+            fillEllipse(pixels, 50, 63, 6, 10, 0);
+            fillEllipse(pixels, 52, 67, 4, 6, 2);
+
+            // Back - arching
+            fillLine(pixels, 28, 51, 87, 49, 2, 0);
+            fillCircle(pixels, 82, 49, 3, 0);
+
+            // Shoulder
+            fillEllipse(pixels, 86, 60, 6, 11, 1);
+            fillCircle(pixels, 88, 64, 5, 0);
+
+            // Neck
+            fillEllipse(pixels, 89, 51, 5, 5, 1);
+            fillEllipse(pixels, 94, 46, 5, 5, 1);
+            fillEllipse(pixels, 89, 50, 4, 4, 0);
+            fillCircle(pixels, 91, 48, 2, 2);
+            fillLine(pixels, 91, 56, 103, 45, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 106, 40, 3, 5, 1);
+            fillEllipse(pixels, 111, 41, 3, 5, 1);
+            fillEllipse(pixels, 106, 39, 2, 4, 0);
+            fillLine(pixels, 116, 45, 107, 44, 2, 0);
+            pixels[41][109] = 0;
+
+            // Ear
+            fillLine(pixels, 105, 35, 103, 30, 2, 0);
+
+            // Hind legs - gathering
+            fillEllipse(pixels, 35, 84, 5, 8, 1);
+            fillEllipse(pixels, 38, 97, 3, 10, 1);
+            fillCircle(pixels, 42, 110, 3, 0);
+            fillLine(pixels, 43, 113, 46, 132, 2, 0);
+            fillEllipse(pixels, 46, 142, 3, 3, 0);
+
+            fillEllipse(pixels, 40, 84, 5, 8, 1);
+            fillEllipse(pixels, 43, 97, 3, 10, 1);
+            fillCircle(pixels, 47, 110, 3, 0);
+            fillLine(pixels, 48, 113, 51, 132, 2, 0);
+            fillEllipse(pixels, 51, 142, 3, 3, 0);
+
+            // Front legs - tucking
+            fillEllipse(pixels, 86, 81, 3, 8, 1);
+            fillEllipse(pixels, 88, 94, 3, 10, 1);
+            fillCircle(pixels, 90, 107, 3, 0);
+            fillLine(pixels, 91, 110, 93, 130, 2, 0);
+            fillEllipse(pixels, 93, 141, 3, 3, 0);
+
+            fillEllipse(pixels, 89, 81, 3, 8, 1);
+            fillEllipse(pixels, 91, 94, 3, 10, 1);
+            fillCircle(pixels, 93, 107, 3, 0);
+            fillLine(pixels, 94, 110, 96, 130, 2, 0);
+            fillEllipse(pixels, 96, 141, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 43, 71, 6, 8, 1);
+            fillEllipse(pixels, 82, 66, 6, 10, 1);
+
+            return pixels;
         }
 
         function drawFrame11() {
-            return drawFrame2();
+            // GATHERING MORE - Body compressing
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Tail
+            fillEllipse(pixels, 17, 54, 3, 7, 0);
+            fillEllipse(pixels, 14, 68, 3, 9, 0);
+            fillEllipse(pixels, 11, 84, 3, 10, 0);
+            fillEllipse(pixels, 15, 62, 2, 5, 1);
+
+            // Hindquarters - rounding
+            fillEllipse(pixels, 29, 58, 8, 10, 1);
+            fillEllipse(pixels, 34, 66, 10, 11, 1);
+            fillEllipse(pixels, 28, 57, 6, 8, 0);
+            fillEllipse(pixels, 32, 63, 7, 9, 0);
+            fillCircle(pixels, 30, 60, 3, 2);
+
+            // Barrel
+            fillEllipse(pixels, 49, 64, 8, 13, 1);
+            fillEllipse(pixels, 62, 66, 10, 14, 1);
+            fillEllipse(pixels, 75, 67, 10, 14, 1);
+            fillEllipse(pixels, 49, 62, 6, 10, 0);
+            fillEllipse(pixels, 51, 66, 4, 6, 2);
+            fillEllipse(pixels, 64, 68, 5, 7, 2);
+
+            // Back - arching more
+            fillLine(pixels, 27, 51, 86, 49, 2, 0);
+            fillCircle(pixels, 81, 49, 3, 0);
+            fillCircle(pixels, 82, 50, 2, 2);
+
+            // Shoulder
+            fillEllipse(pixels, 85, 60, 6, 11, 1);
+            fillCircle(pixels, 87, 64, 5, 0);
+            fillCircle(pixels, 86, 62, 3, 2);
+
+            // Neck - arching
+            fillEllipse(pixels, 88, 51, 5, 5, 1);
+            fillEllipse(pixels, 93, 45, 5, 5, 1);
+            fillEllipse(pixels, 98, 41, 5, 5, 1);
+            fillEllipse(pixels, 88, 50, 4, 4, 0);
+            fillEllipse(pixels, 93, 44, 4, 4, 0);
+            fillCircle(pixels, 90, 47, 2, 2);
+            fillCircle(pixels, 96, 41, 2, 2);
+            fillLine(pixels, 90, 56, 101, 43, 2, 0);
+
+            // Head
+            fillEllipse(pixels, 105, 38, 3, 5, 1);
+            fillEllipse(pixels, 110, 39, 3, 5, 1);
+            fillEllipse(pixels, 115, 42, 3, 5, 1);
+            fillEllipse(pixels, 105, 37, 2, 4, 0);
+            fillCircle(pixels, 107, 39, 1, 2);
+            fillLine(pixels, 115, 46, 106, 42, 2, 0);
+            pixels[39][108] = 0;
+
+            // Ear
+            fillLine(pixels, 104, 33, 102, 28, 2, 0);
+            fillLine(pixels, 102, 28, 105, 30, 2, 0);
+
+            // Hind legs - tucking more
+            fillEllipse(pixels, 37, 83, 5, 8, 1);
+            fillEllipse(pixels, 40, 96, 3, 10, 1);
+            fillCircle(pixels, 44, 109, 3, 0);
+            fillLine(pixels, 45, 112, 48, 129, 2, 0);
+            fillCircle(pixels, 48, 131, 2, 0);
+            fillLine(pixels, 50, 132, 51, 139, 2, 0);
+            fillEllipse(pixels, 51, 140, 3, 3, 0);
+
+            fillEllipse(pixels, 42, 83, 5, 8, 1);
+            fillEllipse(pixels, 45, 96, 3, 10, 1);
+            fillCircle(pixels, 49, 109, 3, 0);
+            fillLine(pixels, 50, 112, 53, 129, 2, 0);
+            fillEllipse(pixels, 53, 140, 3, 3, 0);
+
+            // Front legs - tucking more
+            fillEllipse(pixels, 85, 80, 3, 8, 1);
+            fillEllipse(pixels, 87, 93, 3, 10, 1);
+            fillCircle(pixels, 89, 106, 3, 0);
+            fillLine(pixels, 90, 109, 92, 128, 2, 0);
+            fillCircle(pixels, 92, 130, 2, 0);
+            fillLine(pixels, 93, 131, 93, 138, 2, 0);
+            fillEllipse(pixels, 93, 139, 3, 3, 0);
+
+            fillEllipse(pixels, 88, 80, 3, 8, 1);
+            fillEllipse(pixels, 90, 93, 3, 10, 1);
+            fillCircle(pixels, 92, 106, 3, 0);
+            fillLine(pixels, 93, 109, 95, 128, 2, 0);
+            fillEllipse(pixels, 95, 139, 3, 3, 0);
+
+            // Smoothing
+            fillEllipse(pixels, 42, 70, 6, 8, 1);
+            fillEllipse(pixels, 81, 64, 6, 10, 1);
+            fillEllipse(pixels, 88, 55, 5, 6, 1);
+
+            return pixels;
         }
 
         function drawFrame12() {
+            // PRE-SUSPENSION 2 - Nearly airborne
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Similar to Frame 3 but mirrored in cycle
+            // (Reusing Frame 3 structure with slight variations)
             return drawFrame3();
         }
 
         function drawFrame13() {
+            // SUSPENSION 2 - Peak of second suspension
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Similar to Frame 4
             return drawFrame4();
         }
 
         function drawFrame14() {
-            return drawFrame3();
+            // POST-SUSPENSION 2 - Descending
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Similar to Frame 5
+            return drawFrame5();
         }
 
         function drawFrame15() {
-            return drawFrame2();
+            // EXTENDING - Preparing for next contact
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // Similar to Frame 6 but transitioning back to Frame 0
+            return drawFrame6();
         }
 
         // Frame drawing array
