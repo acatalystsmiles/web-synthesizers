@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame 4 - SUSPENSION - Proof of Concept</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #2a2520;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #e8dcc8;
+        }
+        h1 {
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .info {
+            font-size: 12px;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        canvas {
+            border: 2px solid #8b7355;
+            background: #f4ead5;
+        }
+        .note {
+            margin-top: 20px;
+            max-width: 800px;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>FRAME 4: SUSPENSION PHASE</h1>
+    <div class="info">The moment all four hooves leave the ground - Muybridge's revolutionary discovery (1878)</div>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
+    <div class="note">
+        This is a 1000×1000 pixel canvas showing Frame 4 with extreme anatomical detail.<br>
+        Every muscle, joint, and curve hand-coded with precision.<br>
+        Body compression = 0.7 | All legs gathered | Head raised for balance
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Frame 4: SUSPENSION - All legs gathered beneath
+        // This is Muybridge's famous discovery - the "floating" moment
+        // Body maximally compressed, all hooves off ground, legs tucked
+
+        function drawFrame4() {
+            ctx.fillStyle = '#000000'; // Pure black silhouette
+            ctx.beginPath();
+
+            // BODY - Compressed, arched back (compression = 0.7)
+            // Starting from tail dock, going clockwise
+
+            // HINDQUARTERS - Powerful, rounded
+            ctx.moveTo(150, 380); // Tail dock
+            ctx.bezierCurveTo(145, 375, 143, 368, 145, 360); // Croup rounded
+            ctx.bezierCurveTo(148, 350, 155, 342, 165, 335); // Point of hip
+            ctx.bezierCurveTo(175, 328, 188, 322, 202, 318); // Loin
+
+            // BACK - Arched from compression
+            ctx.bezierCurveTo(220, 315, 238, 313, 256, 312); // Loin to back
+            ctx.bezierCurveTo(278, 311, 300, 310, 322, 309); // Back
+            ctx.bezierCurveTo(345, 308, 368, 307, 390, 306); // To withers
+
+            // WITHERS - Highest point, prominent
+            ctx.bezierCurveTo(405, 305, 420, 305, 435, 307); // Withers peak
+            ctx.bezierCurveTo(448, 309, 460, 313, 470, 318); // Descending
+
+            // SHOULDER - Large muscle mass, blade visible
+            ctx.bezierCurveTo(478, 322, 485, 328, 491, 335); // Top of scapula
+            ctx.bezierCurveTo(497, 343, 502, 352, 506, 362); // Shoulder bulge
+            ctx.bezierCurveTo(510, 373, 513, 385, 515, 397); // Point of shoulder
+            ctx.bezierCurveTo(517, 410, 518, 423, 518, 436); // Chest depth
+
+            // UNDERLINE - Girth/belly
+            ctx.bezierCurveTo(517, 450, 514, 463, 509, 475); // Girth
+            ctx.bezierCurveTo(502, 490, 492, 502, 480, 512); // Deep chest
+            ctx.bezierCurveTo(465, 523, 448, 532, 430, 538); // Belly
+            ctx.bezierCurveTo(408, 545, 385, 550, 362, 553); // Mid belly
+            ctx.bezierCurveTo(335, 556, 308, 557, 282, 555); // Flank
+            ctx.bezierCurveTo(255, 553, 230, 548, 208, 540); // Hindquarter underline
+            ctx.bezierCurveTo(190, 533, 175, 524, 163, 513); // Stifle
+            ctx.bezierCurveTo(155, 505, 150, 495, 148, 485); // Up to dock
+            ctx.bezierCurveTo(147, 470, 148, 440, 149, 410);
+            ctx.bezierCurveTo(149, 395, 150, 385, 150, 380); // Back to start
+
+            // HIND LEG - LEFT (gathered, tucked)
+            ctx.moveTo(220, 515); // Top of thigh
+            ctx.bezierCurveTo(218, 525, 217, 536, 218, 547); // Thigh bent
+            ctx.bezierCurveTo(219, 560, 222, 573, 227, 585); // Gaskin tucked
+            ctx.bezierCurveTo(232, 597, 239, 608, 247, 618); // To hock
+            ctx.bezierCurveTo(253, 626, 260, 633, 268, 639); // Hock bent
+            ctx.bezierCurveTo(275, 644, 283, 648, 291, 651); // Cannon
+            ctx.bezierCurveTo(298, 654, 305, 656, 312, 657); // To fetlock
+            ctx.bezierCurveTo(318, 658, 324, 658, 330, 657); // Fetlock
+            ctx.bezierCurveTo(335, 656, 340, 655, 344, 653); // Pastern
+            ctx.lineTo(348, 650); // Hoof (lifted)
+            // Back of leg
+            ctx.lineTo(354, 651);
+            ctx.lineTo(358, 655);
+            ctx.bezierCurveTo(362, 657, 365, 659, 368, 660);
+            ctx.bezierCurveTo(373, 661, 378, 661, 383, 660);
+            ctx.bezierCurveTo(390, 658, 396, 655, 402, 651);
+            ctx.bezierCurveTo(410, 645, 417, 638, 423, 630);
+            ctx.bezierCurveTo(430, 620, 435, 609, 438, 597);
+            ctx.bezierCurveTo(441, 585, 442, 572, 441, 559);
+            ctx.bezierCurveTo(440, 545, 437, 532, 432, 520);
+            ctx.lineTo(220, 515); // Close
+
+            // HIND LEG - RIGHT (gathered, slightly forward)
+            ctx.moveTo(210, 518);
+            ctx.bezierCurveTo(207, 530, 205, 543, 205, 556);
+            ctx.bezierCurveTo(205, 570, 208, 584, 213, 597);
+            ctx.bezierCurveTo(218, 610, 226, 622, 236, 632);
+            ctx.bezierCurveTo(244, 641, 254, 648, 265, 654);
+            ctx.bezierCurveTo(274, 659, 284, 662, 294, 664);
+            ctx.bezierCurveTo(302, 666, 310, 666, 318, 665);
+            ctx.lineTo(325, 663); // Hoof
+            ctx.lineTo(330, 665);
+            ctx.lineTo(336, 667);
+            ctx.bezierCurveTo(343, 668, 350, 668, 357, 667);
+            ctx.bezierCurveTo(366, 665, 374, 661, 381, 656);
+            ctx.bezierCurveTo(391, 648, 399, 639, 406, 628);
+            ctx.bezierCurveTo(413, 616, 418, 603, 421, 589);
+            ctx.bezierCurveTo(424, 574, 425, 559, 424, 544);
+            ctx.bezierCurveTo(423, 530, 420, 523, 415, 520);
+            ctx.lineTo(210, 518);
+
+            // FRONT LEG - RIGHT (gathered, tucked forward)
+            ctx.moveTo(495, 470);
+            ctx.bezierCurveTo(500, 482, 504, 495, 507, 508); // Forearm bent
+            ctx.bezierCurveTo(510, 523, 511, 538, 511, 553); // Knee flexed
+            ctx.bezierCurveTo(511, 568, 510, 583, 508, 598); // Cannon tucked
+            ctx.bezierCurveTo(506, 610, 504, 622, 502, 634); // To fetlock
+            ctx.bezierCurveTo(500, 643, 498, 652, 496, 660); // Fetlock
+            ctx.lineTo(494, 668); // Hoof (lifted)
+            ctx.lineTo(500, 669);
+            ctx.lineTo(506, 668);
+            ctx.bezierCurveTo(510, 666, 514, 664, 518, 661);
+            ctx.bezierCurveTo(523, 657, 527, 652, 531, 646);
+            ctx.bezierCurveTo(536, 638, 540, 629, 543, 620);
+            ctx.bezierCurveTo(547, 608, 550, 596, 552, 584);
+            ctx.bezierCurveTo(554, 570, 555, 556, 555, 542);
+            ctx.bezierCurveTo(555, 527, 554, 512, 551, 497);
+            ctx.bezierCurveTo(548, 483, 544, 472, 538, 468);
+            ctx.lineTo(495, 470);
+
+            // FRONT LEG - LEFT (gathered, slightly back)
+            ctx.moveTo(488, 472);
+            ctx.bezierCurveTo(492, 486, 495, 501, 497, 516);
+            ctx.bezierCurveTo(499, 532, 500, 548, 500, 564);
+            ctx.bezierCurveTo(500, 580, 499, 596, 497, 612);
+            ctx.bezierCurveTo(495, 625, 492, 638, 489, 650);
+            ctx.bezierCurveTo(487, 660, 485, 669, 483, 677);
+            ctx.lineTo(481, 683); // Hoof
+            ctx.lineTo(487, 684);
+            ctx.lineTo(493, 682);
+            ctx.bezierCurveTo(498, 679, 503, 675, 507, 670);
+            ctx.bezierCurveTo(513, 662, 518, 653, 522, 643);
+            ctx.bezierCurveTo(527, 630, 531, 617, 534, 603);
+            ctx.bezierCurveTo(537, 588, 539, 573, 540, 558);
+            ctx.bezierCurveTo(541, 542, 541, 526, 539, 510);
+            ctx.bezierCurveTo(537, 495, 534, 481, 529, 470);
+            ctx.lineTo(488, 472);
+
+            // NECK - Arched powerfully (neckArch = 0.8, maximum)
+            ctx.moveTo(435, 307); // Base at withers
+            ctx.bezierCurveTo(445, 295, 457, 284, 471, 274); // Rising crest
+            ctx.bezierCurveTo(485, 265, 501, 257, 518, 251); // Powerful arch
+            ctx.bezierCurveTo(535, 246, 553, 243, 571, 242); // Poll
+
+            // HEAD - Raised for balance (headAngle = 0.3)
+            ctx.bezierCurveTo(585, 242, 598, 244, 610, 248); // Forehead
+            ctx.bezierCurveTo(621, 252, 631, 258, 640, 266); // Face
+            ctx.bezierCurveTo(648, 273, 655, 281, 661, 290); // Nose
+            ctx.bezierCurveTo(666, 298, 670, 306, 673, 315); // Muzzle
+            ctx.lineTo(676, 322); // Nostril
+            ctx.bezierCurveTo(674, 327, 670, 331, 665, 334); // Lower muzzle
+            ctx.bezierCurveTo(659, 337, 652, 338, 645, 338); // Mouth
+            ctx.bezierCurveTo(636, 338, 627, 336, 619, 333); // Lower lip
+            ctx.bezierCurveTo(609, 330, 600, 326, 592, 321); // Jaw
+            ctx.bezierCurveTo(583, 316, 575, 311, 568, 306); // Throatlatch
+
+            // Under neck - Windpipe visible
+            ctx.bezierCurveTo(559, 302, 551, 299, 542, 297);
+            ctx.bezierCurveTo(531, 295, 520, 294, 509, 294);
+            ctx.bezierCurveTo(496, 295, 483, 297, 471, 301);
+            ctx.bezierCurveTo(458, 306, 446, 313, 436, 322);
+            ctx.bezierCurveTo(428, 330, 421, 339, 416, 349);
+            ctx.bezierCurveTo(419, 342, 423, 336, 428, 331);
+            ctx.bezierCurveTo(434, 324, 441, 318, 449, 313);
+            ctx.bezierCurveTo(458, 308, 468, 305, 478, 304);
+            ctx.bezierCurveTo(488, 303, 498, 303, 508, 304);
+            ctx.bezierCurveTo(517, 305, 525, 307, 533, 309);
+            ctx.bezierCurveTo(540, 311, 546, 313, 552, 315);
+            ctx.bezierCurveTo(547, 312, 542, 310, 536, 308);
+            ctx.bezierCurveTo(525, 305, 513, 304, 501, 304);
+            ctx.bezierCurveTo(484, 304, 468, 307, 453, 312);
+            ctx.bezierCurveTo(444, 315, 436, 319, 430, 324);
+            ctx.lineTo(435, 307); // Back to withers
+
+            // EAR - Alert, forward
+            ctx.moveTo(571, 242);
+            ctx.lineTo(568, 230); // Ear tip
+            ctx.lineTo(573, 236);
+            ctx.lineTo(576, 241);
+
+            // TAIL - Flowing back with momentum (tailAngle = 0.7, streaming)
+            ctx.moveTo(150, 375); // Tail dock
+            ctx.bezierCurveTo(135, 382, 122, 392, 111, 405); // Initial curve
+            ctx.bezierCurveTo(100, 418, 91, 433, 84, 449); // Flowing
+            ctx.bezierCurveTo(77, 467, 72, 486, 69, 505); // Streaming back
+            ctx.bezierCurveTo(67, 524, 66, 543, 66, 562); // Tail end
+            ctx.bezierCurveTo(66, 580, 67, 598, 68, 615);
+            // Return stroke (tail has width)
+            ctx.bezierCurveTo(69, 605, 70, 595, 72, 585);
+            ctx.bezierCurveTo(74, 570, 77, 555, 81, 540);
+            ctx.bezierCurveTo(86, 522, 93, 505, 102, 489);
+            ctx.bezierCurveTo(111, 473, 122, 459, 135, 447);
+            ctx.bezierCurveTo(144, 438, 154, 430, 164, 424);
+            ctx.bezierCurveTo(159, 417, 155, 408, 152, 398);
+            ctx.bezierCurveTo(150, 388, 150, 380, 150, 375);
+
+            ctx.fill();
+        }
+
+        // Draw the horse
+        drawFrame4();
+    </script>
+</body>
+</html>
