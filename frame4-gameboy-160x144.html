@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame 4 - Game Boy Resolution - 160×144</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #9bbc0f;
+        }
+        h1 {
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            color: #8bac0f;
+        }
+        .info {
+            font-size: 12px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+            color: #8bac0f;
+        }
+        .gb-screen {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+        }
+        #display {
+            border: 3px solid #0f380f;
+            background: #9bbc0f;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 640px;  /* 160 × 4 */
+            height: 576px; /* 144 × 4 */
+            box-shadow: inset 0 0 20px rgba(15, 56, 15, 0.3);
+        }
+        #canvas {
+            display: none;
+        }
+        .specs {
+            margin-top: 20px;
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            line-height: 1.8;
+        }
+        .note {
+            margin-top: 20px;
+            max-width: 640px;
+            text-align: center;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #8bac0f;
+        }
+    </style>
+</head>
+<body>
+    <h1>FRAME 4: SUSPENSION (GAME BOY RESOLUTION)</h1>
+    <div class="info">160×144 pixels | 4-shade DMG palette | 8×8 tile grid</div>
+
+    <div class="gb-screen">
+        <canvas id="canvas" width="160" height="144"></canvas>
+        <canvas id="display"></canvas>
+    </div>
+
+    <div class="specs">
+        Aspect ratio: 10:9 | Screen: 2.6" diagonal | 20×18 tiles (8×8px each)
+    </div>
+
+    <div class="note">
+        Game Boy DMG palette (4 shades):<br>
+        Shade 0 (Darkest): Silhouette outline | Shade 1: Body mass | Shade 2: Muscle highlights | Shade 3: Background
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const display = document.getElementById('display');
+        const displayCtx = display.getContext('2d');
+
+        // Game Boy DMG 4-shade palette (classic green)
+        const GB_PALETTE = [
+            '#0f380f',  // Shade 0 - Darkest (almost black green)
+            '#306230',  // Shade 1 - Dark green
+            '#8bac0f',  // Shade 2 - Light green
+            '#9bbc0f'   // Shade 3 - Lightest (off-white green)
+        ];
+
+        // Create 160×144 pixel array (values 0-3 for 4 shades)
+        const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+        // Helper to fill a circle
+        function fillCircle(cx, cy, radius, shade) {
+            for (let y = -radius; y <= radius; y++) {
+                for (let x = -radius; x <= radius; x++) {
+                    if (x * x + y * y <= radius * radius) {
+                        const px = Math.round(cx + x);
+                        const py = Math.round(cy + y);
+                        if (px >= 0 && px < 160 && py >= 0 && py < 144) {
+                            pixels[py][px] = shade;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Helper to fill an ellipse
+        function fillEllipse(cx, cy, rx, ry, shade) {
+            for (let y = -ry; y <= ry; y++) {
+                for (let x = -rx; x <= rx; x++) {
+                    if ((x * x) / (rx * rx) + (y * y) / (ry * ry) <= 1) {
+                        const px = Math.round(cx + x);
+                        const py = Math.round(cy + y);
+                        if (px >= 0 && px < 160 && py >= 0 && py < 144) {
+                            pixels[py][px] = shade;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Helper to fill a line
+        function fillLine(x1, y1, x2, y2, thickness, shade) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            for (let i = 0; i <= length; i++) {
+                const t = i / length;
+                const x = Math.round(x1 + dx * t);
+                const y = Math.round(y1 + dy * t);
+
+                for (let ty = -thickness; ty <= thickness; ty++) {
+                    for (let tx = -thickness; tx <= thickness; tx++) {
+                        if (tx * tx + ty * ty <= thickness * thickness) {
+                            const px = x + tx;
+                            const py = y + ty;
+                            if (px >= 0 && px < 160 && py >= 0 && py < 144) {
+                                pixels[py][px] = shade;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Build Frame 4 - SUSPENSION phase at 160×144 resolution
+        // Horse faces RIGHT, coordinates scaled from 100×100 by 1.6×
+        // Using 4 shades: 0=darkest outline, 1=body mass, 2=highlights, 3=background
+
+        // ===== TAIL - streaming back =====
+        fillEllipse(17, 54, 3, 7, 0);   // Tail dock
+        fillEllipse(14, 69, 3, 9, 0);
+        fillEllipse(11, 86, 3, 11, 0);
+        fillEllipse(9, 104, 2, 12, 0);
+        fillEllipse(8, 122, 2, 10, 0);
+        // Internal shading
+        fillEllipse(15, 62, 2, 5, 1);
+        fillEllipse(11, 80, 2, 8, 1);
+
+        // ===== HINDQUARTERS - massive, rounded =====
+        // Main body mass (shade 1)
+        fillEllipse(29, 58, 8, 10, 1);  // Croup
+        fillEllipse(34, 66, 10, 11, 1); // Main haunch
+        fillEllipse(38, 75, 8, 10, 1);  // Lower haunch
+
+        // Darker outline/muscles (shade 0)
+        fillEllipse(28, 57, 6, 8, 0);   // Croup definition
+        fillEllipse(32, 63, 7, 9, 0);   // Gluteal mass
+        fillEllipse(36, 71, 7, 8, 0);   // Hip bulge
+        fillEllipse(39, 78, 6, 7, 0);   // Lower haunch muscle
+
+        // Highlights (shade 2)
+        fillCircle(30, 60, 3, 2);       // Croup highlight
+        fillCircle(34, 68, 3, 2);       // Hip highlight
+
+        // ===== BARREL/RIBCAGE - compressed =====
+        // Body mass (shade 1)
+        fillEllipse(48, 64, 8, 13, 1);  // Rear barrel
+        fillEllipse(61, 66, 10, 14, 1); // Mid barrel
+        fillEllipse(74, 67, 10, 14, 1); // Front barrel
+        fillEllipse(83, 69, 8, 13, 1);  // Chest
+
+        // Darker definition (shade 0)
+        fillEllipse(48, 62, 6, 10, 0);
+        fillEllipse(61, 64, 8, 11, 0);
+        fillEllipse(74, 65, 8, 11, 0);
+        fillEllipse(83, 67, 6, 10, 0);
+
+        // Highlights (shade 2)
+        fillEllipse(50, 66, 4, 6, 2);
+        fillEllipse(63, 68, 5, 7, 2);
+        fillEllipse(76, 69, 5, 7, 2);
+
+        // ===== BACK/SPINE - arched =====
+        fillLine(27, 51, 86, 48, 2, 0);  // Topline (shade 0)
+        fillLine(27, 53, 86, 50, 1, 1);  // Topline body (shade 1)
+
+        // Withers (highest point)
+        fillCircle(80, 48, 3, 0);
+        fillCircle(83, 48, 3, 0);
+        fillCircle(81, 49, 2, 2);  // Highlight
+
+        // ===== SHOULDER - large scapula =====
+        fillEllipse(85, 59, 6, 11, 1);  // Scapula blade (shade 1)
+        fillEllipse(90, 66, 5, 10, 1);  // Shoulder point
+        fillCircle(87, 63, 5, 0);       // Muscle mass (shade 0)
+        fillCircle(89, 68, 4, 0);       // Deltoid
+        fillCircle(86, 61, 3, 2);       // Highlight
+
+        // ===== UNDERLINE - belly =====
+        fillLine(26, 83, 90, 86, 2, 0);  // Belly line
+        fillLine(26, 85, 90, 88, 1, 1);
+
+        // Girth (deeper belly)
+        fillEllipse(60, 88, 8, 5, 1);
+        fillEllipse(72, 89, 8, 4, 1);
+
+        // ===== NECK - powerfully arched =====
+        // Body mass (shade 1)
+        fillEllipse(88, 51, 5, 5, 1);
+        fillEllipse(93, 45, 5, 5, 1);
+        fillEllipse(98, 40, 5, 5, 1);
+        fillEllipse(103, 37, 4, 5, 1);
+        fillEllipse(107, 35, 3, 4, 1);
+
+        // Crest definition (shade 0)
+        fillEllipse(88, 50, 4, 4, 0);
+        fillEllipse(93, 44, 4, 4, 0);
+        fillEllipse(98, 38, 4, 4, 0);
+        fillEllipse(103, 35, 3, 4, 0);
+
+        // Crest highlights (shade 2)
+        fillCircle(90, 47, 2, 2);
+        fillCircle(96, 40, 2, 2);
+        fillCircle(101, 37, 2, 2);
+
+        // Under-neck
+        fillLine(90, 56, 106, 42, 2, 0);
+        fillLine(90, 58, 106, 44, 1, 1);
+
+        // ===== HEAD - raised, refined =====
+        // Face (shade 1)
+        fillEllipse(110, 37, 3, 5, 1);  // Forehead
+        fillEllipse(115, 38, 3, 5, 1);  // Face
+        fillEllipse(120, 42, 3, 5, 1);  // Nose
+        fillCircle(124, 45, 2, 1);      // Muzzle
+
+        // Head outline/features (shade 0)
+        fillEllipse(110, 36, 2, 4, 0);
+        fillEllipse(115, 37, 2, 4, 0);
+        fillEllipse(120, 41, 2, 4, 0);
+        fillCircle(124, 45, 1, 0);
+
+        // Highlights (shade 2)
+        fillCircle(112, 37, 1, 2);
+        fillCircle(117, 39, 1, 2);
+
+        // Lower jaw
+        fillLine(120, 46, 112, 45, 2, 0);
+        fillLine(112, 45, 107, 42, 2, 0);
+        fillLine(120, 47, 112, 46, 1, 1);
+
+        // Nostril detail
+        pixels[47][126] = 0;
+        pixels[47][127] = 0;
+
+        // ===== EAR - pricked forward =====
+        fillLine(109, 32, 107, 27, 2, 0);
+        fillLine(107, 27, 110, 29, 2, 0);
+        fillLine(109, 32, 110, 29, 1, 1);
+        // Ear interior (shade 2)
+        pixels[29][108] = 2;
+        pixels[30][109] = 2;
+
+        // ===== EYE =====
+        pixels[37][113] = 0;
+        pixels[37][114] = 0;
+        pixels[38][113] = 0;
+
+        // ===== HIND LEG - LEFT (gathered, tucked) =====
+        // Upper thigh (shade 1)
+        fillEllipse(40, 83, 5, 8, 1);
+        // Muscle definition (shade 0)
+        fillEllipse(40, 82, 4, 7, 0);
+        // Highlight (shade 2)
+        fillCircle(40, 84, 2, 2);
+
+        // Gaskin (lower thigh)
+        fillEllipse(43, 96, 3, 10, 1);
+        fillEllipse(43, 95, 2, 8, 0);
+
+        // Hock joint
+        fillCircle(46, 109, 3, 0);
+        fillCircle(47, 110, 2, 2);
+
+        // Cannon
+        fillLine(48, 112, 51, 128, 2, 0);
+        fillLine(49, 112, 52, 128, 1, 1);
+
+        // Fetlock
+        fillCircle(51, 130, 2, 0);
+
+        // Pastern
+        fillLine(53, 131, 54, 138, 2, 0);
+        fillLine(53, 131, 55, 138, 1, 1);
+
+        // Hoof
+        fillEllipse(54, 140, 3, 3, 0);
+
+        // ===== HIND LEG - RIGHT (gathered, forward) =====
+        fillEllipse(35, 83, 5, 8, 1);
+        fillEllipse(35, 82, 4, 7, 0);
+        fillCircle(35, 85, 2, 2);
+        fillEllipse(38, 96, 3, 10, 1);
+        fillEllipse(38, 95, 2, 8, 0);
+        fillCircle(42, 109, 3, 0);
+        fillCircle(43, 110, 2, 2);
+        fillLine(43, 112, 46, 131, 2, 0);
+        fillLine(44, 112, 47, 131, 1, 1);
+        fillCircle(46, 133, 2, 0);
+        fillLine(48, 134, 50, 142, 2, 0);
+        fillLine(48, 134, 50, 142, 1, 1);
+        fillEllipse(49, 143, 3, 3, 0);
+
+        // ===== FRONT LEG - RIGHT (gathered, tucked) =====
+        // Forearm
+        fillEllipse(86, 80, 3, 8, 1);
+        fillEllipse(88, 93, 3, 10, 1);
+        fillEllipse(86, 79, 2, 7, 0);
+        fillEllipse(88, 92, 2, 8, 0);
+        fillCircle(87, 82, 2, 2);
+
+        // Knee (carpus)
+        fillCircle(90, 106, 3, 0);
+        fillCircle(91, 107, 2, 2);
+
+        // Cannon
+        fillLine(91, 109, 93, 128, 2, 0);
+        fillLine(92, 109, 94, 128, 1, 1);
+
+        // Fetlock
+        fillCircle(93, 130, 2, 0);
+
+        // Pastern
+        fillLine(94, 131, 94, 139, 2, 0);
+        fillLine(95, 131, 95, 139, 1, 1);
+
+        // Hoof
+        fillEllipse(94, 141, 3, 3, 0);
+
+        // ===== FRONT LEG - LEFT (gathered, back) =====
+        fillEllipse(82, 80, 3, 8, 1);
+        fillEllipse(83, 93, 3, 10, 1);
+        fillEllipse(82, 79, 2, 7, 0);
+        fillEllipse(83, 92, 2, 8, 0);
+        fillCircle(82, 82, 2, 2);
+        fillCircle(85, 106, 3, 0);
+        fillCircle(86, 107, 2, 2);
+        fillLine(86, 109, 88, 130, 2, 0);
+        fillLine(87, 109, 89, 130, 1, 1);
+        fillCircle(88, 132, 2, 0);
+        fillLine(90, 133, 90, 142, 2, 0);
+        fillLine(90, 133, 90, 142, 1, 1);
+        fillEllipse(90, 143, 3, 3, 0);
+
+        // ===== SMOOTHING - fill body gaps =====
+        // Connect hindquarters to barrel (shade 1)
+        fillEllipse(42, 70, 6, 8, 1);
+        fillEllipse(42, 69, 5, 7, 0);
+
+        // Connect barrel to shoulder
+        fillEllipse(80, 64, 6, 10, 1);
+        fillEllipse(80, 62, 5, 8, 0);
+
+        // Connect shoulder to neck
+        fillEllipse(88, 54, 5, 6, 1);
+        fillEllipse(88, 53, 4, 5, 0);
+
+        // Connect neck to head
+        fillEllipse(107, 38, 3, 5, 1);
+        fillEllipse(107, 37, 2, 4, 0);
+
+        // Thicken body underline
+        fillEllipse(48, 83, 6, 5, 1);
+        fillEllipse(64, 85, 8, 5, 1);
+        fillEllipse(80, 86, 6, 5, 1);
+
+        // ===== RENDER TO CANVAS =====
+        const imageData = ctx.createImageData(160, 144);
+
+        for (let y = 0; y < 144; y++) {
+            for (let x = 0; x < 160; x++) {
+                const shade = pixels[y][x];
+                const color = GB_PALETTE[shade];
+
+                // Convert hex to RGB
+                const r = parseInt(color.substr(1, 2), 16);
+                const g = parseInt(color.substr(3, 2), 16);
+                const b = parseInt(color.substr(5, 2), 16);
+
+                const index = (y * 160 + x) * 4;
+                imageData.data[index] = r;
+                imageData.data[index + 1] = g;
+                imageData.data[index + 2] = b;
+                imageData.data[index + 3] = 255;
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Scale up 4x for display (640×576)
+        displayCtx.imageSmoothingEnabled = false;
+        displayCtx.drawImage(canvas, 0, 0, 640, 576);
+    </script>
+</body>
+</html>
