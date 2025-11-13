@@ -203,129 +203,88 @@
             }
         }
 
-        // FRAME 0: Right hind pushoff - Extended stance
-        // Horse anatomy from scientific measurement:
-        // - Body length (nose to tail): ~100px
-        // - Height at withers: ~68px
-        // - Leg length: ~45px
+        // FRAME 0: Traced from actual Muybridge reference
+        // Using THIN legs (lines not polygons) to match the real photographs
         function createFrame0() {
             const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
 
-            // BODY OUTLINE - Working from real horse silhouette
-            // Poll (top of head) at x=120, y=35
-            // Withers (highest point) at x=85, y=48
-            // Croup (hindquarters top) at x=30, y=52
-            // Ground level at y=138
-
-            // TAIL - streaming back from dock
-            const tail = [
-                {x: 18, y: 50}, {x: 15, y: 52}, {x: 22, y: 52}, {x: 20, y: 54},
-                {x: 13, y: 62}, {x: 11, y: 64}, {x: 16, y: 64}, {x: 14, y: 66},
-                {x: 9, y: 78}, {x: 7, y: 80}, {x: 12, y: 80}, {x: 10, y: 82},
-                {x: 6, y: 95}, {x: 8, y: 95}, {x: 7, y: 105}
-            ];
-            for (let i = 0; i < tail.length - 1; i++) {
-                drawLine(pixels, tail[i].x, tail[i].y, tail[i + 1].x, tail[i + 1].y, 0);
+            // Helper to draw thick line (for legs)
+            function drawThickLine(x0, y0, x1, y1, thickness, shade) {
+                for (let t = -Math.floor(thickness/2); t <= Math.floor(thickness/2); t++) {
+                    drawLine(pixels, x0 + t, y0, x1 + t, y1, shade);
+                    drawLine(pixels, x0, y0 + t, x1, y1 + t, shade);
+                }
             }
 
-            // MAIN BODY MASS - one continuous silhouette
+            // BODY - compact, horizontal silhouette based on real Muybridge
             const body = [
-                // Start at tail dock
-                {x: 20, y: 51},
-                // Croup (top of hindquarters)
-                {x: 28, y: 52}, {x: 32, y: 52}, {x: 36, y: 53},
-                // Back
-                {x: 45, y: 52}, {x: 60, y: 50}, {x: 75, y: 49},
-                // Withers (highest point)
-                {x: 82, y: 48}, {x: 88, y: 48}, {x: 92, y: 49},
-                // Neck rising to poll
-                {x: 96, y: 47}, {x: 100, y: 45}, {x: 104, y: 42}, {x: 108, y: 39}, {x: 112, y: 37},
-                // Poll and ear
-                {x: 116, y: 36}, {x: 118, y: 35}, {x: 120, y: 34},
-                // Ear tip
-                {x: 118, y: 30}, {x: 117, y: 28}, {x: 118, y: 32}, {x: 119, y: 34},
-                // Forehead and face
-                {x: 122, y: 37}, {x: 125, y: 40}, {x: 128, y: 44}, {x: 130, y: 48},
-                // Muzzle
-                {x: 131, y: 52}, {x: 131, y: 54}, {x: 130, y: 56},
+                // Hindquarters - starts around x=30
+                {x: 25, y: 70}, {x: 28, y: 68}, {x: 32, y: 67}, {x: 38, y: 67},
+                // Back - relatively flat/horizontal
+                {x: 48, y: 67}, {x: 58, y: 66}, {x: 68, y: 66}, {x: 78, y: 66},
+                // Withers area
+                {x: 85, y: 66}, {x: 90, y: 65},
+                // Neck rising
+                {x: 95, y: 64}, {x: 100, y: 62}, {x: 105, y: 59}, {x: 110, y: 56},
+                // Head/poll
+                {x: 115, y: 52}, {x: 118, y: 50}, {x: 120, y: 48},
+                // Ear
+                {x: 119, y: 45}, {x: 120, y: 47},
+                // Face
+                {x: 122, y: 50}, {x: 125, y: 54}, {x: 127, y: 58},
+                // Muzzle/nose
+                {x: 128, y: 62}, {x: 128, y: 64}, {x: 127, y: 66},
                 // Lower jaw
-                {x: 128, y: 57}, {x: 125, y: 58}, {x: 120, y: 58}, {x: 115, y: 57},
+                {x: 125, y: 67}, {x: 122, y: 68}, {x: 118, y: 68}, {x: 114, y: 67},
                 // Throatlatch
-                {x: 110, y: 55}, {x: 106, y: 54}, {x: 102, y: 54},
+                {x: 110, y: 66}, {x: 106, y: 66}, {x: 102, y: 67},
                 // Underside of neck
-                {x: 98, y: 55}, {x: 94, y: 57}, {x: 90, y: 60},
+                {x: 98, y: 68}, {x: 94, y: 70}, {x: 90, y: 72},
                 // Chest
-                {x: 88, y: 63}, {x: 88, y: 68}, {x: 89, y: 72},
-                // Underline (belly)
-                {x: 85, y: 76}, {x: 78, y: 79}, {x: 68, y: 81}, {x: 55, y: 82}, {x: 40, y: 83}, {x: 30, y: 83},
+                {x: 88, y: 75}, {x: 87, y: 78},
+                // Belly - relatively straight
+                {x: 85, y: 80}, {x: 78, y: 82}, {x: 68, y: 83}, {x: 55, y: 84}, {x: 42, y: 84}, {x: 32, y: 83},
                 // Hind flank
-                {x: 25, y: 81}, {x: 22, y: 76}, {x: 20, y: 68}, {x: 20, y: 58}
+                {x: 28, y: 81}, {x: 26, y: 77}, {x: 25, y: 73}
             ];
             fillPoly(pixels, body, 0);
 
-            // RIGHT HIND LEG - EXTENDED (pushoff position)
-            const rhLeg = [
-                {x: 28, y: 82}, // Hip
-                {x: 27, y: 92}, // Thigh
-                {x: 25, y: 102}, // Gaskin
-                {x: 23, y: 115}, // Hock
-                {x: 21, y: 118}, {x: 19, y: 125}, // Cannon
-                {x: 17, y: 132}, // Fetlock
-                {x: 16, y: 135}, {x: 15, y: 137}, // Pastern
-                {x: 14, y: 138}, {x: 13, y: 138}, // Hoof toe
-                // Back of leg
-                {x: 15, y: 138}, {x: 16, y: 137},
-                {x: 18, y: 134}, // Heel
-                {x: 20, y: 132},
-                {x: 22, y: 125}, {x: 24, y: 118},
-                {x: 26, y: 115}, // Back of hock
-                {x: 29, y: 105}, {x: 31, y: 95}, {x: 32, y: 85}
-            ];
-            fillPoly(pixels, rhLeg, 0);
+            // TAIL - flowing back
+            drawThickLine(25, 70, 22, 75, 2, 0);
+            drawThickLine(22, 75, 18, 82, 2, 0);
+            drawThickLine(18, 82, 14, 92, 2, 0);
+            drawThickLine(14, 92, 10, 105, 2, 0);
 
-            // LEFT HIND LEG - GATHERED (lifting)
-            const lhLeg = [
-                {x: 35, y: 82},
-                {x: 37, y: 92}, {x: 40, y: 102},
-                {x: 43, y: 112}, // Hock
-                {x: 46, y: 118}, {x: 50, y: 128},
-                {x: 52, y: 134}, {x: 53, y: 137}, {x: 54, y: 138},
-                {x: 56, y: 138}, {x: 55, y: 136}, {x: 53, y: 133},
-                {x: 51, y: 127}, {x: 48, y: 118},
-                {x: 45, y: 110}, {x: 42, y: 100}, {x: 39, y: 90}, {x: 38, y: 83}
-            ];
-            fillPoly(pixels, lhLeg, 0);
+            // LEGS - THIN LINES matching Muybridge (2-3 pixels thick)
 
-            // LEFT FRONT LEG - GROUNDED (weight-bearing, BEHIND)
-            const lfLeg = [
-                {x: 86, y: 70}, // Shoulder
-                {x: 85, y: 82}, // Elbow
-                {x: 84, y: 94}, {x: 83, y: 106},
-                {x: 82, y: 112}, // Knee
-                {x: 82, y: 118}, {x: 82, y: 128},
-                {x: 82, y: 134}, // Fetlock
-                {x: 82, y: 137}, {x: 82, y: 138},
-                {x: 84, y: 138}, {x: 84, y: 137},
-                {x: 85, y: 134}, {x: 86, y: 128},
-                {x: 87, y: 118}, {x: 88, y: 112},
-                {x: 89, y: 106}, {x: 90, y: 94}, {x: 91, y: 82}, {x: 90, y: 72}
-            ];
-            fillPoly(pixels, lfLeg, 0);
+            // RIGHT HIND - Extended back (pushoff)
+            drawThickLine(30, 83, 28, 95, 2, 0);  // Thigh
+            drawThickLine(28, 95, 25, 108, 2, 0); // Gaskin
+            drawThickLine(25, 108, 23, 118, 2, 0); // To hock
+            drawThickLine(23, 118, 20, 130, 2, 0); // Cannon
+            drawThickLine(20, 130, 18, 137, 2, 0); // Pastern to ground
 
-            // RIGHT FRONT LEG - LIFTED (crossing IN FRONT)
-            const rfLeg = [
-                {x: 92, y: 70},
-                {x: 93, y: 80}, {x: 95, y: 90},
-                {x: 97, y: 100}, // Knee
-                {x: 100, y: 108}, {x: 104, y: 120},
-                {x: 107, y: 128}, {x: 109, y: 134},
-                {x: 110, y: 137}, {x: 111, y: 138},
-                {x: 113, y: 138}, {x: 112, y: 136},
-                {x: 110, y: 132}, {x: 107, y: 124},
-                {x: 104, y: 114}, {x: 101, y: 104},
-                {x: 99, y: 96}, {x: 97, y: 86}, {x: 95, y: 76}, {x: 94, y: 71}
-            ];
-            fillPoly(pixels, rfLeg, 0);
+            // LEFT HIND - Lifted, coming forward
+            drawThickLine(35, 83, 38, 95, 2, 0);  // Thigh
+            drawThickLine(38, 95, 42, 106, 2, 0); // Gaskin
+            drawThickLine(42, 106, 46, 116, 2, 0); // To hock (lifted)
+            drawThickLine(46, 116, 50, 128, 2, 0); // Cannon
+            drawThickLine(50, 128, 52, 137, 2, 0); // Pastern
+
+            // LEFT FRONT - Grounded behind
+            drawThickLine(87, 77, 86, 90, 2, 0);  // Upper leg
+            drawThickLine(86, 90, 85, 105, 2, 0); // Forearm
+            drawThickLine(85, 105, 84, 118, 2, 0); // To knee
+            drawThickLine(84, 118, 83, 130, 2, 0); // Cannon
+            drawThickLine(83, 130, 82, 137, 2, 0); // Pastern to ground
+
+            // RIGHT FRONT - Reaching forward
+            drawThickLine(92, 77, 95, 88, 2, 0);   // Upper leg
+            drawThickLine(95, 88, 100, 98, 2, 0);  // Forearm
+            drawThickLine(100, 98, 106, 108, 2, 0); // Extending
+            drawThickLine(106, 108, 113, 120, 2, 0); // Cannon
+            drawThickLine(113, 120, 118, 130, 2, 0); // Lower
+            drawThickLine(118, 130, 120, 137, 2, 0); // To ground
 
             return pixels;
         }
