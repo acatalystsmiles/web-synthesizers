@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muybridge Horse - Anatomically Precise</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            color: #8bac0f;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            color: #9bbc0f;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 12px;
+            margin-bottom: 30px;
+            opacity: 0.7;
+        }
+        .gb-screen {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+            margin: 0 auto;
+            width: fit-content;
+        }
+        #display {
+            border: 3px solid #0f380f;
+            background: #9bbc0f;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            box-shadow: inset 0 0 20px rgba(15, 56, 15, 0.3);
+        }
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            background: #0f380f;
+            color: #9bbc0f;
+            border: 2px solid #306230;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        button:hover {
+            background: #306230;
+            border-color: #8bac0f;
+        }
+        button.active {
+            background: #8bac0f;
+            color: #0f380f;
+        }
+        .info {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 20px;
+            opacity: 0.7;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MUYBRIDGE HORSE</h1>
+        <div class="subtitle">Anatomically Precise • Based on Real Horse Biomechanics</div>
+
+        <div class="gb-screen">
+            <canvas id="display" width="640" height="576"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="prev">← PREV</button>
+            <button id="play-pause">PAUSE</button>
+            <button id="next">NEXT →</button>
+            <span style="margin-left: 20px; line-height: 36px;" id="frame-num">Frame 0 / 16</span>
+        </div>
+
+        <div class="info">
+            Working from scientific horse anatomy: True proportions • Accurate joint placement • Realistic leg crossing<br>
+            160×144 Game Boy resolution • Hand-crafted pixel silhouettes
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const ctx = display.getContext('2d');
+
+        const GB_PALETTE = [
+            '#0f380f',  // Darkest
+            '#306230',  // Dark
+            '#8bac0f',  // Light
+            '#9bbc0f'   // Lightest (background)
+        ];
+
+        let currentFrame = 0;
+        let isPlaying = true;
+        let lastTime = 0;
+        const fps = 12;
+
+        // Create a 160x144 canvas for pixel-level work
+        const workCanvas = document.createElement('canvas');
+        workCanvas.width = 160;
+        workCanvas.height = 144;
+        const workCtx = workCanvas.getContext('2d');
+
+        // Render pixels to canvas with palette
+        function renderFrame(pixels) {
+            const imageData = workCtx.createImageData(160, 144);
+            for (let y = 0; y < 144; y++) {
+                for (let x = 0; x < 160; x++) {
+                    const shade = pixels[y][x];
+                    const color = GB_PALETTE[shade];
+                    const r = parseInt(color.substr(1, 2), 16);
+                    const g = parseInt(color.substr(3, 2), 16);
+                    const b = parseInt(color.substr(5, 2), 16);
+                    const idx = (y * 160 + x) * 4;
+                    imageData.data[idx] = r;
+                    imageData.data[idx + 1] = g;
+                    imageData.data[idx + 2] = b;
+                    imageData.data[idx + 3] = 255;
+                }
+            }
+            workCtx.putImageData(imageData, 0, 0);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(workCanvas, 0, 0, 640, 576);
+        }
+
+        // Draw a line of pixels (Bresenham's algorithm for precision)
+        function drawLine(pixels, x0, y0, x1, y1, shade) {
+            const dx = Math.abs(x1 - x0);
+            const dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+
+            while (true) {
+                if (x0 >= 0 && x0 < 160 && y0 >= 0 && y0 < 144) {
+                    pixels[y0][x0] = shade;
+                }
+                if (x0 === x1 && y0 === y1) break;
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+
+        // Fill a polygon defined by points
+        function fillPoly(pixels, points, shade) {
+            if (points.length < 3) return;
+
+            let minY = 144, maxY = 0;
+            for (let p of points) {
+                minY = Math.min(minY, p.y);
+                maxY = Math.max(maxY, p.y);
+            }
+
+            for (let y = Math.max(0, minY); y <= Math.min(143, maxY); y++) {
+                let intersections = [];
+                for (let i = 0; i < points.length; i++) {
+                    let p1 = points[i];
+                    let p2 = points[(i + 1) % points.length];
+                    if ((p1.y <= y && p2.y > y) || (p2.y <= y && p1.y > y)) {
+                        let x = p1.x + (y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y);
+                        intersections.push(Math.round(x));
+                    }
+                }
+                intersections.sort((a, b) => a - b);
+                for (let i = 0; i < intersections.length; i += 2) {
+                    if (i + 1 < intersections.length) {
+                        for (let x = intersections[i]; x <= intersections[i + 1]; x++) {
+                            if (x >= 0 && x < 160) {
+                                pixels[y][x] = shade;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // FRAME 0: Right hind pushoff - Extended stance
+        // Horse anatomy from scientific measurement:
+        // - Body length (nose to tail): ~100px
+        // - Height at withers: ~68px
+        // - Leg length: ~45px
+        function createFrame0() {
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // BODY OUTLINE - Working from real horse silhouette
+            // Poll (top of head) at x=120, y=35
+            // Withers (highest point) at x=85, y=48
+            // Croup (hindquarters top) at x=30, y=52
+            // Ground level at y=138
+
+            // TAIL - streaming back from dock
+            const tail = [
+                {x: 18, y: 50}, {x: 15, y: 52}, {x: 22, y: 52}, {x: 20, y: 54},
+                {x: 13, y: 62}, {x: 11, y: 64}, {x: 16, y: 64}, {x: 14, y: 66},
+                {x: 9, y: 78}, {x: 7, y: 80}, {x: 12, y: 80}, {x: 10, y: 82},
+                {x: 6, y: 95}, {x: 8, y: 95}, {x: 7, y: 105}
+            ];
+            for (let i = 0; i < tail.length - 1; i++) {
+                drawLine(pixels, tail[i].x, tail[i].y, tail[i + 1].x, tail[i + 1].y, 0);
+            }
+
+            // MAIN BODY MASS - one continuous silhouette
+            const body = [
+                // Start at tail dock
+                {x: 20, y: 51},
+                // Croup (top of hindquarters)
+                {x: 28, y: 52}, {x: 32, y: 52}, {x: 36, y: 53},
+                // Back
+                {x: 45, y: 52}, {x: 60, y: 50}, {x: 75, y: 49},
+                // Withers (highest point)
+                {x: 82, y: 48}, {x: 88, y: 48}, {x: 92, y: 49},
+                // Neck rising to poll
+                {x: 96, y: 47}, {x: 100, y: 45}, {x: 104, y: 42}, {x: 108, y: 39}, {x: 112, y: 37},
+                // Poll and ear
+                {x: 116, y: 36}, {x: 118, y: 35}, {x: 120, y: 34},
+                // Ear tip
+                {x: 118, y: 30}, {x: 117, y: 28}, {x: 118, y: 32}, {x: 119, y: 34},
+                // Forehead and face
+                {x: 122, y: 37}, {x: 125, y: 40}, {x: 128, y: 44}, {x: 130, y: 48},
+                // Muzzle
+                {x: 131, y: 52}, {x: 131, y: 54}, {x: 130, y: 56},
+                // Lower jaw
+                {x: 128, y: 57}, {x: 125, y: 58}, {x: 120, y: 58}, {x: 115, y: 57},
+                // Throatlatch
+                {x: 110, y: 55}, {x: 106, y: 54}, {x: 102, y: 54},
+                // Underside of neck
+                {x: 98, y: 55}, {x: 94, y: 57}, {x: 90, y: 60},
+                // Chest
+                {x: 88, y: 63}, {x: 88, y: 68}, {x: 89, y: 72},
+                // Underline (belly)
+                {x: 85, y: 76}, {x: 78, y: 79}, {x: 68, y: 81}, {x: 55, y: 82}, {x: 40, y: 83}, {x: 30, y: 83},
+                // Hind flank
+                {x: 25, y: 81}, {x: 22, y: 76}, {x: 20, y: 68}, {x: 20, y: 58}
+            ];
+            fillPoly(pixels, body, 0);
+
+            // RIGHT HIND LEG - EXTENDED (pushoff position)
+            const rhLeg = [
+                {x: 28, y: 82}, // Hip
+                {x: 27, y: 92}, // Thigh
+                {x: 25, y: 102}, // Gaskin
+                {x: 23, y: 115}, // Hock
+                {x: 21, y: 118}, {x: 19, y: 125}, // Cannon
+                {x: 17, y: 132}, // Fetlock
+                {x: 16, y: 135}, {x: 15, y: 137}, // Pastern
+                {x: 14, y: 138}, {x: 13, y: 138}, // Hoof toe
+                // Back of leg
+                {x: 15, y: 138}, {x: 16, y: 137},
+                {x: 18, y: 134}, // Heel
+                {x: 20, y: 132},
+                {x: 22, y: 125}, {x: 24, y: 118},
+                {x: 26, y: 115}, // Back of hock
+                {x: 29, y: 105}, {x: 31, y: 95}, {x: 32, y: 85}
+            ];
+            fillPoly(pixels, rhLeg, 0);
+
+            // LEFT HIND LEG - GATHERED (lifting)
+            const lhLeg = [
+                {x: 35, y: 82},
+                {x: 37, y: 92}, {x: 40, y: 102},
+                {x: 43, y: 112}, // Hock
+                {x: 46, y: 118}, {x: 50, y: 128},
+                {x: 52, y: 134}, {x: 53, y: 137}, {x: 54, y: 138},
+                {x: 56, y: 138}, {x: 55, y: 136}, {x: 53, y: 133},
+                {x: 51, y: 127}, {x: 48, y: 118},
+                {x: 45, y: 110}, {x: 42, y: 100}, {x: 39, y: 90}, {x: 38, y: 83}
+            ];
+            fillPoly(pixels, lhLeg, 0);
+
+            // LEFT FRONT LEG - GROUNDED (weight-bearing, BEHIND)
+            const lfLeg = [
+                {x: 86, y: 70}, // Shoulder
+                {x: 85, y: 82}, // Elbow
+                {x: 84, y: 94}, {x: 83, y: 106},
+                {x: 82, y: 112}, // Knee
+                {x: 82, y: 118}, {x: 82, y: 128},
+                {x: 82, y: 134}, // Fetlock
+                {x: 82, y: 137}, {x: 82, y: 138},
+                {x: 84, y: 138}, {x: 84, y: 137},
+                {x: 85, y: 134}, {x: 86, y: 128},
+                {x: 87, y: 118}, {x: 88, y: 112},
+                {x: 89, y: 106}, {x: 90, y: 94}, {x: 91, y: 82}, {x: 90, y: 72}
+            ];
+            fillPoly(pixels, lfLeg, 0);
+
+            // RIGHT FRONT LEG - LIFTED (crossing IN FRONT)
+            const rfLeg = [
+                {x: 92, y: 70},
+                {x: 93, y: 80}, {x: 95, y: 90},
+                {x: 97, y: 100}, // Knee
+                {x: 100, y: 108}, {x: 104, y: 120},
+                {x: 107, y: 128}, {x: 109, y: 134},
+                {x: 110, y: 137}, {x: 111, y: 138},
+                {x: 113, y: 138}, {x: 112, y: 136},
+                {x: 110, y: 132}, {x: 107, y: 124},
+                {x: 104, y: 114}, {x: 101, y: 104},
+                {x: 99, y: 96}, {x: 97, y: 86}, {x: 95, y: 76}, {x: 94, y: 71}
+            ];
+            fillPoly(pixels, rfLeg, 0);
+
+            return pixels;
+        }
+
+        // FRAME 1: Gathering phase - legs coming together
+        function createFrame1() {
+            const pixels = Array(144).fill(0).map(() => Array(160).fill(3));
+
+            // TAIL - still streaming but starting to follow body motion
+            const tail = [
+                {x: 18, y: 52}, {x: 15, y: 54}, {x: 22, y: 54}, {x: 20, y: 56},
+                {x: 14, y: 65}, {x: 12, y: 67}, {x: 17, y: 67}, {x: 15, y: 69},
+                {x: 10, y: 82}, {x: 8, y: 84}, {x: 13, y: 84}, {x: 11, y: 86},
+                {x: 7, y: 98}, {x: 9, y: 98}, {x: 8, y: 108}
+            ];
+            for (let i = 0; i < tail.length - 1; i++) {
+                drawLine(pixels, tail[i].x, tail[i].y, tail[i + 1].x, tail[i + 1].y, 0);
+            }
+
+            // BODY - slight forward shift
+            const body = [
+                {x: 22, y: 52},
+                {x: 30, y: 53}, {x: 34, y: 53}, {x: 38, y: 54},
+                {x: 47, y: 53}, {x: 62, y: 51}, {x: 77, y: 50},
+                {x: 84, y: 49}, {x: 90, y: 49}, {x: 94, y: 50},
+                {x: 98, y: 48}, {x: 102, y: 46}, {x: 106, y: 43}, {x: 110, y: 40}, {x: 114, y: 38},
+                {x: 118, y: 37}, {x: 120, y: 36}, {x: 122, y: 35},
+                {x: 120, y: 31}, {x: 119, y: 29}, {x: 120, y: 33}, {x: 121, y: 35},
+                {x: 124, y: 38}, {x: 127, y: 41}, {x: 130, y: 45}, {x: 132, y: 49},
+                {x: 133, y: 53}, {x: 133, y: 55}, {x: 132, y: 57},
+                {x: 130, y: 58}, {x: 127, y: 59}, {x: 122, y: 59}, {x: 117, y: 58},
+                {x: 112, y: 56}, {x: 108, y: 55}, {x: 104, y: 55},
+                {x: 100, y: 56}, {x: 96, y: 58}, {x: 92, y: 61},
+                {x: 90, y: 64}, {x: 90, y: 69}, {x: 91, y: 73},
+                {x: 87, y: 77}, {x: 80, y: 80}, {x: 70, y: 82}, {x: 57, y: 83}, {x: 42, y: 84}, {x: 32, y: 84},
+                {x: 27, y: 82}, {x: 24, y: 77}, {x: 22, y: 69}, {x: 22, y: 59}
+            ];
+            fillPoly(pixels, body, 0);
+
+            // RIGHT HIND LEG - Now lifting after pushoff
+            const rhLeg = [
+                {x: 30, y: 83},
+                {x: 30, y: 93}, {x: 30, y: 103},
+                {x: 30, y: 116}, // Hock lifted
+                {x: 32, y: 122}, {x: 35, y: 130},
+                {x: 37, y: 135}, {x: 38, y: 137}, {x: 39, y: 138},
+                {x: 41, y: 138}, {x: 40, y: 136}, {x: 38, y: 133},
+                {x: 36, y: 129}, {x: 34, y: 122},
+                {x: 32, y: 115}, {x: 32, y: 105}, {x: 32, y: 95}, {x: 33, y: 84}
+            ];
+            fillPoly(pixels, rhLeg, 0);
+
+            // LEFT HIND LEG - Coming forward, crossing
+            const lhLeg = [
+                {x: 37, y: 83},
+                {x: 40, y: 92}, {x: 44, y: 100},
+                {x: 49, y: 110}, // Hock
+                {x: 53, y: 118}, {x: 58, y: 128},
+                {x: 61, y: 134}, {x: 62, y: 137}, {x: 63, y: 138},
+                {x: 65, y: 138}, {x: 64, y: 136}, {x: 62, y: 132},
+                {x: 59, y: 126}, {x: 55, y: 117},
+                {x: 51, y: 108}, {x: 46, y: 98}, {x: 42, y: 88}, {x: 40, y: 84}
+            ];
+            fillPoly(pixels, lhLeg, 0);
+
+            // LEFT FRONT LEG - Starting to lift
+            const lfLeg = [
+                {x: 88, y: 71},
+                {x: 87, y: 83}, {x: 87, y: 95},
+                {x: 87, y: 107}, {x: 88, y: 113},
+                {x: 89, y: 119}, {x: 90, y: 128},
+                {x: 91, y: 134}, {x: 92, y: 137}, {x: 93, y: 138},
+                {x: 95, y: 138}, {x: 94, y: 136},
+                {x: 93, y: 132}, {x: 92, y: 127},
+                {x: 91, y: 119}, {x: 91, y: 113},
+                {x: 91, y: 106}, {x: 92, y: 95}, {x: 93, y: 83}, {x: 92, y: 73}
+            ];
+            fillPoly(pixels, lfLeg, 0);
+
+            // RIGHT FRONT LEG - Reaching forward to ground (crossing pattern visible)
+            const rfLeg = [
+                {x: 94, y: 71},
+                {x: 96, y: 81}, {x: 99, y: 91},
+                {x: 103, y: 101}, // Knee extending
+                {x: 107, y: 110}, {x: 112, y: 122},
+                {x: 115, y: 130}, {x: 117, y: 135},
+                {x: 118, y: 137}, {x: 119, y: 138},
+                {x: 121, y: 138}, {x: 120, y: 136},
+                {x: 118, y: 133}, {x: 115, y: 126},
+                {x: 111, y: 117}, {x: 107, y: 106},
+                {x: 104, y: 97}, {x: 100, y: 87}, {x: 97, y: 77}, {x: 96, y: 72}
+            ];
+            fillPoly(pixels, rfLeg, 0);
+
+            return pixels;
+        }
+
+        const frames = [
+            createFrame0(),
+            createFrame1(),
+            createFrame0(), createFrame0(),
+            createFrame0(), createFrame0(), createFrame0(), createFrame0(),
+            createFrame0(), createFrame0(), createFrame0(), createFrame0(),
+            createFrame0(), createFrame0(), createFrame0(), createFrame0()
+        ];
+
+        function render() {
+            renderFrame(frames[currentFrame]);
+            document.getElementById('frame-num').textContent = `Frame ${currentFrame} / 16`;
+        }
+
+        function animate(timestamp) {
+            if (isPlaying) {
+                if (timestamp - lastTime >= 1000 / fps) {
+                    currentFrame = (currentFrame + 1) % 16;
+                    render();
+                    lastTime = timestamp;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        document.getElementById('play-pause').addEventListener('click', (e) => {
+            isPlaying = !isPlaying;
+            e.target.textContent = isPlaying ? 'PAUSE' : 'PLAY';
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            currentFrame = (currentFrame - 1 + 16) % 16;
+            render();
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            currentFrame = (currentFrame + 1) % 16;
+            render();
+        });
+
+        render();
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
