@@ -38,6 +38,29 @@ class FMSynth {
         // Master chain
         this.masterVolume = new Tone.Volume(-8).toDestination();
 
+        // Audio analyzer for visualization sync
+        this.analyzer = new Tone.Analyser('waveform', 256);
+        this.masterVolume.connect(this.analyzer);
+
+        // BroadcastChannel for sending audio data to visualizations
+        try {
+            this.audioChannel = new BroadcastChannel('web-synth-audio');
+            // Send audio data periodically
+            setInterval(() => {
+                if (this.analyzer) {
+                    const values = this.analyzer.getValue();
+                    const rms = this.calculateRMS(values);
+                    this.audioChannel.postMessage({
+                        type: 'audioData',
+                        rms: rms,
+                        waveform: values.slice(0, 64) // Send subset for performance
+                    });
+                }
+            }, 50); // 20 times per second
+        } catch (e) {
+            console.log('BroadcastChannel not available:', e);
+        }
+
         // Reverb
         this.reverb = new Tone.Reverb({
             decay: 2.5,
@@ -719,6 +742,15 @@ class FMSynth {
                 latencyEl.style.color = '#ef4444'; // Red - high
             }
         }
+    }
+
+    calculateRMS(values) {
+        // Calculate root mean square for audio level
+        let sum = 0;
+        for (let i = 0; i < values.length; i++) {
+            sum += values[i] * values[i];
+        }
+        return Math.sqrt(sum / values.length);
     }
 
     updateMIDILed(active) {
