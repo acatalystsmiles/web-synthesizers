@@ -38,8 +38,8 @@ class FMSynth {
         // Master chain
         this.masterVolume = new Tone.Volume(-8).toDestination();
 
-        // Audio analyzer for visualization sync
-        this.analyzer = new Tone.Analyser('waveform', 256);
+        // Audio analyzer for visualization sync (FFT for frequency analysis)
+        this.analyzer = new Tone.Analyser('fft', 512);
         this.masterVolume.connect(this.analyzer);
 
         // BroadcastChannel for sending audio data to visualizations
@@ -48,12 +48,15 @@ class FMSynth {
             // Send audio data periodically
             setInterval(() => {
                 if (this.analyzer) {
-                    const values = this.analyzer.getValue();
-                    const rms = this.calculateRMS(values);
+                    const fftValues = this.analyzer.getValue();
+                    const frequencyBands = this.analyzeFrequencyBands(fftValues);
+
                     this.audioChannel.postMessage({
                         type: 'audioData',
-                        rms: rms,
-                        waveform: values.slice(0, 64) // Send subset for performance
+                        rms: frequencyBands.rms,
+                        bass: frequencyBands.bass,
+                        mid: frequencyBands.mid,
+                        high: frequencyBands.high
                     });
                 }
             }, 50); // 20 times per second
@@ -744,13 +747,54 @@ class FMSynth {
         }
     }
 
-    calculateRMS(values) {
-        // Calculate root mean square for audio level
-        let sum = 0;
-        for (let i = 0; i < values.length; i++) {
-            sum += values[i] * values[i];
+    analyzeFrequencyBands(fftValues) {
+        // FFT values are in decibels (-100 to 0)
+        // Convert to linear scale (0 to 1) for easier processing
+        const dbToLinear = (db) => Math.pow(10, db / 20);
+
+        // Split frequency spectrum into bands
+        // Assuming 512 FFT bins covering 0-22050 Hz (typical sample rate / 2)
+        const bins = fftValues.length;
+
+        // Bass: 20-250 Hz (roughly bins 0-6)
+        const bassStart = 0;
+        const bassEnd = Math.floor(bins * (250 / 22050));
+
+        // Mids: 250-4000 Hz (roughly bins 6-93)
+        const midStart = bassEnd;
+        const midEnd = Math.floor(bins * (4000 / 22050));
+
+        // Highs: 4000-22050 Hz (roughly bins 93-512)
+        const highStart = midEnd;
+        const highEnd = bins;
+
+        // Calculate average energy for each band
+        const getBandEnergy = (start, end) => {
+            let sum = 0;
+            for (let i = start; i < end; i++) {
+                sum += dbToLinear(fftValues[i]);
+            }
+            return sum / (end - start);
+        };
+
+        const bassEnergy = getBandEnergy(bassStart, bassEnd);
+        const midEnergy = getBandEnergy(midStart, midEnd);
+        const highEnergy = getBandEnergy(highStart, highEnd);
+
+        // Calculate overall RMS
+        let rmsSum = 0;
+        for (let i = 0; i < bins; i++) {
+            const linear = dbToLinear(fftValues[i]);
+            rmsSum += linear * linear;
         }
-        return Math.sqrt(sum / values.length);
+        const rms = Math.sqrt(rmsSum / bins);
+
+        return {
+            rms: Math.min(rms, 1),
+            bass: Math.min(bassEnergy, 1),
+            mid: Math.min(midEnergy, 1),
+            high: Math.min(highEnergy, 1)
+        };
     }
 
     updateMIDILed(active) {

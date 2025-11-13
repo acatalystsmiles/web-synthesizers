@@ -151,6 +151,34 @@
         </div>
 
         <div class="control-group">
+            <label>
+                Particle Size: <span class="value-display" id="particleSizeValue">1.5</span>
+            </label>
+            <input type="range" id="particleSize" min="0.5" max="5.0" value="1.5" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>
+                Bass Response: <span class="value-display" id="bassResponseValue">2.0</span>
+            </label>
+            <input type="range" id="bassResponse" min="0" max="5.0" value="2.0" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>
+                Mid Response: <span class="value-display" id="midResponseValue">1.5</span>
+            </label>
+            <input type="range" id="midResponse" min="0" max="5.0" value="1.5" step="0.1">
+        </div>
+
+        <div class="control-group">
+            <label>
+                High Response: <span class="value-display" id="highResponseValue">1.0</span>
+            </label>
+            <input type="range" id="highResponse" min="0" max="5.0" value="1.0" step="0.1">
+        </div>
+
+        <div class="control-group">
             <label>Particle Color:</label>
             <input type="color" id="particleColor" value="#00ffff">
         </div>
@@ -353,8 +381,14 @@
                 this.fieldScale = 0.003;
                 this.trailLength = 0.05;
                 this.noiseSpeed = 0.0005;
+                this.particleSize = 1.5;
                 this.particleColor = '#00ffff';
                 this.audioReactive = true;
+
+                // Audio response settings
+                this.bassResponse = 2.0;
+                this.midResponse = 1.5;
+                this.highResponse = 1.0;
 
                 // State
                 this.particles = [];
@@ -485,6 +519,38 @@
                     noiseSpeedValue.textContent = this.noiseSpeed.toFixed(4);
                 });
 
+                // Particle size
+                const particleSizeSlider = document.getElementById('particleSize');
+                const particleSizeValue = document.getElementById('particleSizeValue');
+                particleSizeSlider.addEventListener('input', (e) => {
+                    this.particleSize = parseFloat(e.target.value);
+                    particleSizeValue.textContent = this.particleSize.toFixed(1);
+                });
+
+                // Bass response
+                const bassResponseSlider = document.getElementById('bassResponse');
+                const bassResponseValue = document.getElementById('bassResponseValue');
+                bassResponseSlider.addEventListener('input', (e) => {
+                    this.bassResponse = parseFloat(e.target.value);
+                    bassResponseValue.textContent = this.bassResponse.toFixed(1);
+                });
+
+                // Mid response
+                const midResponseSlider = document.getElementById('midResponse');
+                const midResponseValue = document.getElementById('midResponseValue');
+                midResponseSlider.addEventListener('input', (e) => {
+                    this.midResponse = parseFloat(e.target.value);
+                    midResponseValue.textContent = this.midResponse.toFixed(1);
+                });
+
+                // High response
+                const highResponseSlider = document.getElementById('highResponse');
+                const highResponseValue = document.getElementById('highResponseValue');
+                highResponseSlider.addEventListener('input', (e) => {
+                    this.highResponse = parseFloat(e.target.value);
+                    highResponseValue.textContent = this.highResponse.toFixed(1);
+                });
+
                 // Particle color
                 const particleColorPicker = document.getElementById('particleColor');
                 particleColorPicker.addEventListener('input', (e) => {
@@ -508,11 +574,30 @@
             }
 
             getAudioBoost() {
-                if (!this.audioReactive || !this.audioData) return 1;
+                if (!this.audioReactive || !this.audioData) {
+                    return { speed: 1, size: 1, fieldScale: 0 };
+                }
 
-                // Use RMS or frequency data to boost particle movement
-                const intensity = this.audioData.rms || this.audioData.level || 0;
-                return 1 + intensity * 2; // Boost up to 3x on loud sounds
+                // Extract frequency band data
+                const bass = this.audioData.bass || 0;
+                const mid = this.audioData.mid || 0;
+                const high = this.audioData.high || 0;
+                const rms = this.audioData.rms || 0;
+
+                // Bass affects particle speed (more energy = faster movement)
+                const speedBoost = 1 + (bass * this.bassResponse);
+
+                // Mids affect particle size (thicker lines when mids hit)
+                const sizeBoost = 1 + (mid * this.midResponse);
+
+                // Highs affect field scale (creates shimmer/jitter effect)
+                const fieldScaleBoost = high * this.highResponse * 0.002;
+
+                return {
+                    speed: speedBoost,
+                    size: sizeBoost,
+                    fieldScale: fieldScaleBoost
+                };
             }
 
             animate() {
@@ -525,13 +610,19 @@
                 // Get audio boost
                 const audioBoost = this.getAudioBoost();
 
+                // Calculate audio-reactive field scale
+                const effectiveFieldScale = this.fieldScale + audioBoost.fieldScale;
+
                 // Update and draw particles
                 this.ctx.strokeStyle = this.particleColor;
-                this.ctx.lineWidth = 1;
 
                 this.particles.forEach(particle => {
-                    particle.update(this.fieldScale, this.noise, this.zoff, audioBoost);
+                    particle.update(effectiveFieldScale, this.noise, this.zoff, audioBoost.speed);
                     particle.edges(this.canvas.width, this.canvas.height);
+
+                    // Audio-reactive particle size
+                    const particleSize = this.particleSize * audioBoost.size;
+                    this.ctx.lineWidth = particleSize;
 
                     // Draw line from previous position
                     this.ctx.beginPath();
